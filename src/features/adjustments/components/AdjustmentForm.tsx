@@ -10,7 +10,7 @@ import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useAdjustmentMutations } from '../hooks/useAdjustments'
 import { useWarehousesList } from '@features/warehouses'
-import { getErrorMessage } from '@/utils/getErrorMessage'
+import { getErrorMessage } from '@shared/lib/getErrorMessage'
 import { ADJUSTMENT_REASON_LABELS } from '../model/types'
 import {
     adjustmentReasons,

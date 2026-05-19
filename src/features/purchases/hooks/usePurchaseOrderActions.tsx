@@ -9,7 +9,7 @@ import {
 } from './usePurchaseOrders'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import { getErrorMessage } from '@/utils/getErrorMessage'
+import { getErrorMessage } from '@shared/lib/getErrorMessage'
 import type {
     PurchaseOrder,
     PurchaseOrderItem,

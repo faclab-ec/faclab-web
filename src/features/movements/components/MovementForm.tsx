@@ -10,7 +10,7 @@ import { makeNumberRegister } from '@/components/ui/Form/utils'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useMovementMutations } from '../hooks/useMovements'
-import { getErrorMessage } from '@/utils/getErrorMessage'
+import { getErrorMessage } from '@shared/lib/getErrorMessage'
 import {
     movementSchema,
     type MovementFormValues,

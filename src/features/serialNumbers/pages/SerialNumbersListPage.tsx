@@ -13,7 +13,7 @@ import {
 } from '../hooks/useSerialNumbers'
 import useCrudOperations from '@shared/hooks/useCrudOperations'
 import { FormModal } from '@/components/shared'
-import { getErrorMessage } from '@/utils/getErrorMessage'
+import { getErrorMessage } from '@shared/lib/getErrorMessage'
 import {
     SERIAL_STATUS_LABELS,
     type SerialNumber,

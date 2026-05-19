@@ -8,7 +8,7 @@ import {
     useWarehousesList,
     useWarehouseMutations,
 } from '../hooks/useWarehouses'
-import { getErrorMessage } from '@/utils/getErrorMessage'
+import { getErrorMessage } from '@shared/lib/getErrorMessage'
 import useCrudOperations from '@shared/hooks/useCrudOperations'
 import { FormModal, DeleteConfirmDialog } from '@/components/shared'
 import { WarehouseForm } from '../components/WarehouseForm'

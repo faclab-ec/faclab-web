@@ -8,7 +8,7 @@ import toast from '@/components/ui/toast'
 import { FormItem } from '@/components/ui/Form'
 import { ControlledSelect } from '@/components/ui/Form/controlled'
 import { useSerialNumberMutations } from '../hooks/useSerialNumbers'
-import { getErrorMessage } from '@/utils/getErrorMessage'
+import { getErrorMessage } from '@shared/lib/getErrorMessage'
 import {
     SERIAL_STATUS_LABELS,
     VALID_TRANSITIONS,

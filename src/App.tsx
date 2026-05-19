@@ -1,6 +1,6 @@
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClient } from '@/lib/react-query'
+import { queryClient } from '@shared/lib/react-query'
 import Theme from '@/components/template/Theme'
 import Layout from '@/components/layouts'
 import NavigationBinder from '@/components/route/NavigationBinder'

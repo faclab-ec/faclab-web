@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/Form/controlled'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { getErrorMessage } from '@/utils/getErrorMessage'
+import { getErrorMessage } from '@shared/lib/getErrorMessage'
 import { useProductsList } from '@features/products'
 import {
     supplierProductSchema,

@@ -9,7 +9,7 @@ import Input from '@/components/ui/Input'
 import { FormItem } from '@/components/ui/Form'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import { getErrorMessage } from '@/utils/getErrorMessage'
+import { getErrorMessage } from '@shared/lib/getErrorMessage'
 import { HiOutlineTrash, HiOutlineUpload } from 'react-icons/hi'
 import type { Certificate } from '../model/types'
 import {
