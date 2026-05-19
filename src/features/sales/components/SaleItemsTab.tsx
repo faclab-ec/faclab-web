@@ -1,0 +1,82 @@
+import Table from '@/components/ui/Table'
+import { formatCurrency } from '@shared/lib/format'
+import { useSaleItems } from '../hooks/useSales'
+
+const { Tr, Th, Td, THead, TBody, TFoot } = Table
+
+interface Product {
+    id: number
+    name: string
+    sku: string
+}
+
+interface SaleItemsTabProps {
+    saleId: number
+    products: Product[]
+}
+
+const SaleItemsTab = ({ saleId, products }: SaleItemsTabProps) => {
+    const { data: items = [], isLoading } = useSaleItems(saleId)
+
+    const getProductName = (productId: number) => {
+        const p = products.find((p) => p.id === productId)
+        return p ? `${p.name} (${p.sku})` : `#${productId}`
+    }
+
+    const itemsTotal = items.reduce((sum, item) => sum + item.subtotal, 0)
+
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center h-32">
+                <div>Cargando items...</div>
+            </div>
+        )
+    }
+
+    if (items.length === 0) {
+        return (
+            <div className="text-center py-8 text-gray-500">
+                No hay items en esta venta
+            </div>
+        )
+    }
+
+    return (
+        <Table>
+            <THead>
+                <Tr>
+                    <Th>Producto</Th>
+                    <Th>Cantidad</Th>
+                    <Th>Precio Unitario</Th>
+                    <Th>Descuento (%)</Th>
+                    <Th>Subtotal</Th>
+                </Tr>
+            </THead>
+            <TBody>
+                {items.map((item) => (
+                    <Tr key={item.id}>
+                        <Td>{getProductName(item.productId)}</Td>
+                        <Td>{item.quantity}</Td>
+                        <Td>{formatCurrency(item.unitPrice)}</Td>
+                        <Td>{item.discount > 0 ? `${item.discount}%` : '-'}</Td>
+                        <Td className="font-medium">
+                            {formatCurrency(item.subtotal)}
+                        </Td>
+                    </Tr>
+                ))}
+            </TBody>
+            <TFoot>
+                <Tr>
+                    <Td colSpan={4} className="text-right font-medium">
+                        Total Items
+                    </Td>
+                    <Td className="font-semibold">
+                        {formatCurrency(itemsTotal)}
+                    </Td>
+                </Tr>
+            </TFoot>
+        </Table>
+    )
+}
+
+export default SaleItemsTab
