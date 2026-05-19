@@ -1,10 +1,8 @@
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
 import { useCategoriesList, useCategoryMutations } from '../hooks/useCategories'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import useCrudOperations from '@shared/hooks/useCrudOperations'
 import { FormModal, DeleteConfirmDialog } from '@/components/shared'
 import { CategoryForm } from '../components/CategoryForm'
@@ -33,29 +31,20 @@ const CategoriesListPage = () => {
                     id: crud.selectedItem.id,
                     data: formData,
                 })
-                toast.push(
-                    <Notification title="Categoría actualizada" type="success">
-                        La categoría se actualizó correctamente
-                    </Notification>,
-                    { placement: 'top-center' }
+                notifySuccess(
+                    'Categoría actualizada',
+                    'La categoría se actualizó correctamente'
                 )
             } else {
                 await create.mutateAsync(formData)
-                toast.push(
-                    <Notification title="Categoría creada" type="success">
-                        La categoría se creó correctamente
-                    </Notification>,
-                    { placement: 'top-center' }
+                notifySuccess(
+                    'Categoría creada',
+                    'La categoría se creó correctamente'
                 )
             }
             crud.closeAll()
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al guardar la categoría')}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al guardar la categoría')
         }
     }
 
@@ -63,20 +52,13 @@ const CategoriesListPage = () => {
         if (!crud.selectedItem) return
         try {
             await remove.mutateAsync(crud.selectedItem.id)
-            toast.push(
-                <Notification title="Categoría eliminada" type="success">
-                    La categoría se eliminó correctamente
-                </Notification>,
-                { placement: 'top-center' }
+            notifySuccess(
+                'Categoría eliminada',
+                'La categoría se eliminó correctamente'
             )
             crud.closeAll()
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al eliminar la categoría')}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al eliminar la categoría')
         }
     }
 

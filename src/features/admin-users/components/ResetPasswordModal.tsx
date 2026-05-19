@@ -2,9 +2,7 @@ import { useState } from 'react'
 import Dialog from '@/components/ui/Dialog'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import generatePassword from '@/utils/generatePassword'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -53,9 +51,7 @@ const ResetPasswordModal = ({
 
     const handleCopy = () => {
         navigator.clipboard.writeText(password)
-        toast.push(<Notification type="success" title="Contraseña copiada" />, {
-            placement: 'top-end',
-        })
+        notifySuccess('Contraseña copiada')
     }
 
     const onSubmit = async (values: ResetPasswordFormValues) => {
@@ -67,16 +63,7 @@ const ResetPasswordModal = ({
             })
             setDone(true)
         } catch (err) {
-            toast.push(
-                <Notification
-                    type="danger"
-                    title={getErrorMessage(
-                        err,
-                        'Error al resetear la contraseña'
-                    )}
-                />,
-                { placement: 'top-end' }
-            )
+            notifyError(err, 'Error al resetear la contraseña')
         }
     }
 

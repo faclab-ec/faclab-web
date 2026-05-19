@@ -3,10 +3,8 @@ import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
 import { FormModal, DeleteConfirmDialog } from '@/components/shared'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyInfo, notifyError } from '@shared/ui/notify'
 import useCrudOperations from '@shared/hooks/useCrudOperations'
 import {
     HiOutlinePlus,
@@ -50,29 +48,20 @@ const SuppliersListPage = () => {
                     id: crud.selectedItem.id,
                     data: formData,
                 })
-                toast.push(
-                    <Notification title="Proveedor actualizado" type="success">
-                        El proveedor se actualizó correctamente
-                    </Notification>,
-                    { placement: 'top-center' }
+                notifySuccess(
+                    'Proveedor actualizado',
+                    'El proveedor se actualizó correctamente'
                 )
             } else {
                 await create.mutateAsync(formData)
-                toast.push(
-                    <Notification title="Proveedor creado" type="success">
-                        El proveedor se creó correctamente
-                    </Notification>,
-                    { placement: 'top-center' }
+                notifySuccess(
+                    'Proveedor creado',
+                    'El proveedor se creó correctamente'
                 )
             }
             crud.closeAll()
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al guardar el proveedor')}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al guardar el proveedor')
         }
     }
 
@@ -80,20 +69,13 @@ const SuppliersListPage = () => {
         if (!crud.selectedItem) return
         try {
             await remove.mutateAsync(crud.selectedItem.id)
-            toast.push(
-                <Notification title="Proveedor eliminado" type="success">
-                    El proveedor se eliminó correctamente
-                </Notification>,
-                { placement: 'top-center' }
+            notifySuccess(
+                'Proveedor eliminado',
+                'El proveedor se eliminó correctamente'
             )
             crud.closeAll()
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al eliminar el proveedor')}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al eliminar el proveedor')
         }
     }
 
@@ -101,31 +83,19 @@ const SuppliersListPage = () => {
         try {
             if (supplier.isActive) {
                 await deactivate.mutateAsync(supplier.id)
-                toast.push(
-                    <Notification title="Proveedor desactivado" type="info">
-                        El proveedor se desactivó correctamente
-                    </Notification>,
-                    { placement: 'top-center' }
+                notifyInfo(
+                    'Proveedor desactivado',
+                    'El proveedor se desactivó correctamente'
                 )
             } else {
                 await activate.mutateAsync(supplier.id)
-                toast.push(
-                    <Notification title="Proveedor activado" type="success">
-                        El proveedor se activó correctamente
-                    </Notification>,
-                    { placement: 'top-center' }
+                notifySuccess(
+                    'Proveedor activado',
+                    'El proveedor se activó correctamente'
                 )
             }
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(
-                        error,
-                        'Error al cambiar el estado del proveedor'
-                    )}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al cambiar el estado del proveedor')
         }
     }
 

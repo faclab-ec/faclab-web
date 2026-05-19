@@ -4,9 +4,7 @@ import {
     useTransferMutations,
     useTransferItemMutations,
 } from '../hooks/useTransfers'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import type {
     Transfer,
     TransferItem,
@@ -63,116 +61,65 @@ export function useTransferActions(
                     requestedBy: editData.requestedBy || undefined,
                 },
             })
-            toast.push(
-                <Notification title="Transferencia actualizada" type="success">
-                    La transferencia se actualizó correctamente
-                </Notification>,
-                { placement: 'top-end' }
+            notifySuccess(
+                'Transferencia actualizada',
+                'La transferencia se actualizó correctamente'
             )
             setEditDialogOpen(false)
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(
-                        error,
-                        'Error al actualizar la transferencia'
-                    )}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al actualizar la transferencia')
         }
     }
 
     const handleConfirm = async () => {
         try {
             await confirmTransfer.mutateAsync(transferId)
-            toast.push(
-                <Notification title="Transferencia confirmada" type="success">
-                    La transferencia se confirmó y el stock fue reservado
-                </Notification>,
-                { placement: 'top-end' }
+            notifySuccess(
+                'Transferencia confirmada',
+                'La transferencia se confirmó y el stock fue reservado'
             )
             setConfirmDialogOpen(false)
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(
-                        error,
-                        'Error al confirmar la transferencia'
-                    )}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al confirmar la transferencia')
         }
     }
 
     const handleReceive = async () => {
         try {
             await receiveTransfer.mutateAsync(transferId)
-            toast.push(
-                <Notification title="Transferencia recibida" type="success">
-                    La transferencia se completó y los movimientos fueron
-                    generados
-                </Notification>,
-                { placement: 'top-end' }
+            notifySuccess(
+                'Transferencia recibida',
+                'La transferencia se completó y los movimientos fueron generados'
             )
             setReceiveDialogOpen(false)
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(
-                        error,
-                        'Error al recibir la transferencia'
-                    )}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al recibir la transferencia')
         }
     }
 
     const handleCancel = async () => {
         try {
             await cancelTransfer.mutateAsync(transferId)
-            toast.push(
-                <Notification title="Transferencia cancelada" type="success">
-                    La transferencia fue cancelada
-                </Notification>,
-                { placement: 'top-end' }
+            notifySuccess(
+                'Transferencia cancelada',
+                'La transferencia fue cancelada'
             )
             setCancelDialogOpen(false)
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(
-                        error,
-                        'Error al cancelar la transferencia'
-                    )}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al cancelar la transferencia')
         }
     }
 
     const handleDelete = async () => {
         try {
             await deleteTransfer.mutateAsync(transferId)
-            toast.push(
-                <Notification title="Transferencia eliminada" type="success">
-                    La transferencia fue eliminada
-                </Notification>,
-                { placement: 'top-end' }
+            notifySuccess(
+                'Transferencia eliminada',
+                'La transferencia fue eliminada'
             )
             navigate('/transfers')
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(
-                        error,
-                        'Error al eliminar la transferencia'
-                    )}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al eliminar la transferencia')
         }
     }
 
@@ -180,20 +127,10 @@ export function useTransferActions(
         if (!deleteItemDialog.item) return
         try {
             await deleteItem.mutateAsync(deleteItemDialog.item.id)
-            toast.push(
-                <Notification title="Item eliminado" type="success">
-                    El item fue eliminado
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifySuccess('Item eliminado', 'El item fue eliminado')
             setDeleteItemDialog({ open: false, item: null })
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al eliminar el item')}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al eliminar el item')
         }
     }
 

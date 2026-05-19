@@ -2,10 +2,8 @@ import { useState } from 'react'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Table from '@/components/ui/Table'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { useProductsList } from '@features/products'
 import {
     useSupplierProducts,
@@ -58,21 +56,14 @@ const SupplierProductsTab = ({ supplierId }: SupplierProductsTabProps) => {
         if (!toDelete) return
         try {
             await deleteSupplierProduct.mutateAsync(toDelete.id)
-            toast.push(
-                <Notification title="Producto eliminado" type="success">
-                    El producto se eliminó del proveedor correctamente
-                </Notification>,
-                { placement: 'top-end' }
+            notifySuccess(
+                'Producto eliminado',
+                'El producto se eliminó del proveedor correctamente'
             )
             setDeleteOpen(false)
             setToDelete(null)
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al eliminar el producto')}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al eliminar el producto')
         }
     }
 

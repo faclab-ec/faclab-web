@@ -3,8 +3,7 @@ import Button from '@/components/ui/Button'
 import { FormItem, FormContainer } from '@/components/ui/Form'
 import { ControlledSelect } from '@/components/ui/Form/controlled'
 import Input from '@/components/ui/Input'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { isApiError } from '@/utils/errors/ApiError'
 import { ROLE, ROLE_LABELS, ALL_ROLES } from '@/constants/roles.constant'
 import { useForm } from 'react-hook-form'
@@ -53,9 +52,7 @@ const CreateUserModal = ({ open, onClose }: CreateUserModalProps) => {
     const onSubmit = async (values: CreateUserFormValues) => {
         try {
             await createUser.mutateAsync(values as CreateUserRequest)
-            toast.push(<Notification type="success" title="Usuario creado" />, {
-                placement: 'top-center',
-            })
+            notifySuccess('Usuario creado')
             reset()
             onClose()
         } catch (err) {
@@ -69,19 +66,10 @@ const CreateUserModal = ({ open, onClose }: CreateUserModalProps) => {
                         message: 'Este email ya está registrado',
                     })
                 } else {
-                    toast.push(
-                        <Notification type="danger" title={err.message} />,
-                        { placement: 'top-center' }
-                    )
+                    notifyError(err, 'Error al crear el usuario')
                 }
             } else {
-                toast.push(
-                    <Notification
-                        type="danger"
-                        title="Error al crear el usuario"
-                    />,
-                    { placement: 'top-center' }
-                )
+                notifyError(err, 'Error al crear el usuario')
             }
         }
     }

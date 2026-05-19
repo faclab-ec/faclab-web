@@ -2,9 +2,8 @@ import { useState } from 'react'
 import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
 import Input from '@/components/ui/Input'
-import Notification from '@/components/ui/Notification'
 import Switcher from '@/components/ui/Switcher'
-import toast from '@/components/ui/toast'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { usePOSStore } from '../store/usePOSStore'
 import { useCartTotals } from '../hooks/useCartTotals'
 import { usePOSCustomerSearch, useQuickCreateCustomer } from '../hooks/usePOS'
@@ -56,14 +55,9 @@ const CustomerSelector = () => {
                 taxType: newTaxType,
             })
             handleSelectCustomer(customer.id, customer.name)
-            toast.push(<Notification type="success" title="Cliente creado" />, {
-                placement: 'top-end',
-            })
-        } catch {
-            toast.push(
-                <Notification type="danger" title="Error al crear cliente" />,
-                { placement: 'top-end' }
-            )
+            notifySuccess('Cliente creado')
+        } catch (error: unknown) {
+            notifyError(error, 'Error al crear cliente')
         }
     }
 

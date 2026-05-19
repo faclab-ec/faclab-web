@@ -1,10 +1,8 @@
 import { useState } from 'react'
 import Button from '@/components/ui/Button'
 import Table from '@/components/ui/Table'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import {
     useSupplierContacts,
     useSupplierContactMutations,
@@ -47,21 +45,14 @@ const SupplierContactsTab = ({ supplierId }: SupplierContactsTabProps) => {
         if (!toDelete) return
         try {
             await deleteContact.mutateAsync(toDelete.id)
-            toast.push(
-                <Notification title="Contacto eliminado" type="success">
-                    El contacto se eliminó correctamente
-                </Notification>,
-                { placement: 'top-end' }
+            notifySuccess(
+                'Contacto eliminado',
+                'El contacto se eliminó correctamente'
             )
             setDeleteOpen(false)
             setToDelete(null)
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al eliminar el contacto')}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al eliminar el contacto')
         }
     }
 

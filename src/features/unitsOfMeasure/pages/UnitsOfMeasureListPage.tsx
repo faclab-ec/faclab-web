@@ -7,12 +7,10 @@ import {
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
-import Notification from '@/components/ui/Notification'
 import type { UnitOfMeasure, UnitOfMeasureInput } from '../model/types'
 import type { UnitOfMeasureFormValues } from '../model/unitOfMeasure.schema'
 import { UnitOfMeasureForm } from '../components/UnitOfMeasureForm'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
-import toast from '@/components/ui/toast'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import useCrudOperations from '@shared/hooks/useCrudOperations'
 import { FormModal, DeleteConfirmDialog } from '@/components/shared'
 
@@ -37,32 +35,20 @@ const UnitsOfMeasureListPage = () => {
                     id: crud.selectedItem.id,
                     data: formData as UnitOfMeasureInput,
                 })
-                toast.push(
-                    <Notification title="Unidad actualizada" type="success">
-                        La unidad de medida se actualizó correctamente
-                    </Notification>,
-                    { placement: 'top-center' }
+                notifySuccess(
+                    'Unidad actualizada',
+                    'La unidad de medida se actualizó correctamente'
                 )
             } else {
                 await create.mutateAsync(formData as UnitOfMeasureInput)
-                toast.push(
-                    <Notification title="Unidad creada" type="success">
-                        La unidad de medida se creó correctamente
-                    </Notification>,
-                    { placement: 'top-center' }
+                notifySuccess(
+                    'Unidad creada',
+                    'La unidad de medida se creó correctamente'
                 )
             }
             crud.closeAll()
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(
-                        error,
-                        'Error al guardar la unidad de medida'
-                    )}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al guardar la unidad de medida')
         }
     }
 
@@ -70,23 +56,13 @@ const UnitsOfMeasureListPage = () => {
         if (!crud.selectedItem) return
         try {
             await remove.mutateAsync(crud.selectedItem.id)
-            toast.push(
-                <Notification title="Unidad eliminada" type="success">
-                    La unidad de medida se eliminó correctamente
-                </Notification>,
-                { placement: 'top-center' }
+            notifySuccess(
+                'Unidad eliminada',
+                'La unidad de medida se eliminó correctamente'
             )
             crud.closeAll()
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(
-                        error,
-                        'Error al eliminar la unidad de medida'
-                    )}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al eliminar la unidad de medida')
         }
     }
 

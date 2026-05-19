@@ -3,12 +3,10 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Dialog from '@/components/ui/Dialog'
 import Button from '@/components/ui/Button'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
 import { FormItem } from '@/components/ui/Form'
 import { ControlledSelect } from '@/components/ui/Form/controlled'
 import { useSerialNumberMutations } from '../hooks/useSerialNumbers'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import {
     SERIAL_STATUS_LABELS,
     VALID_TRANSITIONS,
@@ -72,27 +70,16 @@ export const StatusChangeDialog = ({
                 status: data.status as SerialStatus,
             })
 
-            toast.push(
-                <Notification title="Estado actualizado" type="success">
-                    El estado se cambió a{' '}
-                    {SERIAL_STATUS_LABELS[data.status as SerialStatus]}
-                </Notification>,
-                { placement: 'top-end' }
+            notifySuccess(
+                'Estado actualizado',
+                `El estado se cambió a ${
+                    SERIAL_STATUS_LABELS[data.status as SerialStatus]
+                }`
             )
 
             onClose()
         } catch (error: unknown) {
-            const errorMessage = getErrorMessage(
-                error,
-                'Error al cambiar el estado'
-            )
-
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {errorMessage}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al cambiar el estado')
         }
     }
 

@@ -4,12 +4,10 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Input from '@/components/ui/Input'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
 import { useLotsList, useLotMutations } from '../hooks/useLots'
 import useCrudOperations from '@shared/hooks/useCrudOperations'
 import { FormModal } from '@/components/shared'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import type {
     Lot,
     LotInput,
@@ -47,29 +45,17 @@ const LotsListPage = () => {
                     id: crud.selectedItem.id,
                     data: data as LotUpdateInput,
                 })
-                toast.push(
-                    <Notification title="Lote actualizado" type="success">
-                        El lote se actualizó correctamente
-                    </Notification>,
-                    { placement: 'top-center' }
+                notifySuccess(
+                    'Lote actualizado',
+                    'El lote se actualizó correctamente'
                 )
             } else {
                 await createLot.mutateAsync(data as LotInput)
-                toast.push(
-                    <Notification title="Lote creado" type="success">
-                        El lote se creó correctamente
-                    </Notification>,
-                    { placement: 'top-center' }
-                )
+                notifySuccess('Lote creado', 'El lote se creó correctamente')
             }
             crud.closeAll()
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al guardar el lote')}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al guardar el lote')
         }
     }
 

@@ -4,11 +4,9 @@ import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 import { FormItem, FormContainer } from '@/components/ui/Form'
 import { ControlledSelect } from '@/components/ui/Form/controlled'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
 import { useCreatePurchaseOrder } from '../hooks/usePurchaseOrders'
 import { useSuppliersList } from '@features/suppliers'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { dateToIsoStartOfDay } from '@shared/lib/dateToIsoStartOfDay'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -73,11 +71,9 @@ const PurchaseOrderForm = ({
                 expectedDate: dateToIsoStartOfDay(values.expectedDate),
             })
 
-            toast.push(
-                <Notification title="Orden creada" type="success">
-                    La orden de compra se creó correctamente
-                </Notification>,
-                { placement: 'top-center' }
+            notifySuccess(
+                'Orden creada',
+                'La orden de compra se creó correctamente'
             )
 
             onClose()
@@ -85,15 +81,7 @@ const PurchaseOrderForm = ({
                 onCreated(order.id)
             }
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(
-                        error,
-                        'Error al crear la orden de compra'
-                    )}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al crear la orden de compra')
         }
     }
 

@@ -4,10 +4,8 @@ import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
 import { FormModal, DeleteConfirmDialog } from '@/components/shared'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyInfo, notifyError } from '@shared/ui/notify'
 import {
     HiOutlinePlus,
     HiOutlinePencil,
@@ -44,29 +42,20 @@ const CustomersListPage = () => {
                     id: crud.selectedItem.id,
                     data: formData,
                 })
-                toast.push(
-                    <Notification title="Cliente actualizado" type="success">
-                        El cliente se actualizó correctamente
-                    </Notification>,
-                    { placement: 'top-center' }
+                notifySuccess(
+                    'Cliente actualizado',
+                    'El cliente se actualizó correctamente'
                 )
             } else {
                 await mutations.create.mutateAsync(formData)
-                toast.push(
-                    <Notification title="Cliente creado" type="success">
-                        El cliente se creó correctamente
-                    </Notification>,
-                    { placement: 'top-center' }
+                notifySuccess(
+                    'Cliente creado',
+                    'El cliente se creó correctamente'
                 )
             }
             crud.closeAll()
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al guardar el cliente')}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al guardar el cliente')
         }
     }
 
@@ -74,20 +63,13 @@ const CustomersListPage = () => {
         if (!crud.selectedItem) return
         try {
             await mutations.delete.mutateAsync(crud.selectedItem.id)
-            toast.push(
-                <Notification title="Cliente eliminado" type="success">
-                    El cliente se eliminó correctamente
-                </Notification>,
-                { placement: 'top-center' }
+            notifySuccess(
+                'Cliente eliminado',
+                'El cliente se eliminó correctamente'
             )
             crud.closeAll()
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al eliminar el cliente')}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al eliminar el cliente')
         }
     }
 
@@ -95,31 +77,19 @@ const CustomersListPage = () => {
         try {
             if (customer.isActive) {
                 await mutations.deactivate.mutateAsync(customer.id)
-                toast.push(
-                    <Notification title="Cliente desactivado" type="info">
-                        El cliente se desactivó correctamente
-                    </Notification>,
-                    { placement: 'top-center' }
+                notifyInfo(
+                    'Cliente desactivado',
+                    'El cliente se desactivó correctamente'
                 )
             } else {
                 await mutations.activate.mutateAsync(customer.id)
-                toast.push(
-                    <Notification title="Cliente activado" type="success">
-                        El cliente se activó correctamente
-                    </Notification>,
-                    { placement: 'top-center' }
+                notifySuccess(
+                    'Cliente activado',
+                    'El cliente se activó correctamente'
                 )
             }
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(
-                        error,
-                        'Error al cambiar el estado del cliente'
-                    )}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al cambiar el estado del cliente')
         }
     }
 

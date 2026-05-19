@@ -2,13 +2,11 @@ import { useEffect } from 'react'
 import Dialog from '@/components/ui/Dialog'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
 import { FormItem } from '@/components/ui/Form'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { contactSchema, type ContactFormValues } from '@features/customers'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { useSupplierContactMutations } from '../hooks/useSupplierContacts'
 import type { SupplierContact } from '../model/types'
 
@@ -67,21 +65,10 @@ const ContactForm = ({
             } else {
                 await create.mutateAsync(values)
             }
-            toast.push(
-                <Notification
-                    title={isEdit ? 'Contacto actualizado' : 'Contacto creado'}
-                    type="success"
-                />,
-                { placement: 'top-center' }
-            )
+            notifySuccess(isEdit ? 'Contacto actualizado' : 'Contacto creado')
             onClose()
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al guardar el contacto')}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al guardar el contacto')
         }
     }
 

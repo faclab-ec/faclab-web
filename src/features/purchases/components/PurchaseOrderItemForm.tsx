@@ -2,8 +2,6 @@ import { useEffect } from 'react'
 import Dialog from '@/components/ui/Dialog'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
 import { FormItem } from '@/components/ui/Form'
 import { makeNumberRegister } from '@/components/ui/Form/utils'
 import { ControlledSelect } from '@/components/ui/Form/controlled'
@@ -14,7 +12,7 @@ import {
     useUpdatePurchaseOrderItem,
 } from '../hooks/usePurchaseOrders'
 import { useProductsList } from '@features/products'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { formatCurrency } from '@shared/lib/format'
 import {
     purchaseOrderItemCreateSchema,
@@ -91,17 +89,10 @@ const PurchaseOrderItemCreateForm = ({
                 quantityOrdered: values.quantityOrdered,
                 unitCost: values.unitCost,
             })
-            toast.push(<Notification title="Item agregado" type="success" />, {
-                placement: 'top-center',
-            })
+            notifySuccess('Item agregado')
             onClose()
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al agregar el item')}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al agregar el item')
         }
     }
 
@@ -258,18 +249,10 @@ const PurchaseOrderItemUpdateForm = ({
                 orderId,
                 data: values,
             })
-            toast.push(
-                <Notification title="Item actualizado" type="success" />,
-                { placement: 'top-center' }
-            )
+            notifySuccess('Item actualizado')
             onClose()
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al actualizar el item')}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al actualizar el item')
         }
     }
 

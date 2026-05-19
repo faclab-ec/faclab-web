@@ -3,8 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import Dialog from '@/components/ui/Dialog'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { FormItem } from '@/components/ui/Form'
 import { makeNumberRegister } from '@/components/ui/Form/utils'
 import { useAddCashMovement } from '../hooks/usePOS'
@@ -52,20 +51,11 @@ const CashMovementDialog = ({ isOpen, onClose }: CashMovementDialogProps) => {
                     reason: data.reason || undefined,
                 },
             })
-            toast.push(
-                <Notification type="success" title="Movimiento registrado" />,
-                { placement: 'top-end' }
-            )
+            notifySuccess('Movimiento registrado')
             reset()
             onClose()
-        } catch {
-            toast.push(
-                <Notification
-                    type="danger"
-                    title="Error al registrar movimiento"
-                />,
-                { placement: 'top-end' }
-            )
+        } catch (error: unknown) {
+            notifyError(error, 'Error al registrar movimiento')
         }
     }
 
