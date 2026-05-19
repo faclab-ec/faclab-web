@@ -1,0 +1,155 @@
+import { useState } from 'react'
+import Button from '@/components/ui/Button'
+import Table from '@/components/ui/Table'
+import Notification from '@/components/ui/Notification'
+import toast from '@/components/ui/toast'
+import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi'
+import { getErrorMessage } from '@/utils/getErrorMessage'
+import {
+    useSupplierContacts,
+    useSupplierContactMutations,
+} from '../hooks/useSupplierContacts'
+import ContactForm from './ContactForm'
+import DeleteConfirmDialog from './DeleteConfirmDialog'
+import type { SupplierContact } from '../model/types'
+
+const { Tr, Th, Td, THead, TBody } = Table
+
+interface SupplierContactsTabProps {
+    supplierId: number
+}
+
+const SupplierContactsTab = ({ supplierId }: SupplierContactsTabProps) => {
+    const { data: contacts = [], isLoading } = useSupplierContacts(supplierId)
+    const { delete: deleteContact } = useSupplierContactMutations(supplierId)
+
+    const [formOpen, setFormOpen] = useState(false)
+    const [selected, setSelected] = useState<SupplierContact | null>(null)
+    const [deleteOpen, setDeleteOpen] = useState(false)
+    const [toDelete, setToDelete] = useState<SupplierContact | null>(null)
+
+    const handleCreate = () => {
+        setSelected(null)
+        setFormOpen(true)
+    }
+
+    const handleEdit = (contact: SupplierContact) => {
+        setSelected(contact)
+        setFormOpen(true)
+    }
+
+    const handleCloseForm = () => {
+        setFormOpen(false)
+        setSelected(null)
+    }
+
+    const handleDeleteConfirm = async () => {
+        if (!toDelete) return
+        try {
+            await deleteContact.mutateAsync(toDelete.id)
+            toast.push(
+                <Notification title="Contacto eliminado" type="success">
+                    El contacto se eliminó correctamente
+                </Notification>,
+                { placement: 'top-end' }
+            )
+            setDeleteOpen(false)
+            setToDelete(null)
+        } catch (error: unknown) {
+            toast.push(
+                <Notification title="Error" type="danger">
+                    {getErrorMessage(error, 'Error al eliminar el contacto')}
+                </Notification>,
+                { placement: 'top-end' }
+            )
+        }
+    }
+
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center h-32">
+                <div>Cargando contactos...</div>
+            </div>
+        )
+    }
+
+    return (
+        <div className="mt-4">
+            <div className="flex items-center justify-end mb-4">
+                <Button
+                    size="sm"
+                    variant="solid"
+                    icon={<HiOutlinePlus />}
+                    onClick={handleCreate}
+                >
+                    Nuevo Contacto
+                </Button>
+            </div>
+
+            {contacts.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                    No hay contactos registrados para este proveedor
+                </div>
+            ) : (
+                <Table>
+                    <THead>
+                        <Tr>
+                            <Th>Nombre</Th>
+                            <Th>Cargo</Th>
+                            <Th>Email</Th>
+                            <Th>Teléfono</Th>
+                            <Th>Acciones</Th>
+                        </Tr>
+                    </THead>
+                    <TBody>
+                        {contacts.map((contact) => (
+                            <Tr key={contact.id}>
+                                <Td>{contact.name}</Td>
+                                <Td>{contact.role || '-'}</Td>
+                                <Td>{contact.email || '-'}</Td>
+                                <Td>{contact.phone || '-'}</Td>
+                                <Td>
+                                    <div className="flex gap-2">
+                                        <Button
+                                            size="sm"
+                                            variant="plain"
+                                            icon={<HiOutlinePencil />}
+                                            onClick={() => handleEdit(contact)}
+                                        />
+                                        <Button
+                                            size="sm"
+                                            variant="plain"
+                                            icon={<HiOutlineTrash />}
+                                            onClick={() => {
+                                                setToDelete(contact)
+                                                setDeleteOpen(true)
+                                            }}
+                                        />
+                                    </div>
+                                </Td>
+                            </Tr>
+                        ))}
+                    </TBody>
+                </Table>
+            )}
+
+            <ContactForm
+                open={formOpen}
+                supplierId={supplierId}
+                contact={selected}
+                onClose={handleCloseForm}
+            />
+
+            <DeleteConfirmDialog
+                isOpen={deleteOpen}
+                title="Confirmar eliminación"
+                message={`¿Está seguro que desea eliminar el contacto ${toDelete?.name}? Esta acción no se puede deshacer.`}
+                isPending={deleteContact.isPending}
+                onConfirm={handleDeleteConfirm}
+                onClose={() => setDeleteOpen(false)}
+            />
+        </div>
+    )
+}
+
+export default SupplierContactsTab
