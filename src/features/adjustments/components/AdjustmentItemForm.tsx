@@ -13,7 +13,7 @@ import { useAdjustmentItemMutations } from '../hooks/useAdjustments'
 import { useProductsList } from '@features/products'
 import { useLocationsList } from '@features/locations'
 import { useLotsList } from '@features/lots'
-import { getErrorMessage } from '@/utils/getErrorMessage'
+import { getErrorMessage } from '@shared/lib/getErrorMessage'
 import {
     adjustmentItemCreateSchema,
     adjustmentItemUpdateSchema,

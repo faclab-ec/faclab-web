@@ -7,7 +7,7 @@ import Badge from '@/components/ui/Badge'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { FormModal, DeleteConfirmDialog } from '@/components/shared'
-import { getErrorMessage } from '@/utils/getErrorMessage'
+import { getErrorMessage } from '@shared/lib/getErrorMessage'
 import {
     HiOutlinePlus,
     HiOutlinePencil,

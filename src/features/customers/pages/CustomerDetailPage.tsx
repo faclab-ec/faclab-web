@@ -7,7 +7,7 @@ import Table from '@/components/ui/Table'
 import Dialog from '@/components/ui/Dialog'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import { getErrorMessage } from '@/utils/getErrorMessage'
+import { getErrorMessage } from '@shared/lib/getErrorMessage'
 import {
     HiOutlineArrowLeft,
     HiOutlinePlus,

@@ -9,7 +9,7 @@ import toast from '@/components/ui/toast'
 import { useLotsList, useLotMutations } from '../hooks/useLots'
 import useCrudOperations from '@shared/hooks/useCrudOperations'
 import { FormModal } from '@/components/shared'
-import { getErrorMessage } from '@/utils/getErrorMessage'
+import { getErrorMessage } from '@shared/lib/getErrorMessage'
 import type {
     Lot,
     LotInput,

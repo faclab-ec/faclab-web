@@ -4,7 +4,7 @@ import Table from '@/components/ui/Table'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi'
-import { getErrorMessage } from '@/utils/getErrorMessage'
+import { getErrorMessage } from '@shared/lib/getErrorMessage'
 import {
     useSupplierContacts,
     useSupplierContactMutations,

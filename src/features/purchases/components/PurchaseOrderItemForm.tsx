@@ -14,7 +14,7 @@ import {
     useUpdatePurchaseOrderItem,
 } from '../hooks/usePurchaseOrders'
 import { useProductsList } from '@features/products'
-import { getErrorMessage } from '@/utils/getErrorMessage'
+import { getErrorMessage } from '@shared/lib/getErrorMessage'
 import { formatCurrency } from '@shared/lib/format'
 import {
     purchaseOrderItemCreateSchema,

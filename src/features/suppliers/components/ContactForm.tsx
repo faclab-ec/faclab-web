@@ -8,7 +8,7 @@ import { FormItem } from '@/components/ui/Form'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { contactSchema, type ContactFormValues } from '@features/customers'
-import { getErrorMessage } from '@/utils/getErrorMessage'
+import { getErrorMessage } from '@shared/lib/getErrorMessage'
 import { useSupplierContactMutations } from '../hooks/useSupplierContacts'
 import type { SupplierContact } from '../model/types'
 

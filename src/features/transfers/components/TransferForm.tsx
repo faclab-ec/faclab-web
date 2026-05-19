@@ -10,7 +10,7 @@ import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useTransferMutations } from '../hooks/useTransfers'
 import { useLocationsList } from '@features/locations'
-import { getErrorMessage } from '@/utils/getErrorMessage'
+import { getErrorMessage } from '@shared/lib/getErrorMessage'
 import {
     transferSchema,
     type TransferFormValues,

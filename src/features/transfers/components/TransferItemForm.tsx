@@ -12,7 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useTransferItemMutations } from '../hooks/useTransfers'
 import { useProductsList } from '@features/products'
 import { useLotsList } from '@features/lots'
-import { getErrorMessage } from '@/utils/getErrorMessage'
+import { getErrorMessage } from '@shared/lib/getErrorMessage'
 import {
     transferItemCreateSchema,
     transferItemUpdateSchema,
