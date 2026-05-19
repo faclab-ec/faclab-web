@@ -5,9 +5,7 @@ import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Table from '@/components/ui/Table'
 import Dialog from '@/components/ui/Dialog'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import {
     HiOutlineArrowLeft,
     HiOutlinePlus,
@@ -68,21 +66,14 @@ const CustomerDetailPage = () => {
 
         try {
             await deleteContact.mutateAsync(contactToDelete.id)
-            toast.push(
-                <Notification title="Contacto eliminado" type="success">
-                    El contacto se eliminó correctamente
-                </Notification>,
-                { placement: 'top-end' }
+            notifySuccess(
+                'Contacto eliminado',
+                'El contacto se eliminó correctamente'
             )
             setDeleteDialogOpen(false)
             setContactToDelete(null)
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al eliminar el contacto')}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al eliminar el contacto')
         }
     }
 

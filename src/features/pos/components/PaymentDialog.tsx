@@ -2,8 +2,7 @@ import { useState } from 'react'
 import Dialog from '@/components/ui/Dialog'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
+import { notifyError } from '@shared/ui/notify'
 import { usePOSStore } from '../store/usePOSStore'
 import { useCartTotals } from '../hooks/useCartTotals'
 import { useQuickSale } from '../hooks/usePOS'
@@ -97,13 +96,7 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
             resetForm()
             onComplete(sale.id)
         } catch (error: unknown) {
-            const message =
-                error instanceof Error
-                    ? error.message
-                    : 'Error al procesar la venta'
-            toast.push(<Notification type="danger" title={message} />, {
-                placement: 'top-end',
-            })
+            notifyError(error, 'Error al procesar la venta')
         }
     }
 

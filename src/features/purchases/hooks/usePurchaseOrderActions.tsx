@@ -7,9 +7,7 @@ import {
     useCancelPurchaseOrder,
     useDeletePurchaseOrderItem,
 } from './usePurchaseOrders'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import type {
     PurchaseOrder,
     PurchaseOrderItem,
@@ -74,80 +72,46 @@ export function usePurchaseOrderActions(
                         : undefined,
                 },
             })
-            toast.push(
-                <Notification title="Orden actualizada" type="success">
-                    La orden de compra se actualizó correctamente
-                </Notification>,
-                { placement: 'top-end' }
+            notifySuccess(
+                'Orden actualizada',
+                'La orden de compra se actualizó correctamente'
             )
             setEditDialogOpen(false)
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al actualizar la orden')}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al actualizar la orden')
         }
     }
 
     const handleSend = async () => {
         try {
             await sendOrder.mutateAsync(orderId)
-            toast.push(
-                <Notification title="Orden enviada" type="success">
-                    La orden de compra fue enviada al proveedor
-                </Notification>,
-                { placement: 'top-end' }
+            notifySuccess(
+                'Orden enviada',
+                'La orden de compra fue enviada al proveedor'
             )
             setSendDialogOpen(false)
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al enviar la orden')}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al enviar la orden')
         }
     }
 
     const handleCancel = async () => {
         try {
             await cancelOrder.mutateAsync(orderId)
-            toast.push(
-                <Notification title="Orden cancelada" type="success">
-                    La orden de compra fue cancelada
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifySuccess('Orden cancelada', 'La orden de compra fue cancelada')
             setCancelDialogOpen(false)
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al cancelar la orden')}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al cancelar la orden')
         }
     }
 
     const handleDelete = async () => {
         try {
             await deleteOrder.mutateAsync(orderId)
-            toast.push(
-                <Notification title="Orden eliminada" type="success">
-                    La orden de compra fue eliminada
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifySuccess('Orden eliminada', 'La orden de compra fue eliminada')
             navigate('/purchase-orders')
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al eliminar la orden')}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al eliminar la orden')
         }
     }
 
@@ -158,20 +122,10 @@ export function usePurchaseOrderActions(
                 itemId: deleteItemDialog.item.id,
                 orderId,
             })
-            toast.push(
-                <Notification title="Item eliminado" type="success">
-                    El item fue eliminado
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifySuccess('Item eliminado', 'El item fue eliminado')
             setDeleteItemDialog({ open: false, item: null })
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al eliminar el item')}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al eliminar el item')
         }
     }
 

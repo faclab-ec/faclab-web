@@ -6,11 +6,9 @@ import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 import { FormItem, FormContainer } from '@/components/ui/Form'
 import { ControlledSelect } from '@/components/ui/Form/controlled'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
 import { useAdjustmentMutations } from '../hooks/useAdjustments'
 import { useWarehousesList } from '@features/warehouses'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { ADJUSTMENT_REASON_LABELS } from '../model/types'
 import {
     adjustmentReasons,
@@ -62,21 +60,11 @@ const AdjustmentForm = ({ open, onClose, onCreated }: AdjustmentFormProps) => {
                 notes: values.notes || undefined,
                 adjustedBy: values.adjustedBy || undefined,
             })
-            toast.push(
-                <Notification title="Ajuste creado" type="success">
-                    El ajuste se creó correctamente
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifySuccess('Ajuste creado', 'El ajuste se creó correctamente')
             onClose()
             onCreated?.(adjustment.id)
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al crear el ajuste')}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al crear el ajuste')
         }
     }
 

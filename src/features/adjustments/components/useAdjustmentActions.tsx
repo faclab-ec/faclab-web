@@ -4,9 +4,7 @@ import {
     useAdjustmentMutations,
     useAdjustmentItemMutations,
 } from '../hooks/useAdjustments'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import type {
     Adjustment,
     AdjustmentItem,
@@ -63,81 +61,46 @@ export function useAdjustmentActions(
                     adjustedBy: editData.adjustedBy || undefined,
                 },
             })
-            toast.push(
-                <Notification title="Ajuste actualizado" type="success">
-                    El ajuste se actualizó correctamente
-                </Notification>,
-                { placement: 'top-end' }
+            notifySuccess(
+                'Ajuste actualizado',
+                'El ajuste se actualizó correctamente'
             )
             setEditDialogOpen(false)
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al actualizar el ajuste')}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al actualizar el ajuste')
         }
     }
 
     const handleConfirm = async () => {
         try {
             await confirmAdjustment.mutateAsync(adjustmentId)
-            toast.push(
-                <Notification title="Ajuste confirmado" type="success">
-                    El ajuste se confirmó y los movimientos de inventario fueron
-                    generados
-                </Notification>,
-                { placement: 'top-end' }
+            notifySuccess(
+                'Ajuste confirmado',
+                'El ajuste se confirmó y los movimientos de inventario fueron generados'
             )
             setConfirmDialogOpen(false)
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al confirmar el ajuste')}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al confirmar el ajuste')
         }
     }
 
     const handleCancel = async () => {
         try {
             await cancelAdjustment.mutateAsync(adjustmentId)
-            toast.push(
-                <Notification title="Ajuste cancelado" type="success">
-                    El ajuste fue cancelado
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifySuccess('Ajuste cancelado', 'El ajuste fue cancelado')
             setCancelDialogOpen(false)
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al cancelar el ajuste')}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al cancelar el ajuste')
         }
     }
 
     const handleDelete = async () => {
         try {
             await deleteAdjustment.mutateAsync(adjustmentId)
-            toast.push(
-                <Notification title="Ajuste eliminado" type="success">
-                    El ajuste fue eliminado
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifySuccess('Ajuste eliminado', 'El ajuste fue eliminado')
             navigate('/adjustments')
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al eliminar el ajuste')}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al eliminar el ajuste')
         }
     }
 
@@ -145,20 +108,10 @@ export function useAdjustmentActions(
         if (!deleteItemDialog.item) return
         try {
             await deleteItem.mutateAsync(deleteItemDialog.item.id)
-            toast.push(
-                <Notification title="Item eliminado" type="success">
-                    El item fue eliminado
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifySuccess('Item eliminado', 'El item fue eliminado')
             setDeleteItemDialog({ open: false, item: null })
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al eliminar el item')}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al eliminar el item')
         }
     }
 

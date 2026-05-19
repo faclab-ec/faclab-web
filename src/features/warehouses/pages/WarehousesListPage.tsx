@@ -2,13 +2,11 @@ import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
 import {
     useWarehousesList,
     useWarehouseMutations,
 } from '../hooks/useWarehouses'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import useCrudOperations from '@shared/hooks/useCrudOperations'
 import { FormModal, DeleteConfirmDialog } from '@/components/shared'
 import { WarehouseForm } from '../components/WarehouseForm'
@@ -37,29 +35,20 @@ const WarehousesListPage = () => {
                     id: crud.selectedItem.id,
                     data: formData,
                 })
-                toast.push(
-                    <Notification title="Bodega actualizada" type="success">
-                        La bodega se actualizó correctamente
-                    </Notification>,
-                    { placement: 'top-center' }
+                notifySuccess(
+                    'Bodega actualizada',
+                    'La bodega se actualizó correctamente'
                 )
             } else {
                 await create.mutateAsync(formData)
-                toast.push(
-                    <Notification title="Bodega creada" type="success">
-                        La bodega se creó correctamente
-                    </Notification>,
-                    { placement: 'top-center' }
+                notifySuccess(
+                    'Bodega creada',
+                    'La bodega se creó correctamente'
                 )
             }
             crud.closeAll()
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al guardar la bodega')}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al guardar la bodega')
         }
     }
 
@@ -67,20 +56,13 @@ const WarehousesListPage = () => {
         if (!crud.selectedItem) return
         try {
             await remove.mutateAsync(crud.selectedItem.id)
-            toast.push(
-                <Notification title="Bodega eliminada" type="success">
-                    La bodega se eliminó correctamente
-                </Notification>,
-                { placement: 'top-center' }
+            notifySuccess(
+                'Bodega eliminada',
+                'La bodega se eliminó correctamente'
             )
             crud.closeAll()
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al eliminar la bodega')}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al eliminar la bodega')
         }
     }
 

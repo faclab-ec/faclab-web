@@ -5,15 +5,13 @@ import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Input from '@/components/ui/Input'
 import Select from '@/components/ui/Select'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
 import {
     useSerialNumbersList,
     useSerialNumberMutations,
 } from '../hooks/useSerialNumbers'
 import useCrudOperations from '@shared/hooks/useCrudOperations'
 import { FormModal } from '@/components/shared'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import {
     SERIAL_STATUS_LABELS,
     type SerialNumber,
@@ -70,23 +68,13 @@ const SerialNumbersListPage = () => {
     const handleFormSubmit = async (data: SerialNumberInput) => {
         try {
             await createSerialNumber.mutateAsync(data)
-            toast.push(
-                <Notification title="Número de serie creado" type="success">
-                    El número de serie se creó correctamente
-                </Notification>,
-                { placement: 'top-center' }
+            notifySuccess(
+                'Número de serie creado',
+                'El número de serie se creó correctamente'
             )
             crud.closeAll()
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(
-                        error,
-                        'Error al crear el número de serie'
-                    )}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al crear el número de serie')
         }
     }
 

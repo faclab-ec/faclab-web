@@ -2,8 +2,6 @@ import { useEffect } from 'react'
 import Dialog from '@/components/ui/Dialog'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
 import { FormItem } from '@/components/ui/Form'
 import { makeNumberRegister } from '@/components/ui/Form/utils'
 import {
@@ -12,7 +10,7 @@ import {
 } from '@/components/ui/Form/controlled'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { useProductsList } from '@features/products'
 import {
     supplierProductSchema,
@@ -107,26 +105,10 @@ const SupplierProductForm = ({
             } else {
                 await create.mutateAsync(values)
             }
-            toast.push(
-                <Notification
-                    title={
-                        isEdit ? 'Producto actualizado' : 'Producto agregado'
-                    }
-                    type="success"
-                />,
-                { placement: 'top-center' }
-            )
+            notifySuccess(isEdit ? 'Producto actualizado' : 'Producto agregado')
             onClose()
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(
-                        error,
-                        'Error al guardar el producto del proveedor'
-                    )}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al guardar el producto del proveedor')
         }
     }
 

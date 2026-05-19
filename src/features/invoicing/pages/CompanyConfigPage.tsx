@@ -10,9 +10,7 @@ import {
     ControlledSelect,
     ControlledSwitcher,
 } from '@/components/ui/Form/controlled'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import {
     companyConfigSchema,
     type CompanyConfigFormValues,
@@ -112,22 +110,12 @@ const CompanyConfigPage = () => {
                     values.withholdingAgentResolution || undefined,
             }
             await updateConfig.mutateAsync(payload)
-            toast.push(
-                <Notification title="Configuración guardada" type="success">
-                    La configuración fiscal se guardó correctamente
-                </Notification>,
-                { placement: 'top-end' }
+            notifySuccess(
+                'Configuración guardada',
+                'La configuración fiscal se guardó correctamente'
             )
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(
-                        error,
-                        'Error al guardar la configuración'
-                    )}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al guardar la configuración')
         }
     }
 

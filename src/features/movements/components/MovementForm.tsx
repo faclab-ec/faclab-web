@@ -7,10 +7,8 @@ import Input from '@/components/ui/Input'
 import { FormItem, FormContainer } from '@/components/ui/Form'
 import { ControlledSelect } from '@/components/ui/Form/controlled'
 import { makeNumberRegister } from '@/components/ui/Form/utils'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
 import { useMovementMutations } from '../hooks/useMovements'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import {
     movementSchema,
     type MovementFormValues,
@@ -56,20 +54,13 @@ const MovementForm = ({ open, onClose }: MovementFormProps) => {
                 reason: values.reason || undefined,
                 date: values.date || undefined,
             })
-            toast.push(
-                <Notification title="Movimiento creado" type="success">
-                    El movimiento se registró correctamente
-                </Notification>,
-                { placement: 'top-end' }
+            notifySuccess(
+                'Movimiento creado',
+                'El movimiento se registró correctamente'
             )
             onClose()
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al crear el movimiento')}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al crear el movimiento')
         }
     }
 

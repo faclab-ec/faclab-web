@@ -2,10 +2,8 @@ import { useState, useMemo } from 'react'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
 import { useProductsList, useProductMutations } from '../hooks/useProducts'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { useCategoriesList } from '@features/categories'
 import { useUnitsOfMeasureList } from '@features/unitsOfMeasure'
 import useCrudOperations from '@shared/hooks/useCrudOperations'
@@ -68,29 +66,20 @@ const ProductsListPage = () => {
                     id: crud.selectedItem.id,
                     data: formData,
                 })
-                toast.push(
-                    <Notification title="Producto actualizado" type="success">
-                        El producto se actualizó correctamente
-                    </Notification>,
-                    { placement: 'top-center' }
+                notifySuccess(
+                    'Producto actualizado',
+                    'El producto se actualizó correctamente'
                 )
             } else {
                 await createProduct.mutateAsync(formData)
-                toast.push(
-                    <Notification title="Producto creado" type="success">
-                        El producto se creó correctamente
-                    </Notification>,
-                    { placement: 'top-center' }
+                notifySuccess(
+                    'Producto creado',
+                    'El producto se creó correctamente'
                 )
             }
             crud.closeAll()
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al guardar el producto')}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al guardar el producto')
         }
     }
 
@@ -98,20 +87,13 @@ const ProductsListPage = () => {
         if (!crud.selectedItem) return
         try {
             await deleteProduct.mutateAsync(crud.selectedItem.id)
-            toast.push(
-                <Notification title="Producto eliminado" type="success">
-                    El producto se eliminó correctamente
-                </Notification>,
-                { placement: 'top-center' }
+            notifySuccess(
+                'Producto eliminado',
+                'El producto se eliminó correctamente'
             )
             crud.closeAll()
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al eliminar el producto')}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al eliminar el producto')
         }
     }
 

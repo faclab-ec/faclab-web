@@ -3,8 +3,7 @@ import Dialog from '@/components/ui/Dialog'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Spinner from '@/components/ui/Spinner'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
+import { notifySuccess, notifyWarning, notifyError } from '@shared/ui/notify'
 import { useCreateRefund, useProcessRefund } from '../hooks/usePOS'
 import { getSale, getSaleItems, getProduct } from '../api/client'
 import {
@@ -57,13 +56,7 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
             const saleData = saleResponse.data
 
             if (saleData.status !== 'CONFIRMED') {
-                toast.push(
-                    <Notification
-                        type="warning"
-                        title="La venta debe estar confirmada para devolver"
-                    />,
-                    { placement: 'top-end' }
-                )
+                notifyWarning('La venta debe estar confirmada para devolver')
                 setLoading(false)
                 return
             }
@@ -86,11 +79,8 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
             setSale(saleData)
             setItems(selections)
             setStep('select')
-        } catch {
-            toast.push(
-                <Notification type="danger" title="Venta no encontrada" />,
-                { placement: 'top-end' }
-            )
+        } catch (error: unknown) {
+            notifyError(error, 'Venta no encontrada')
         } finally {
             setLoading(false)
         }
@@ -138,13 +128,7 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
             setRefundId(refund.id)
             setStep('payment')
         } catch (error: unknown) {
-            const message =
-                error instanceof Error
-                    ? error.message
-                    : 'Error al crear la devolución'
-            toast.push(<Notification type="danger" title={message} />, {
-                placement: 'top-end',
-            })
+            notifyError(error, 'Error al crear la devolución')
         }
     }
 
@@ -163,22 +147,10 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
                     ],
                 },
             })
-            toast.push(
-                <Notification
-                    type="success"
-                    title="Devolución procesada correctamente"
-                />,
-                { placement: 'top-end' }
-            )
+            notifySuccess('Devolución procesada correctamente')
             handleClose()
         } catch (error: unknown) {
-            const message =
-                error instanceof Error
-                    ? error.message
-                    : 'Error al procesar la devolución'
-            toast.push(<Notification type="danger" title={message} />, {
-                placement: 'top-end',
-            })
+            notifyError(error, 'Error al procesar la devolución')
         }
     }
 

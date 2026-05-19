@@ -7,9 +7,7 @@ import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
 import Input from '@/components/ui/Input'
 import { FormItem } from '@/components/ui/Form'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { HiOutlineTrash, HiOutlineUpload } from 'react-icons/hi'
 import type { Certificate } from '../model/types'
 import {
@@ -62,20 +60,13 @@ const CertificatesPage = () => {
     const onUploadSubmit = async (values: CertificateUploadFormValues) => {
         try {
             await uploadCertificate.mutateAsync(values)
-            toast.push(
-                <Notification title="Certificado subido" type="success">
-                    El certificado se subió correctamente
-                </Notification>,
-                { placement: 'top-end' }
+            notifySuccess(
+                'Certificado subido',
+                'El certificado se subió correctamente'
             )
             closeUploadForm()
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al subir el certificado')}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al subir el certificado')
         }
     }
 
@@ -83,20 +74,13 @@ const CertificatesPage = () => {
         if (!deleteDialog.cert) return
         try {
             await deleteCertificate.mutateAsync(deleteDialog.cert.id)
-            toast.push(
-                <Notification title="Certificado eliminado" type="success">
-                    El certificado se eliminó correctamente
-                </Notification>,
-                { placement: 'top-end' }
+            notifySuccess(
+                'Certificado eliminado',
+                'El certificado se eliminó correctamente'
             )
             setDeleteDialog({ open: false, cert: null })
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al eliminar el certificado')}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al eliminar el certificado')
         }
     }
 

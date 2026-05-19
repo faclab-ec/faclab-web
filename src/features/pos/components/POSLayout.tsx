@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { usePOSStore } from '../store/usePOSStore'
 import {
     useCreateSale,
@@ -82,17 +81,9 @@ const POSLayout = () => {
             await parkSale.mutateAsync({ saleId: sale.id })
 
             clearCart()
-            toast.push(<Notification type="success" title="Venta retenida" />, {
-                placement: 'top-end',
-            })
-        } catch {
-            toast.push(
-                <Notification
-                    type="danger"
-                    title="Error al retener la venta"
-                />,
-                { placement: 'top-end' }
-            )
+            notifySuccess('Venta retenida')
+        } catch (error: unknown) {
+            notifyError(error, 'Error al retener la venta')
         }
     }
 

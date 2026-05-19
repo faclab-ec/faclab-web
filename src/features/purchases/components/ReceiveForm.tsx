@@ -4,11 +4,9 @@ import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 import Table from '@/components/ui/Table'
 import { ControlledSelect } from '@/components/ui/Form/controlled'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
 import { useReceivePurchaseOrder } from '../hooks/usePurchaseOrders'
 import { useLocationsList } from '@features/locations'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { dateToIsoStartOfDay } from '@shared/lib/dateToIsoStartOfDay'
 import { useForm, useFieldArray, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -121,21 +119,14 @@ const ReceiveForm = ({
                 },
             })
 
-            toast.push(
-                <Notification title="Mercancía recibida" type="success">
-                    La recepción se registró correctamente
-                </Notification>,
-                { placement: 'top-end' }
+            notifySuccess(
+                'Mercancía recibida',
+                'La recepción se registró correctamente'
             )
 
             onClose()
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al registrar la recepción')}
-                </Notification>,
-                { placement: 'top-end' }
-            )
+            notifyError(error, 'Error al registrar la recepción')
         }
     }
 

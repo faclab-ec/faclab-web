@@ -2,11 +2,9 @@ import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
 import { FormModal, DeleteConfirmDialog } from '@/components/shared'
 import useCrudOperations from '@shared/hooks/useCrudOperations'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { useWarehousesList } from '@features/warehouses'
 import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
 import { useLocationsList, useLocationMutations } from '../hooks/useLocations'
@@ -46,29 +44,20 @@ const LocationsListPage = () => {
                     id: crud.selectedItem.id,
                     data: formData,
                 })
-                toast.push(
-                    <Notification title="Ubicación actualizada" type="success">
-                        La ubicación se actualizó correctamente
-                    </Notification>,
-                    { placement: 'top-center' }
+                notifySuccess(
+                    'Ubicación actualizada',
+                    'La ubicación se actualizó correctamente'
                 )
             } else {
                 await mutations.create.mutateAsync(formData)
-                toast.push(
-                    <Notification title="Ubicación creada" type="success">
-                        La ubicación se creó correctamente
-                    </Notification>,
-                    { placement: 'top-center' }
+                notifySuccess(
+                    'Ubicación creada',
+                    'La ubicación se creó correctamente'
                 )
             }
             crud.closeAll()
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al guardar la ubicación')}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al guardar la ubicación')
         }
     }
 
@@ -76,20 +65,13 @@ const LocationsListPage = () => {
         if (!crud.selectedItem) return
         try {
             await mutations.delete.mutateAsync(crud.selectedItem.id)
-            toast.push(
-                <Notification title="Ubicación eliminada" type="success">
-                    La ubicación se eliminó correctamente
-                </Notification>,
-                { placement: 'top-center' }
+            notifySuccess(
+                'Ubicación eliminada',
+                'La ubicación se eliminó correctamente'
             )
             crud.closeAll()
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al eliminar la ubicación')}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al eliminar la ubicación')
         }
     }
 

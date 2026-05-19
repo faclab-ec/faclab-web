@@ -3,10 +3,8 @@ import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Select from '@/components/ui/Select'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
 import { ConfirmDialog } from '@/components/shared'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { ROLE_LABELS, ALL_ROLES } from '@/constants/roles.constant'
 import type { RoleCode } from '@/constants/roles.constant'
 import type { AdminUserResponse } from '@/@types/auth'
@@ -86,18 +84,9 @@ const UsersPage = () => {
         setUpdatingRoleId(userId)
         try {
             await updateRole.mutateAsync({ id: userId, role })
-            toast.push(
-                <Notification type="success" title="Rol actualizado" />,
-                { placement: 'top-center' }
-            )
+            notifySuccess('Rol actualizado')
         } catch (err) {
-            toast.push(
-                <Notification
-                    type="danger"
-                    title={getErrorMessage(err, 'Error al actualizar el rol')}
-                />,
-                { placement: 'top-center' }
-            )
+            notifyError(err, 'Error al actualizar el rol')
         } finally {
             setUpdatingRoleId(null)
         }
@@ -107,18 +96,9 @@ const UsersPage = () => {
         setTogglingId(userId)
         try {
             await activateUser.mutateAsync(userId)
-            toast.push(
-                <Notification type="success" title="Usuario activado" />,
-                { placement: 'top-center' }
-            )
+            notifySuccess('Usuario activado')
         } catch (err) {
-            toast.push(
-                <Notification
-                    type="danger"
-                    title={getErrorMessage(err, 'Error al activar el usuario')}
-                />,
-                { placement: 'top-center' }
-            )
+            notifyError(err, 'Error al activar el usuario')
         } finally {
             setTogglingId(null)
         }
@@ -131,21 +111,9 @@ const UsersPage = () => {
         setTogglingId(userId)
         try {
             await deactivateUser.mutateAsync(userId)
-            toast.push(
-                <Notification type="success" title="Usuario desactivado" />,
-                { placement: 'top-center' }
-            )
+            notifySuccess('Usuario desactivado')
         } catch (err) {
-            toast.push(
-                <Notification
-                    type="danger"
-                    title={getErrorMessage(
-                        err,
-                        'Error al desactivar el usuario'
-                    )}
-                />,
-                { placement: 'top-center' }
-            )
+            notifyError(err, 'Error al desactivar el usuario')
         } finally {
             setTogglingId(null)
         }

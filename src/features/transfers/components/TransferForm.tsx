@@ -6,11 +6,9 @@ import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 import { FormItem, FormContainer } from '@/components/ui/Form'
 import { ControlledSelect } from '@/components/ui/Form/controlled'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
 import { useTransferMutations } from '../hooks/useTransfers'
 import { useLocationsList } from '@features/locations'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import {
     transferSchema,
     type TransferFormValues,
@@ -55,21 +53,14 @@ const TransferForm = ({ open, onClose, onCreated }: TransferFormProps) => {
                 notes: values.notes || undefined,
                 requestedBy: values.requestedBy || undefined,
             })
-            toast.push(
-                <Notification title="Transferencia creada" type="success">
-                    La transferencia se creó correctamente
-                </Notification>,
-                { placement: 'top-center' }
+            notifySuccess(
+                'Transferencia creada',
+                'La transferencia se creó correctamente'
             )
             onClose()
             onCreated?.(transfer.id)
         } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al crear la transferencia')}
-                </Notification>,
-                { placement: 'top-center' }
-            )
+            notifyError(error, 'Error al crear la transferencia')
         }
     }
 

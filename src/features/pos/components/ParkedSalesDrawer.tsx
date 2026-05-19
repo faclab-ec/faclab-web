@@ -1,8 +1,7 @@
 import Drawer from '@/components/ui/Drawer'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { useParkedSales, useResumeSale, useCancelSale } from '../hooks/usePOS'
 import { usePOSStore } from '../store/usePOSStore'
 import { getSale, getSaleItems, getProduct, getCustomer } from '../api/client'
@@ -64,19 +63,10 @@ const ParkedSalesDrawer = ({ isOpen, onClose }: ParkedSalesDrawerProps) => {
                 }
             }
 
-            toast.push(
-                <Notification type="success" title="Venta reanudada" />,
-                { placement: 'top-end' }
-            )
+            notifySuccess('Venta reanudada')
             onClose()
-        } catch {
-            toast.push(
-                <Notification
-                    type="danger"
-                    title="Error al reanudar la venta"
-                />,
-                { placement: 'top-end' }
-            )
+        } catch (error: unknown) {
+            notifyError(error, 'Error al reanudar la venta')
         }
     }
 
@@ -86,18 +76,9 @@ const ParkedSalesDrawer = ({ isOpen, onClose }: ParkedSalesDrawerProps) => {
                 saleId,
                 reason: 'Cancelada desde ventas retenidas',
             })
-            toast.push(
-                <Notification type="success" title="Venta cancelada" />,
-                { placement: 'top-end' }
-            )
-        } catch {
-            toast.push(
-                <Notification
-                    type="danger"
-                    title="Error al cancelar la venta"
-                />,
-                { placement: 'top-end' }
-            )
+            notifySuccess('Venta cancelada')
+        } catch (error: unknown) {
+            notifyError(error, 'Error al cancelar la venta')
         }
     }
 

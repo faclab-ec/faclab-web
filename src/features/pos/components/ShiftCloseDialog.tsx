@@ -5,8 +5,7 @@ import Dialog from '@/components/ui/Dialog'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Spinner from '@/components/ui/Spinner'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
+import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { useCloseShift, useCashSummary } from '../hooks/usePOS'
 import { useShift } from './useShift'
 
@@ -72,15 +71,10 @@ const ShiftCloseDialog = ({ isOpen, onClose }: ShiftCloseDialogProps) => {
                     notes: notes || undefined,
                 },
             })
-            toast.push(<Notification type="success" title="Turno cerrado" />, {
-                placement: 'top-end',
-            })
+            notifySuccess('Turno cerrado')
             navigate('/home')
-        } catch {
-            toast.push(
-                <Notification type="danger" title="Error al cerrar el turno" />,
-                { placement: 'top-end' }
-            )
+        } catch (error: unknown) {
+            notifyError(error, 'Error al cerrar el turno')
         }
     }
 
