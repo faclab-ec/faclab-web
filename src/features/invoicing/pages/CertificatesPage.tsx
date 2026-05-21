@@ -1,172 +1,15 @@
-import { useState, useRef } from 'react'
-import { useForm, useWatch } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
-import Input from '@/components/ui/Input'
-import { FormItem } from '@/components/ui/Form'
-import { notifySuccess, notifyError } from '@shared/ui/notify'
-import { HiOutlineTrash, HiOutlineUpload } from 'react-icons/hi'
-import type { Certificate } from '../model/types'
-import {
-    certificateUploadSchema,
-    type CertificateUploadFormValues,
-} from '../model/schemas'
-import {
-    useCertificates,
-    useUploadCertificate,
-    useDeleteCertificate,
-} from '../hooks/useInvoicing'
+import { HiOutlineUpload } from 'react-icons/hi'
+import { useCertificates } from '../hooks/useInvoicing'
+import { useCertificateActions } from '../hooks/useCertificateActions'
+import CertificatesTable from '../components/CertificatesTable'
+import UploadCertificateDialog from '../components/UploadCertificateDialog'
 
 const CertificatesPage = () => {
-    const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
-    const [deleteDialog, setDeleteDialog] = useState<{
-        open: boolean
-        cert: Certificate | null
-    }>({ open: false, cert: null })
-    const fileInputRef = useRef<HTMLInputElement>(null)
-
     const { data: certificates = [], isLoading } = useCertificates()
-    const uploadCertificate = useUploadCertificate()
-    const deleteCertificate = useDeleteCertificate()
-
-    const {
-        register,
-        handleSubmit,
-        control,
-        setValue,
-        reset,
-        formState: { errors, isSubmitting },
-    } = useForm<CertificateUploadFormValues>({
-        resolver: zodResolver(certificateUploadSchema),
-        defaultValues: { password: '' },
-    })
-
-    const watchedFile = useWatch({ control, name: 'file' })
-
-    const closeUploadForm = () => {
-        setIsUploadDialogOpen(false)
-        reset()
-        if (fileInputRef.current) fileInputRef.current.value = ''
-    }
-
-    const handleUploadClose = () => {
-        if (isSubmitting) return
-        closeUploadForm()
-    }
-
-    const onUploadSubmit = async (values: CertificateUploadFormValues) => {
-        try {
-            await uploadCertificate.mutateAsync(values)
-            notifySuccess(
-                'Certificado subido',
-                'El certificado se subió correctamente'
-            )
-            closeUploadForm()
-        } catch (error: unknown) {
-            notifyError(error, 'Error al subir el certificado')
-        }
-    }
-
-    const handleDeleteConfirm = async () => {
-        if (!deleteDialog.cert) return
-        try {
-            await deleteCertificate.mutateAsync(deleteDialog.cert.id)
-            notifySuccess(
-                'Certificado eliminado',
-                'El certificado se eliminó correctamente'
-            )
-            setDeleteDialog({ open: false, cert: null })
-        } catch (error: unknown) {
-            notifyError(error, 'Error al eliminar el certificado')
-        }
-    }
-
-    const formatDate = (iso: string) =>
-        new Date(iso).toLocaleDateString('es-EC', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-        })
-
-    const isExpired = (validTo: string) => new Date(validTo) < new Date()
-
-    const columns: ColumnDef<Certificate>[] = [
-        {
-            header: 'Archivo',
-            accessorKey: 'fileName',
-            cell: (props) => (
-                <span className="font-medium">
-                    {props.row.original.fileName}
-                </span>
-            ),
-        },
-        {
-            header: 'Sujeto',
-            accessorKey: 'subject',
-            cell: (props) => (
-                <span className="text-sm">{props.row.original.subject}</span>
-            ),
-        },
-        {
-            header: 'Emisor',
-            accessorKey: 'issuer',
-            cell: (props) => (
-                <span className="text-sm text-gray-500">
-                    {props.row.original.issuer}
-                </span>
-            ),
-        },
-        {
-            header: 'Válido desde',
-            accessorKey: 'validFrom',
-            cell: (props) => (
-                <span className="text-sm">
-                    {formatDate(props.row.original.validFrom)}
-                </span>
-            ),
-        },
-        {
-            header: 'Válido hasta',
-            accessorKey: 'validTo',
-            cell: (props) => {
-                const expired = isExpired(props.row.original.validTo)
-                return (
-                    <span
-                        className={`inline-flex items-center gap-1 text-sm font-medium ${
-                            expired ? 'text-red-500' : 'text-green-600'
-                        }`}
-                    >
-                        <span
-                            className={`w-2 h-2 rounded-full ${
-                                expired ? 'bg-red-500' : 'bg-green-500'
-                            }`}
-                        />
-                        {formatDate(props.row.original.validTo)}
-                    </span>
-                )
-            },
-        },
-        {
-            header: 'Acciones',
-            id: 'actions',
-            cell: (props) => (
-                <Button
-                    size="sm"
-                    variant="plain"
-                    icon={<HiOutlineTrash />}
-                    onClick={() =>
-                        setDeleteDialog({
-                            open: true,
-                            cert: props.row.original,
-                        })
-                    }
-                />
-            ),
-        },
-    ]
+    const actions = useCertificateActions()
 
     return (
         <>
@@ -186,130 +29,52 @@ const CertificatesPage = () => {
                             variant="solid"
                             size="sm"
                             icon={<HiOutlineUpload />}
-                            onClick={() => setIsUploadDialogOpen(true)}
+                            onClick={actions.openUpload}
                         >
                             Subir Certificado
                         </Button>
                     </div>
 
-                    <DataTable
-                        columns={columns}
-                        data={certificates}
-                        loading={isLoading}
-                        pagingData={{
-                            total: certificates.length,
-                            pageIndex: 1,
-                            pageSize: certificates.length || 10,
-                        }}
+                    <CertificatesTable
+                        certificates={certificates}
+                        isLoading={isLoading}
+                        onDelete={actions.openDelete}
                     />
                 </div>
             </Card>
 
-            <Dialog
-                isOpen={isUploadDialogOpen}
-                shouldCloseOnEsc={!isSubmitting}
-                shouldCloseOnOverlayClick={!isSubmitting}
-                onClose={handleUploadClose}
-                onRequestClose={handleUploadClose}
-            >
-                <div className="flex flex-col h-full justify-between">
-                    <h5 className="mb-4">Subir Certificado Digital</h5>
-                    <form
-                        className="flex-1"
-                        onSubmit={(e) => {
-                            void handleSubmit(onUploadSubmit)(e)
-                        }}
-                    >
-                        <div className="space-y-4">
-                            <FormItem
-                                asterisk
-                                label="Archivo .p12"
-                                invalid={!!errors.file}
-                                errorMessage={errors.file?.message}
-                            >
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    accept=".p12"
-                                    disabled={isSubmitting}
-                                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
-                                    onChange={(e) => {
-                                        const file = e.target.files?.[0]
-                                        setValue('file', file as File, {
-                                            shouldValidate: true,
-                                        })
-                                    }}
-                                />
-                                {watchedFile && (
-                                    <span className="text-xs text-gray-500 mt-1 block">
-                                        {watchedFile.name}
-                                    </span>
-                                )}
-                            </FormItem>
-                            <FormItem
-                                asterisk
-                                label="Contraseña"
-                                invalid={!!errors.password}
-                                errorMessage={errors.password?.message}
-                            >
-                                <Input
-                                    type="password"
-                                    placeholder="Contraseña del certificado"
-                                    disabled={isSubmitting}
-                                    invalid={!!errors.password}
-                                    {...register('password')}
-                                />
-                            </FormItem>
-                        </div>
-                        <div className="flex justify-end gap-2 mt-6">
-                            <Button
-                                type="button"
-                                variant="plain"
-                                disabled={isSubmitting}
-                                onClick={handleUploadClose}
-                            >
-                                Cancelar
-                            </Button>
-                            <Button
-                                type="submit"
-                                variant="solid"
-                                loading={isSubmitting}
-                                disabled={!watchedFile}
-                            >
-                                Subir
-                            </Button>
-                        </div>
-                    </form>
-                </div>
-            </Dialog>
+            <UploadCertificateDialog
+                isOpen={actions.isUploadDialogOpen}
+                form={actions.form}
+                fileInputRef={actions.fileInputRef}
+                watchedFile={actions.watchedFile}
+                onClose={actions.handleUploadClose}
+                onSubmit={actions.onUploadSubmit}
+            />
 
             <Dialog
-                isOpen={deleteDialog.open}
-                onClose={() => setDeleteDialog({ open: false, cert: null })}
-                onRequestClose={() =>
-                    setDeleteDialog({ open: false, cert: null })
-                }
+                isOpen={actions.deleteDialog.open}
+                onClose={actions.closeDelete}
+                onRequestClose={actions.closeDelete}
             >
                 <h5 className="mb-4">Confirmar Eliminación</h5>
                 <p className="mb-6">
                     ¿Estás seguro de que deseas eliminar el certificado{' '}
-                    <strong>{deleteDialog.cert?.fileName}</strong>? Esta acción
-                    no se puede deshacer.
+                    <strong>{actions.deleteDialog.cert?.fileName}</strong>? Esta
+                    acción no se puede deshacer.
                 </p>
                 <div className="flex justify-end gap-2">
                     <Button
                         variant="plain"
-                        disabled={deleteCertificate.isPending}
-                        onClick={() =>
-                            setDeleteDialog({ open: false, cert: null })
-                        }
+                        disabled={actions.deleteCertificate.isPending}
+                        onClick={actions.closeDelete}
                     >
                         Cancelar
                     </Button>
                     <Button
                         variant="solid"
-                        loading={deleteCertificate.isPending}
-                        onClick={handleDeleteConfirm}
+                        loading={actions.deleteCertificate.isPending}
+                        onClick={actions.handleDeleteConfirm}
                     >
                         Eliminar
                     </Button>

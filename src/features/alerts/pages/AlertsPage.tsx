@@ -1,10 +1,8 @@
 import { useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import Card from '@/components/ui/Card'
-import Badge from '@/components/ui/Badge'
 import Select from '@/components/ui/Select'
 import Tabs from '@/components/ui/Tabs'
-import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import {
     useLowStock,
     useOutOfStock,
@@ -12,13 +10,13 @@ import {
     useExpiringLots,
 } from '../hooks/useAlerts'
 import { useWarehousesList } from '@features/warehouses'
-import { type StockAlert } from '../model/types'
+import AlertSummaryCards from '../components/AlertSummaryCards'
+import StockAlertTab from '../components/StockAlertTab'
+import ExpiringLotsTab from '../components/ExpiringLotsTab'
 
 const { TabList, TabNav, TabContent } = Tabs
 
 const AlertsPage = () => {
-    const navigate = useNavigate()
-
     const location = useLocation()
     const initialTab =
         (location.state as { tab?: string } | null)?.tab ?? 'low_stock'
@@ -56,184 +54,18 @@ const AlertsPage = () => {
         return w ? w.name : `#${warehouseId}`
     }
 
-    const stockColumns: ColumnDef<StockAlert>[] = [
-        {
-            header: 'Producto',
-            accessorKey: 'productName',
-            cell: (props) => (
-                <button
-                    className="text-primary font-medium hover:underline text-left"
-                    onClick={() => navigate(`/catalog/products`)}
-                >
-                    {props.row.original.productName}
-                </button>
-            ),
-        },
-        {
-            header: 'SKU',
-            accessorKey: 'sku',
-            cell: (props) => (
-                <span className="text-sm text-gray-600 dark:text-gray-400 font-mono">
-                    {props.row.original.sku}
-                </span>
-            ),
-        },
-        {
-            header: 'Cantidad Actual',
-            accessorKey: 'currentQuantity',
-            cell: (props) => (
-                <span className="font-semibold text-red-600 dark:text-red-400">
-                    {props.row.original.currentQuantity}
-                </span>
-            ),
-        },
-        {
-            header: 'Umbral',
-            accessorKey: 'threshold',
-            cell: (props) => (
-                <span className="text-gray-700 dark:text-gray-300">
-                    {props.row.original.threshold}
-                </span>
-            ),
-        },
-        {
-            header: 'Almacén',
-            accessorKey: 'warehouseId',
-            cell: (props) => getWarehouseName(props.row.original.warehouseId),
-        },
-    ]
-
-    const expiringColumns: ColumnDef<StockAlert>[] = [
-        {
-            header: 'Producto',
-            accessorKey: 'productName',
-            cell: (props) => (
-                <span className="font-medium">
-                    {props.row.original.productName}
-                </span>
-            ),
-        },
-        {
-            header: 'SKU',
-            accessorKey: 'sku',
-            cell: (props) => (
-                <span className="text-sm text-gray-600 dark:text-gray-400 font-mono">
-                    {props.row.original.sku}
-                </span>
-            ),
-        },
-        {
-            header: 'Lote',
-            accessorKey: 'lotId',
-            cell: (props) => {
-                const lotId = props.row.original.lotId
-                return lotId ? (
-                    <button
-                        className="text-primary hover:underline"
-                        onClick={() => navigate(`/lots`)}
-                    >
-                        #{lotId}
-                    </button>
-                ) : (
-                    '-'
-                )
-            },
-        },
-        {
-            header: 'Cantidad',
-            accessorKey: 'currentQuantity',
-            cell: (props) => (
-                <span className="font-medium">
-                    {props.row.original.currentQuantity}
-                </span>
-            ),
-        },
-        {
-            header: 'Días para Vencer',
-            accessorKey: 'daysToExpiry',
-            cell: (props) => {
-                const d = props.row.original.daysToExpiry
-                if (d === null) return '-'
-                const isUrgent = d <= 7
-                return (
-                    <Badge
-                        content={`${d} días`}
-                        className={
-                            isUrgent
-                                ? 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300'
-                                : 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300'
-                        }
-                    />
-                )
-            },
-        },
-    ]
-
-    const summaryCards = [
-        {
-            tab: 'low_stock',
-            label: 'Stock Bajo',
-            count: lowStock.length,
-            colorClass:
-                'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20',
-            textClass: 'text-amber-700 dark:text-amber-300',
-            countClass: 'text-amber-600 dark:text-amber-400',
-        },
-        {
-            tab: 'out_of_stock',
-            label: 'Sin Stock',
-            count: outOfStock.length,
-            colorClass:
-                'bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20',
-            textClass: 'text-red-700 dark:text-red-300',
-            countClass: 'text-red-600 dark:text-red-400',
-        },
-        {
-            tab: 'reorder_point',
-            label: 'Punto de Reorden',
-            count: reorderPoint.length,
-            colorClass:
-                'bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/20',
-            textClass: 'text-blue-700 dark:text-blue-300',
-            countClass: 'text-blue-600 dark:text-blue-400',
-        },
-        {
-            tab: 'expiring_soon',
-            label: 'Por Vencer',
-            count: expiringLots.length,
-            colorClass:
-                'bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20',
-            textClass: 'text-orange-700 dark:text-orange-300',
-            countClass: 'text-orange-600 dark:text-orange-400',
-        },
-    ]
-
     return (
         <div className="flex flex-col gap-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {summaryCards.map((card) => (
-                    <button
-                        key={card.tab}
-                        className={`border rounded-lg p-4 text-left cursor-pointer transition-all hover:shadow-md ${
-                            card.colorClass
-                        } ${
-                            activeTab === card.tab
-                                ? 'ring-2 ring-offset-1 ring-current'
-                                : ''
-                        }`}
-                        onClick={() => setActiveTab(card.tab)}
-                    >
-                        <p className={`text-sm font-medium ${card.textClass}`}>
-                            {card.label}
-                        </p>
-                        <p
-                            className={`text-3xl font-bold mt-1 ${card.countClass}`}
-                        >
-                            {card.count}
-                        </p>
-                    </button>
-                ))}
-            </div>
+            <AlertSummaryCards
+                counts={{
+                    lowStock: lowStock.length,
+                    outOfStock: outOfStock.length,
+                    reorderPoint: reorderPoint.length,
+                    expiringLots: expiringLots.length,
+                }}
+                activeTab={activeTab}
+                onSelect={setActiveTab}
+            />
 
             <Card>
                 <div className="p-4">
@@ -293,80 +125,37 @@ const AlertsPage = () => {
 
                     <div className="mt-4">
                         <TabContent value="low_stock">
-                            {lowStock.length === 0 && !loadingLowStock ? (
-                                <div className="text-center py-8 text-gray-500">
-                                    Sin alertas de stock bajo
-                                </div>
-                            ) : (
-                                <DataTable
-                                    columns={stockColumns}
-                                    data={lowStock}
-                                    loading={loadingLowStock}
-                                    pagingData={{
-                                        total: lowStock.length,
-                                        pageIndex: 1,
-                                        pageSize: lowStock.length || 10,
-                                    }}
-                                />
-                            )}
+                            <StockAlertTab
+                                data={lowStock}
+                                loading={loadingLowStock}
+                                emptyMessage="Sin alertas de stock bajo"
+                                getWarehouseName={getWarehouseName}
+                            />
                         </TabContent>
 
                         <TabContent value="out_of_stock">
-                            {outOfStock.length === 0 && !loadingOutOfStock ? (
-                                <div className="text-center py-8 text-gray-500">
-                                    Sin productos sin stock
-                                </div>
-                            ) : (
-                                <DataTable
-                                    columns={stockColumns}
-                                    data={outOfStock}
-                                    loading={loadingOutOfStock}
-                                    pagingData={{
-                                        total: outOfStock.length,
-                                        pageIndex: 1,
-                                        pageSize: outOfStock.length || 10,
-                                    }}
-                                />
-                            )}
+                            <StockAlertTab
+                                data={outOfStock}
+                                loading={loadingOutOfStock}
+                                emptyMessage="Sin productos sin stock"
+                                getWarehouseName={getWarehouseName}
+                            />
                         </TabContent>
 
                         <TabContent value="reorder_point">
-                            {reorderPoint.length === 0 &&
-                            !loadingReorderPoint ? (
-                                <div className="text-center py-8 text-gray-500">
-                                    Sin alertas de punto de reorden
-                                </div>
-                            ) : (
-                                <DataTable
-                                    columns={stockColumns}
-                                    data={reorderPoint}
-                                    loading={loadingReorderPoint}
-                                    pagingData={{
-                                        total: reorderPoint.length,
-                                        pageIndex: 1,
-                                        pageSize: reorderPoint.length || 10,
-                                    }}
-                                />
-                            )}
+                            <StockAlertTab
+                                data={reorderPoint}
+                                loading={loadingReorderPoint}
+                                emptyMessage="Sin alertas de punto de reorden"
+                                getWarehouseName={getWarehouseName}
+                            />
                         </TabContent>
 
                         <TabContent value="expiring_soon">
-                            {expiringLots.length === 0 && !loadingExpiring ? (
-                                <div className="text-center py-8 text-gray-500">
-                                    Sin lotes próximos a vencer
-                                </div>
-                            ) : (
-                                <DataTable
-                                    columns={expiringColumns}
-                                    data={expiringLots}
-                                    loading={loadingExpiring}
-                                    pagingData={{
-                                        total: expiringLots.length,
-                                        pageIndex: 1,
-                                        pageSize: expiringLots.length || 10,
-                                    }}
-                                />
-                            )}
+                            <ExpiringLotsTab
+                                data={expiringLots}
+                                loading={loadingExpiring}
+                            />
                         </TabContent>
                     </div>
                 </Tabs>
