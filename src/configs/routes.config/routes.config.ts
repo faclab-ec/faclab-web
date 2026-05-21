@@ -10,6 +10,8 @@ import { purchasesRoutes } from '@features/purchases'
 import { posRoutes } from '@features/pos'
 import { unitsOfMeasureRoutes } from '@features/unitsOfMeasure'
 import { productsRoutes } from '@features/products'
+import { categoriesRoutes } from '@features/categories'
+import { suppliersRoutes } from '@features/suppliers'
 import { stockRoutes } from '@features/stock'
 import { lotsRoutes } from '@features/lots'
 import { serialNumbersRoutes } from '@features/serialNumbers'
@@ -30,6 +32,7 @@ export const protectedRoutes: Routes = [
         authority: [],
     },
     ...productsRoutes,
+    ...categoriesRoutes,
     ...unitsOfMeasureRoutes,
     ...stockRoutes,
     ...movementsRoutes,
@@ -40,6 +43,7 @@ export const protectedRoutes: Routes = [
     ...serialNumbersRoutes,
     ...adjustmentsRoutes,
     ...transfersRoutes,
+    ...suppliersRoutes,
     ...purchasesRoutes,
     ...salesRoutes,
     ...reportsRoutes,
