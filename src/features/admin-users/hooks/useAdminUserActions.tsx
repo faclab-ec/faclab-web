@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { notifySuccess, notifyError } from '@shared/ui/notify'
 import type { AdminUserResponse } from '@/@types/auth'
 import type { RoleCode } from '@/constants/roles.constant'
-import generatePassword from '@/utils/generatePassword'
+import generatePassword from '../lib/generatePassword'
 import {
     useUpdateUserRole,
     useActivateUser,
