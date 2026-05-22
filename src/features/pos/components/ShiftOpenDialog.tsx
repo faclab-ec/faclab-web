@@ -71,6 +71,7 @@ const ShiftOpenDialog = () => {
                         >
                             <Input
                                 type="number"
+                                step="any"
                                 prefix="$"
                                 disabled={isSubmitting}
                                 invalid={!!errors.openingBalance}

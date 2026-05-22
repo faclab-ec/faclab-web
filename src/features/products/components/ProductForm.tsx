@@ -213,6 +213,7 @@ export const ProductForm = ({
                         <Input
                             id="purchasePrice"
                             type="number"
+                            step="any"
                             placeholder="0.00"
                             disabled={isSubmitting}
                             invalid={!!errors.purchasePrice}
@@ -228,6 +229,7 @@ export const ProductForm = ({
                         <Input
                             id="salePrice"
                             type="number"
+                            step="any"
                             placeholder="0.00"
                             disabled={isSubmitting}
                             invalid={!!errors.salePrice}

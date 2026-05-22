@@ -135,6 +135,7 @@ const ShiftCloseDialog = ({ isOpen, onClose }: ShiftCloseDialogProps) => {
                 </label>
                 <Input
                     type="number"
+                    step="any"
                     value={closingBalance}
                     prefix="$"
                     placeholder="0.00"

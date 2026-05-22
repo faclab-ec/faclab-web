@@ -111,6 +111,7 @@ const CashMovementDialog = ({ isOpen, onClose }: CashMovementDialogProps) => {
                 >
                     <Input
                         type="number"
+                        step="any"
                         prefix="$"
                         placeholder="0.00"
                         disabled={isSubmitting}

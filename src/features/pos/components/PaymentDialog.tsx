@@ -148,6 +148,7 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
 
             <Input
                 type="number"
+                step="any"
                 value={amount}
                 placeholder={total.toFixed(2)}
                 prefix="$"
