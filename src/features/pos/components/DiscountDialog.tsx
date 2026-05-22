@@ -92,6 +92,7 @@ const DiscountDialog = ({ isOpen, onClose }: DiscountDialogProps) => {
 
             <Input
                 type="number"
+                step="any"
                 value={value}
                 placeholder="0"
                 suffix={type === 'PERCENTAGE' ? '%' : '$'}
