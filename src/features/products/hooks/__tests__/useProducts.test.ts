@@ -17,6 +17,7 @@ const mockProduct = {
     unitOfMeasureId: null,
     purchasePrice: null,
     salePrice: null,
+    taxCode: 'VAT_15' as const,
     isActive: true,
     isService: false,
     minStock: 0,

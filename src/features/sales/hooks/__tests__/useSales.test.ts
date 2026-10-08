@@ -39,6 +39,8 @@ const SALE_ITEM = {
     quantity: 2,
     unitPrice: 45,
     discount: 0,
+    taxCode: 'VAT_15' as const,
+    taxAmount: 13.5,
     subtotal: 90,
 }
 

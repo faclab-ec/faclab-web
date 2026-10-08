@@ -1,4 +1,5 @@
 import type { PaginationParams } from '@/@types/api'
+import type { TaxCode } from '@/constants/tax.constant'
 
 export type Product = {
     id: number
@@ -10,6 +11,7 @@ export type Product = {
     unitOfMeasureId: number | null
     purchasePrice: number | null
     salePrice: number | null
+    taxCode: TaxCode
     isActive: boolean
     isService: boolean
     minStock: number
@@ -27,6 +29,7 @@ export type ProductInput = {
     unitOfMeasureId?: number | null
     purchasePrice?: number | null
     salePrice?: number | null
+    taxCode?: TaxCode
     isActive?: boolean
     isService?: boolean
     minStock?: number

@@ -4,6 +4,7 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Spinner from '@/components/ui/Spinner'
 import { notifySuccess, notifyWarning, notifyError } from '@shared/ui/notify'
+import { TAX_CODE_RATES } from '@/constants/tax.constant'
 import { useCreateRefund, useProcessRefund } from '../hooks/usePOS'
 import { getSale, getSaleItems, getProduct } from '../api/client'
 import {
@@ -109,7 +110,8 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
             item.saleItem.unitPrice *
             item.selectedQuantity *
             (1 - item.saleItem.discount / 100)
-        const lineTax = lineSubtotal * (item.saleItem.taxRate / 100)
+        const lineTax =
+            lineSubtotal * (TAX_CODE_RATES[item.saleItem.taxCode] / 100)
         return sum + lineSubtotal + lineTax
     }, 0)
 
