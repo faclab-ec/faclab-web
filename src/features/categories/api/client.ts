@@ -8,7 +8,7 @@ import type {
 import type { Category } from '../model/types'
 import type { CategoryFormValues } from '../model/category.schema'
 
-const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
+const HOST = appConfig.inventoryApiHost
 
 export const getCategories = (params?: PaginationParams) =>
     httpClient.get<PaginatedResponse<Category>>(`${HOST}/categories`, {

@@ -35,7 +35,7 @@ import type {
     QuickCustomerInput,
 } from '../model/types'
 
-const HOST = appConfig.posApiHost || 'http://localhost:3000/api/pos'
+const HOST = appConfig.posApiHost
 
 // === SHIFTS ===
 

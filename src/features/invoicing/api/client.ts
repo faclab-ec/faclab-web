@@ -8,7 +8,7 @@ import type {
     Invoice,
 } from '../model/types'
 
-const HOST = appConfig.invoicingApiHost || 'http://localhost:3173'
+const HOST = appConfig.invoicingApiHost
 
 interface CertificatesResponse {
     data: Certificate[]

@@ -19,6 +19,7 @@ const PAGINATION = { total: 1, limit: 10, offset: 0 }
 const SALE = {
     id: 1,
     customerId: 10,
+    customerName: 'Ana Pérez',
     status: 'CONFIRMED' as const,
     saleDate: '2025-01-15',
     subtotal: 90,

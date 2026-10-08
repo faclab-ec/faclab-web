@@ -16,7 +16,7 @@ interface TransferItemsResponse {
     meta: { requestId: string; timestamp: string }
 }
 
-const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
+const HOST = appConfig.inventoryApiHost
 
 export async function getTransfers(params?: TransferListParams) {
     const queryParams = new URLSearchParams()

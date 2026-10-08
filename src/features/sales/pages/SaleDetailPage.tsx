@@ -4,7 +4,6 @@ import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Tabs from '@/components/ui/Tabs'
 import { HiOutlineArrowLeft } from 'react-icons/hi'
-import { useCustomersList } from '@features/customers'
 import { useProductsList } from '@features/products'
 import { useSale } from '../hooks/useSales'
 import {
@@ -28,8 +27,6 @@ const SaleDetailPage = () => {
     const { data: sale, isLoading } = useSale(saleId)
     const { data: productsData } = useProductsList()
     const products = productsData?.items ?? []
-    const { data: customersData } = useCustomersList({ limit: 100 })
-    const customers = customersData?.items ?? []
 
     if (isLoading) {
         return (
@@ -73,7 +70,7 @@ const SaleDetailPage = () => {
                 />
             </div>
 
-            <SaleInfoCard sale={sale} customers={customers} />
+            <SaleInfoCard sale={sale} />
 
             <Card>
                 <Tabs defaultValue="items">

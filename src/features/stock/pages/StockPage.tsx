@@ -32,8 +32,10 @@ const StockPage = () => {
             ),
         },
         {
-            header: 'ID Producto',
-            accessorKey: 'productId',
+            header: 'Producto',
+            accessorKey: 'productName',
+            cell: ({ row }) =>
+                row.original.productName ?? `#${row.original.productId}`,
         },
         {
             header: 'Cantidad',
@@ -57,9 +59,9 @@ const StockPage = () => {
         },
         {
             header: 'Ubicación',
-            accessorKey: 'location',
+            accessorKey: 'locationName',
             cell: ({ row }) =>
-                row.original.location || (
+                row.original.locationName || (
                     <span className="text-gray-400 italic">Sin ubicación</span>
                 ),
         },

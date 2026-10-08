@@ -11,7 +11,12 @@ import {
     locationSchema,
     type LocationFormValues,
 } from '../model/location.schema'
-import type { Location, LocationType } from '../model/types'
+import {
+    LOCATION_TYPES,
+    LOCATION_TYPE_LABELS,
+    type Location,
+    type LocationType,
+} from '../model/types'
 
 interface LocationFormProps {
     formId: string
@@ -20,12 +25,11 @@ interface LocationFormProps {
     onSubmit: (data: LocationFormValues) => void
 }
 
-const locationTypeOptions: { value: LocationType; label: string }[] = [
-    { value: 'STORAGE', label: 'Almacenamiento' },
-    { value: 'RECEIVING', label: 'Recepción' },
-    { value: 'SHIPPING', label: 'Despacho' },
-    { value: 'RETURN', label: 'Devolución' },
-]
+const locationTypeOptions: { value: LocationType; label: string }[] =
+    LOCATION_TYPES.map((value) => ({
+        value,
+        label: LOCATION_TYPE_LABELS[value],
+    }))
 
 const LocationForm = ({
     formId,
@@ -59,7 +63,7 @@ const LocationForm = ({
             : {
                   name: '',
                   code: '',
-                  type: 'STORAGE',
+                  type: 'storage',
                   isActive: true,
                   capacity: null,
               },

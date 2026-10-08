@@ -8,6 +8,7 @@ import { useCartTotals } from '../hooks/useCartTotals'
 import { useQuickSale } from '../hooks/usePOS'
 import {
     POS_PAYMENT_METHOD_LABELS,
+    POS_PAYMENT_METHODS,
     type POSPaymentMethod,
     type QuickSalePaymentInput,
 } from '../model/types'
@@ -19,18 +20,13 @@ interface PaymentDialogProps {
     onComplete: (saleId: number) => void
 }
 
-const PAYMENT_METHODS: POSPaymentMethod[] = [
-    'CASH',
-    'CARD',
-    'TRANSFER',
-    'CREDIT',
-]
-
 const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
     const { cartItems, customerId, discountType, discountValue, clearCart } =
         usePOSStore()
     const quickSale = useQuickSale()
-    const { total } = useCartTotals()
+    const { total: cartTotal } = useCartTotals()
+    // Charge whole cents: the cart total comes from float arithmetic
+    const total = Math.round(cartTotal * 100) / 100
 
     const [selectedMethod, setSelectedMethod] =
         useState<POSPaymentMethod>('CASH')
@@ -130,8 +126,8 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
                 </p>
             </div>
 
-            <div className="grid grid-cols-4 gap-2 mb-4">
-                {PAYMENT_METHODS.map((method) => (
+            <div className="grid grid-cols-3 gap-2 mb-4">
+                {POS_PAYMENT_METHODS.map((method) => (
                     <Button
                         key={method}
                         block
@@ -155,7 +151,7 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
                 onChange={(e) => setAmount(e.target.value)}
             />
 
-            {(selectedMethod === 'CARD' || selectedMethod === 'TRANSFER') && (
+            {selectedMethod !== 'CASH' && (
                 <Input
                     className="mt-3"
                     value={reference}

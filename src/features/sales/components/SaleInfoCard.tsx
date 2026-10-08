@@ -2,22 +2,11 @@ import Card from '@/components/ui/Card'
 import { formatCurrency, formatDate, formatDatetime } from '@shared/lib/format'
 import type { Sale } from '../model/types'
 
-interface Customer {
-    id: number
-    name: string
-}
-
 interface SaleInfoCardProps {
     sale: Sale
-    customers: Customer[]
 }
 
-const SaleInfoCard = ({ sale, customers }: SaleInfoCardProps) => {
-    const getCustomerName = (customerId: number) => {
-        const c = customers.find((c) => c.id === customerId)
-        return c ? c.name : `#${customerId}`
-    }
-
+const SaleInfoCard = ({ sale }: SaleInfoCardProps) => {
     return (
         <Card>
             <h5 className="mb-4">Información de la Venta</h5>
@@ -25,7 +14,7 @@ const SaleInfoCard = ({ sale, customers }: SaleInfoCardProps) => {
                 <div>
                     <p className="text-sm text-gray-500">Cliente</p>
                     <p className="font-medium">
-                        {getCustomerName(sale.customerId)}
+                        {sale.customerName ?? 'Consumidor final'}
                     </p>
                 </div>
                 <div>

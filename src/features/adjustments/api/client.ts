@@ -16,7 +16,7 @@ interface AdjustmentItemsResponse {
     meta: { requestId: string; timestamp: string }
 }
 
-const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
+const HOST = appConfig.inventoryApiHost
 
 export async function getAdjustments(params?: AdjustmentListParams) {
     const queryParams = new URLSearchParams()

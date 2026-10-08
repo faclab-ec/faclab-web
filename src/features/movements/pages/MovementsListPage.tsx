@@ -23,7 +23,7 @@ const MovementsListPage = () => {
 
     const queryParams = {
         productId: productId ? parseInt(productId) : undefined,
-        type: type ? (type as 'in' | 'out') : undefined,
+        type: type ? (type as 'IN' | 'OUT') : undefined,
         fromDate: fromDate || undefined,
         toDate: toDate || undefined,
         limit: pageSize,
@@ -55,12 +55,12 @@ const MovementsListPage = () => {
                 return (
                     <span
                         className={`px-2 py-1 rounded text-xs font-semibold ${
-                            type === 'in'
+                            type === 'IN'
                                 ? 'bg-green-100 text-green-800'
                                 : 'bg-red-100 text-red-800'
                         }`}
                     >
-                        {type === 'in' ? 'Entrada' : 'Salida'}
+                        {type === 'IN' ? 'Entrada' : 'Salida'}
                     </span>
                 )
             },
@@ -113,8 +113,8 @@ const MovementsListPage = () => {
 
     const typeOptions = [
         { value: '', label: 'Todos' },
-        { value: 'in', label: 'Entrada' },
-        { value: 'out', label: 'Salida' },
+        { value: 'IN', label: 'Entrada' },
+        { value: 'OUT', label: 'Salida' },
     ]
 
     return (

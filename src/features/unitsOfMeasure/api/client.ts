@@ -7,7 +7,7 @@ import type {
     UnitOfMeasureListParams,
 } from '../model/types'
 
-const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
+const HOST = appConfig.inventoryApiHost
 
 export const getUnitsOfMeasure = (params?: UnitOfMeasureListParams) =>
     httpClient.get<PaginatedResponse<UnitOfMeasure>>(

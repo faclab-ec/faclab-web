@@ -52,11 +52,6 @@ const PurchaseOrderDetailPage = () => {
         return p ? `${p.name} (${p.sku})` : `#${productId}`
     }
 
-    const getSupplierName = (supplierId: number) => {
-        const s = suppliers.find((s) => s.id === supplierId)
-        return s ? s.name : `#${supplierId}`
-    }
-
     if (orderLoading) {
         return (
             <div className="flex justify-center items-center h-96">
@@ -97,7 +92,7 @@ const PurchaseOrderDetailPage = () => {
 
             <PurchaseOrderInfo
                 order={order}
-                supplierName={getSupplierName(order.supplierId)}
+                supplierName={order.supplierName ?? `#${order.supplierId}`}
             />
 
             <PurchaseOrderItems

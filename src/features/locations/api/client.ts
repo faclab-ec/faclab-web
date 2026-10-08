@@ -4,7 +4,7 @@ import type { PaginatedResponse, DataResponse } from '@/@types/api'
 import type { Location, LocationListParams, LocationType } from '../model/types'
 import type { LocationFormValues } from '../model/location.schema'
 
-const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
+const HOST = appConfig.inventoryApiHost
 
 export type LocationInput = {
     warehouseId: number

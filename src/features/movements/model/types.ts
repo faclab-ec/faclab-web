@@ -1,4 +1,6 @@
-export type MovementType = 'in' | 'out'
+// Values defined by faclab-core
+export const MOVEMENT_TYPES = ['IN', 'OUT'] as const
+export type MovementType = (typeof MOVEMENT_TYPES)[number]
 
 export interface Movement {
     id: number
