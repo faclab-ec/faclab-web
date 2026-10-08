@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { refreshScheduler } from '../refreshScheduler'
-import { apiRefresh } from '../../api/client'
+import { refreshSession } from '@shared/lib/auth/session'
 import { useAuthStore } from '@/stores/useAuthStore'
 
 // vi.mock calls are hoisted by Vitest before imports at runtime
-vi.mock('../../api/client', () => ({
-    apiRefresh: vi.fn(),
+vi.mock('@shared/lib/auth/session', () => ({
+    refreshSession: vi.fn(),
 }))
 
 vi.mock('@/stores/useAuthStore', () => ({
@@ -14,7 +14,7 @@ vi.mock('@/stores/useAuthStore', () => ({
     },
 }))
 
-const mockApiRefresh = vi.mocked(apiRefresh)
+const mockRefreshSession = vi.mocked(refreshSession)
 const mockGetState = vi.mocked(useAuthStore.getState)
 
 describe('refreshScheduler', () => {
@@ -64,14 +64,14 @@ describe('refreshScheduler', () => {
         expect(refreshScheduler._isRunning()).toBe(false)
     })
 
-    it('calls apiRefresh when timer fires and re-schedules on success', async () => {
+    it('calls refreshSession when timer fires and re-schedules on success', async () => {
         const newTokens = {
             accessToken: 'new-at',
             refreshToken: 'new-rt',
             expiresIn: 300,
             tokenType: 'Bearer' as const,
         }
-        mockApiRefresh.mockResolvedValueOnce(newTokens)
+        mockRefreshSession.mockResolvedValueOnce(newTokens)
 
         refreshScheduler.start(61) // delay = (61-60)*1000 = 1000ms
         vi.advanceTimersByTime(1000) // fires the 1s timer
@@ -81,13 +81,12 @@ describe('refreshScheduler', () => {
         await Promise.resolve()
         await Promise.resolve()
 
-        expect(mockApiRefresh).toHaveBeenCalledWith({ refreshToken: 'mock-rt' })
-        expect(mockGetState().setTokens).toHaveBeenCalledWith(newTokens)
+        expect(mockRefreshSession).toHaveBeenCalledTimes(1)
         expect(refreshScheduler._isRunning()).toBe(true) // re-scheduled for 240s
     })
 
-    it('does not throw and does not re-schedule if apiRefresh fails', async () => {
-        mockApiRefresh.mockRejectedValueOnce(new Error('network error'))
+    it('does not throw and does not re-schedule if refreshSession fails', async () => {
+        mockRefreshSession.mockRejectedValueOnce(new Error('network error'))
 
         refreshScheduler.start(61)
         vi.advanceTimersByTime(1000)
@@ -112,7 +111,7 @@ describe('refreshScheduler', () => {
         await Promise.resolve()
         await Promise.resolve()
 
-        expect(mockApiRefresh).not.toHaveBeenCalled()
+        expect(mockRefreshSession).not.toHaveBeenCalled()
     })
 
     it('clamps negative delay to 0 (expiresIn < 60)', () => {

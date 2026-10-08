@@ -1,4 +1,4 @@
-import { apiRefresh } from '../api/client'
+import { refreshSession } from '@shared/lib/auth/session'
 import { useAuthStore } from '@/stores/useAuthStore'
 
 let timer: ReturnType<typeof setTimeout> | null = null
@@ -9,11 +9,9 @@ export const refreshScheduler = {
         const delay = Math.max(0, (expiresIn - 60) * 1000)
         timer = setTimeout(async () => {
             timer = null
-            const rt = useAuthStore.getState().refreshToken
-            if (!rt) return
+            if (!useAuthStore.getState().refreshToken) return
             try {
-                const newTokens = await apiRefresh({ refreshToken: rt })
-                useAuthStore.getState().setTokens(newTokens)
+                const newTokens = await refreshSession()
                 refreshScheduler.start(newTokens.expiresIn)
             } catch {
                 /* reactive interceptor handles TOKEN_EXPIRED as fallback */

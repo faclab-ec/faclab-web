@@ -1,39 +1,23 @@
-import { authRequest } from '@shared/lib/http/authClient'
+import { httpClient } from '@shared/lib/http/httpClient'
 import appConfig from '@/configs/app.config'
+import type { DataResponse } from '@/@types/api'
 import type {
     ChangePasswordRequest,
     LoginRequest,
     LoginResponse,
     MeResponse,
-    RefreshRequest,
-    RefreshResponse,
 } from '@/@types/auth'
 
 const AUTH = appConfig.authApiHost
 
-export const apiLogin = (body: LoginRequest): Promise<LoginResponse> =>
-    authRequest<LoginResponse>({
-        url: `${AUTH}/login`,
-        method: 'POST',
-        data: body,
-    })
+// El refresh no vive aquí: usa `refreshSession` de @shared/lib/auth/session,
+// que deduplica las llamadas y guarda los tokens en el store.
 
-export const apiRefresh = (body: RefreshRequest): Promise<RefreshResponse> =>
-    authRequest<RefreshResponse>({
-        url: `${AUTH}/refresh`,
-        method: 'POST',
-        data: body,
-    })
+export const apiLogin = (body: LoginRequest) =>
+    httpClient.post<DataResponse<LoginResponse>>(`${AUTH}/login`, body)
 
-export const apiMe = (): Promise<MeResponse> =>
-    authRequest<MeResponse>({
-        url: `${AUTH}/me`,
-        method: 'GET',
-    })
+export const apiMe = () =>
+    httpClient.get<DataResponse<MeResponse>>(`${AUTH}/me`)
 
-export const apiChangePassword = (body: ChangePasswordRequest): Promise<void> =>
-    authRequest<void>({
-        url: `${AUTH}/change-password`,
-        method: 'POST',
-        data: body,
-    })
+export const apiChangePassword = (body: ChangePasswordRequest) =>
+    httpClient.post<void>(`${AUTH}/change-password`, body)

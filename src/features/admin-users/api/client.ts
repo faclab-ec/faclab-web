@@ -1,5 +1,6 @@
 import appConfig from '@/configs/app.config'
-import { authRequest, authRequestPaginated } from '@shared/lib/http/authClient'
+import { httpClient } from '@shared/lib/http/httpClient'
+import type { DataResponse, PaginatedResponse } from '@/@types/api'
 import type {
     AdminUserResponse,
     AdminUserListParams,
@@ -11,40 +12,25 @@ import type {
 const BASE = appConfig.adminUsersApiHost
 
 export const listUsers = (params?: AdminUserListParams) =>
-    authRequestPaginated<AdminUserResponse>({
-        url: BASE,
-        method: 'GET',
-        params,
-    })
+    httpClient.get<PaginatedResponse<AdminUserResponse>>(BASE, { params })
 
 export const getUser = (id: number) =>
-    authRequest<AdminUserResponse>({ url: `${BASE}/${id}`, method: 'GET' })
+    httpClient.get<DataResponse<AdminUserResponse>>(`${BASE}/${id}`)
 
 export const createUser = (data: CreateUserRequest) =>
-    authRequest<AdminUserResponse>({ url: BASE, method: 'POST', data })
+    httpClient.post<DataResponse<AdminUserResponse>>(BASE, data)
 
 export const updateRole = (id: number, data: UpdateUserRoleRequest) =>
-    authRequest<AdminUserResponse>({
-        url: `${BASE}/${id}/role`,
-        method: 'PUT',
-        data,
-    })
+    httpClient.put<DataResponse<AdminUserResponse>>(`${BASE}/${id}/role`, data)
 
 export const activateUser = (id: number) =>
-    authRequest<AdminUserResponse>({
-        url: `${BASE}/${id}/activate`,
-        method: 'POST',
-    })
+    httpClient.post<DataResponse<AdminUserResponse>>(`${BASE}/${id}/activate`)
 
 export const deactivateUser = (id: number) =>
-    authRequest<AdminUserResponse>({
-        url: `${BASE}/${id}/deactivate`,
-        method: 'POST',
-    })
+    httpClient.post<DataResponse<AdminUserResponse>>(`${BASE}/${id}/deactivate`)
 
 export const resetPassword = (id: number, data: ResetUserPasswordRequest) =>
-    authRequest<AdminUserResponse>({
-        url: `${BASE}/${id}/reset-password`,
-        method: 'POST',
-        data,
-    })
+    httpClient.post<DataResponse<AdminUserResponse>>(
+        `${BASE}/${id}/reset-password`,
+        data
+    )

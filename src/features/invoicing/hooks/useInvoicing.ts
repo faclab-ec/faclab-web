@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { isApiError } from '@/utils/errors/ApiError'
 import * as api from '../api/client'
 import type { CompanyConfigInput } from '../model/types'
 
@@ -66,8 +67,7 @@ export function useCompanyConfig() {
             return response.data
         },
         retry: (failureCount, error: unknown) => {
-            const axiosError = error as { response?: { status?: number } }
-            if (axiosError?.response?.status === 404) return false
+            if (isApiError(error) && error.status === 404) return false
             return failureCount < 2
         },
     })

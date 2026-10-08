@@ -1,429 +1,220 @@
-# Dashboard Faclab
+# Faclab Web
 
-Dashboard administrativo moderno construido con React, TypeScript, Zustand y React Query.
+Frontend administrativo de **Faclab**, un sistema de gestión comercial para pymes de Ecuador: catálogo, inventario, compras, ventas, punto de venta y facturación electrónica SRI.
 
-## 🚀 Características
+## Módulos
 
-- ⚡ **Vite** - Build tool ultrarrápido
-- ⚛️ **React 18** - Framework UI moderno
-- 🔷 **TypeScript** - Type safety completo
-- 🎨 **Tailwind CSS** - Estilos utility-first
-- 🗃️ **Zustand** - Estado del cliente simple y eficiente
-- 🔄 **React Query** - Manejo de estado del servidor con cache automático
-- 🎭 **MirageJS** - API mock para desarrollo sin backend
-- 🌐 **React Router v6** - Enrutamiento moderno
-- 🌍 **i18next** - Internacionalización
-- 🎨 **Múltiples temas** - Dark mode, múltiples layouts
-- 📱 **Responsive** - Diseño adaptable a todos los dispositivos
+| Área | Features (`src/features/`) |
+|---|---|
+| Catálogo | `products`, `categories`, `unitsOfMeasure` |
+| Inventario | `warehouses`, `locations`, `stock`, `movements`, `lots`, `serialNumbers`, `adjustments`, `transfers`, `alerts` |
+| Compras | `suppliers` (contactos y productos por proveedor), `purchases` (órdenes, envío, recepción) |
+| Ventas | `customers`, `sales`, `pos` (turnos de caja, movimientos de efectivo, ventas en espera, pagos, devoluciones) |
+| Facturación | `invoicing` (certificados `.p12`, configuración de la empresa: establecimiento, punto de emisión, secuencial, ambiente) |
+| Análisis | `reports` (valoración, rotación, movimientos, resumen por bodega) |
+| Administración | `auth` (login, cambio de contraseña), `admin-users` (usuarios y roles) |
 
-## 📋 Requisitos Previos
+### Backends
 
-- Node.js >= 14.0.0
-- npm >= 6.0.0
+| Servicio | Host por defecto | Uso |
+|---|---|---|
+| `faclab-core` | `http://localhost:3000` (`/api/auth`, `/api/admin`, `/api/pos`) | Autenticación, usuarios, inventario, compras, ventas y POS |
+| `faclab-invoicing` | `http://localhost:3173` | Certificados, configuración SRI y comprobantes electrónicos |
 
-## 🛠️ Instalación
+## Stack
+
+- **React 19** con **React Compiler** (`babel-plugin-react-compiler`) y **TypeScript 5.9** en modo strict
+- **Vite 4** como bundler y dev server
+- **TanStack Query 5** para el estado del servidor y **Zustand 5** para el estado del cliente
+- **React Router 6**
+- **React Hook Form 7 + Zod 4** para formularios
+- **Axios** como cliente HTTP (un solo `httpClient`)
+- **Tailwind CSS 3** + `twin.macro`, sobre la plantilla **Elstar**: kit de UI propio, 5 layouts y modo oscuro
+- TanStack Table, ApexCharts, FullCalendar, dayjs, i18next
+- **MirageJS** para mocks de API (opcional)
+- **Vitest** + Testing Library + jsdom
+- **ESLint 9** (flat config) + **Prettier**
+
+## Requisitos
+
+- Node.js 18 o superior
+- npm 9 o superior
+- `faclab-core` corriendo en local (y `faclab-invoicing` para el módulo de facturación)
+
+## Instalación
 
 ```bash
-# Clonar el repositorio
-git clone <repository-url>
-cd Dashboard
-
-# Instalar dependencias
 npm install
-
-# Iniciar servidor de desarrollo
-npm start
+cp .env.example .env
+npm start              # http://localhost:5173
 ```
 
-El proyecto estará disponible en [http://localhost:5173](http://localhost:5173)
+### Configuración
 
-## 📜 Scripts Disponibles
-
-```bash
-# Desarrollo
-npm start           # Inicia el servidor de desarrollo
-
-# Producción
-npm run build      # Crea el build de producción
-npm run preview    # Preview del build de producción
-
-# Calidad de Código
-npm run lint       # Ejecuta ESLint
-npm run lint:fix   # Corrige problemas de ESLint automáticamente
-npm run prettier   # Verifica formato de código
-npm run prettier:fix # Corrige formato automáticamente
-npm run format     # Ejecuta prettier:fix y lint:fix
-```
-
-## 🏗️ Estructura del Proyecto
-
-```
-Dashboard/
-├── public/              # Archivos estáticos
-├── src/
-│   ├── @types/         # Definiciones de tipos TypeScript
-│   ├── assets/         # Imágenes, fuentes, etc.
-│   ├── components/     # Componentes React
-│   │   ├── layouts/    # Layouts de la aplicación
-│   │   ├── route/      # Componentes de rutas
-│   │   ├── shared/     # Componentes compartidos
-│   │   ├── template/   # Componentes de plantilla
-│   │   └── ui/         # Componentes UI reutilizables
-│   ├── configs/        # Configuraciones
-│   │   ├── app.config.ts
-│   │   ├── theme.config.ts
-│   │   └── routes.config/
-│   ├── constants/      # Constantes de la aplicación
-│   ├── hooks/          # React Query hooks (Server State)
-│   │   ├── useAuth.ts
-│   │   └── useProducts.ts
-│   ├── lib/            # Configuraciones de librerías
-│   │   └── react-query.ts
-│   ├── locales/        # Archivos de traducción
-│   ├── mock/           # API Mock con MirageJS
-│   │   ├── data/       # Datos de prueba
-│   │   └── fakeApi/    # Endpoints simulados
-│   ├── services/       # Servicios API
-│   │   ├── ApiService.ts
-│   │   ├── AuthService.ts
-│   │   ├── BaseService.ts
-│   │   └── InventoryService.ts
-│   ├── stores/         # Zustand stores (Client State)
-│   │   ├── useAuthStore.ts
-│   │   ├── useThemeStore.ts
-│   │   ├── useLocaleStore.ts
-│   │   └── useBaseStore.ts
-│   ├── utils/          # Utilidades y helpers
-│   ├── views/          # Páginas/Vistas
-│   │   ├── auth/       # Vistas de autenticación
-│   │   ├── inventory/  # Vistas de inventario
-│   │   └── Home.tsx
-│   ├── App.tsx         # Componente principal
-│   └── main.tsx        # Punto de entrada
-├── .env                # Variables de entorno
-├── package.json
-├── tsconfig.json
-├── vite.config.ts
-└── tailwind.config.cjs
-```
-
-## 🎯 Arquitectura
-
-### Estado de la Aplicación
-
-El proyecto usa un enfoque moderno para manejar el estado:
-
-#### **Client State (Zustand)**
-Para estado del cliente (UI, autenticación, tema):
-
-```typescript
-import { useAuthStore } from '@/stores'
-
-// Obtener estado
-const { user, token } = useAuthStore()
-
-// Ejecutar acciones
-const { signInSuccess, signOutSuccess } = useAuthStore()
-signInSuccess(token, user)
-```
-
-**Stores disponibles:**
-- `useAuthStore` - Autenticación y usuario
-- `useThemeStore` - Tema, modo, layout
-- `useLocaleStore` - Idioma
-- `useBaseStore` - Estado base (rutas)
-
-#### **Server State (React Query)**
-Para datos del servidor (productos, pedidos, etc.):
-
-```typescript
-import { useProducts, useCreateProduct } from '@/hooks'
-
-// Queries (GET)
-const { data: products, isLoading, error } = useProducts()
-
-// Mutations (POST, PUT, DELETE)
-const createProduct = useCreateProduct()
-await createProduct.mutateAsync({ name: 'Producto' })
-```
-
-### Servicios API
-
-Los servicios están ubicados en `/src/services`:
-
-- **BaseService**: Cliente Axios con interceptores para auth
-- **ApiService**: Wrapper genérico para llamadas HTTP
-- **InventoryService**: Ejemplo de servicio de dominio
-
-### Mock API
-
-El proyecto incluye MirageJS para simular un backend:
-
-```typescript
-// src/configs/app.config.ts
-const appConfig = {
-    enableMock: true,  // true = usa datos falsos
-    inventoryApiHost: 'http://localhost:3000',  // API real
-}
-```
-
-## 🎨 Temas y Layouts
-
-### Cambiar Tema
-
-```typescript
-import { useThemeStore } from '@/stores'
-
-const { mode, setMode } = useThemeStore()
-setMode('dark') // 'light' | 'dark'
-```
-
-### Layouts Disponibles
-
-- **Modern** - Layout moderno con navegación transparente
-- **Classic** - Layout clásico con sidebar
-- **Decked** - Layout tipo deck
-- **Simple** - Layout minimalista
-- **Stacked Side** - Layout con sidebar apilado
-
-```typescript
-const { layout, setLayout } = useThemeStore()
-setLayout('modern')
-```
-
-## 📄 Agregar Nueva Página
-
-### 1. Crear el componente de vista
-
-```typescript
-// src/views/myModule/MyPage.tsx
-const MyPage = () => {
-    return (
-        <div>
-            <h1>Mi Nueva Página</h1>
-        </div>
-    )
-}
-
-export default MyPage
-```
-
-### 2. Registrar la ruta
-
-```typescript
-// src/configs/routes.config/routes.config.ts
-export const protectedRoutes = [
-    // ... otras rutas
-    {
-        key: 'myModule.myPage',
-        path: '/my-page',
-        component: lazy(() => import('@/views/myModule/MyPage')),
-        authority: [], // Permisos requeridos
-    },
-]
-```
-
-## 🔌 Agregar Nuevo Servicio
-
-### 1. Crear el servicio
-
-```typescript
-// src/services/MyService.ts
-import ApiService from './ApiService'
-
-class MyService {
-    async getItems() {
-        return ApiService.fetchData({
-            url: '/items',
-            method: 'get'
-        })
-    }
-
-    async createItem(data: any) {
-        return ApiService.fetchData({
-            url: '/items',
-            method: 'post',
-            data
-        })
-    }
-}
-
-export default new MyService()
-```
-
-### 2. Crear React Query hooks
-
-```typescript
-// src/hooks/useMyService.ts
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import MyService from '@/services/MyService'
-
-export function useItems() {
-    return useQuery({
-        queryKey: ['items'],
-        queryFn: async () => {
-            const response = await MyService.getItems()
-            return response.data
-        },
-    })
-}
-
-export function useCreateItem() {
-    const queryClient = useQueryClient()
-
-    return useMutation({
-        mutationFn: (data) => MyService.createItem(data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['items'] })
-        },
-    })
-}
-```
-
-### 3. Usar en componentes
-
-```typescript
-import { useItems, useCreateItem } from '@/hooks/useMyService'
-
-const MyComponent = () => {
-    const { data: items, isLoading } = useItems()
-    const createItem = useCreateItem()
-
-    if (isLoading) return <div>Cargando...</div>
-
-    return (
-        <div>
-            {items?.map(item => <div key={item.id}>{item.name}</div>)}
-            <button onClick={() => createItem.mutate({ name: 'Nuevo' })}>
-                Crear
-            </button>
-        </div>
-    )
-}
-```
-
-## 🔒 Autenticación
-
-### Login
-
-```typescript
-import { useSignIn } from '@/hooks'
-import { useAuthStore } from '@/stores'
-
-const LoginPage = () => {
-    const signIn = useSignIn()
-    const user = useAuthStore((state) => state.user)
-
-    const handleLogin = async () => {
-        try {
-            await signIn.mutateAsync({
-                userName: 'admin',
-                password: '123456'
-            })
-            // Usuario y token guardados automáticamente
-        } catch (error) {
-            console.error('Error en login:', error)
-        }
-    }
-
-    return user ? <h1>Hola {user.userName}</h1> : <button>Login</button>
-}
-```
-
-### Logout
-
-```typescript
-import { useSignOut } from '@/hooks'
-
-const LogoutButton = () => {
-    const signOut = useSignOut()
-
-    return (
-        <button onClick={() => signOut.mutate()}>
-            Cerrar Sesión
-        </button>
-    )
-}
-```
-
-## 🌍 Internacionalización
-
-El proyecto incluye soporte para múltiples idiomas con i18next:
-
-```typescript
-import { useLocaleStore } from '@/stores'
-
-const { currentLang, setLang } = useLocaleStore()
-setLang('es') // Cambiar a español
-```
-
-## 🚀 Build y Deploy
-
-### Build de Producción
-
-```bash
-npm run build
-```
-
-Los archivos generados estarán en `/build`
-
-### Preview del Build
-
-```bash
-npm run preview
-```
-
-### Variables de Entorno
-
-Configurar en `.env`:
+`.env`:
 
 ```env
 NODE_ENV=local
+VITE_API_BASE_URL=http://localhost:3000   # base de /api/auth y /api/admin/users
 ```
 
-## 📚 Documentación Adicional
+Los hosts de inventario, POS y facturación están en `src/configs/app.config.ts` (`inventoryApiHost`, `posApiHost`, `invoicingApiHost`). En ese archivo también está `enableMock` para activar MirageJS.
 
-- **ZUSTAND_MIGRATION.md** - Guía detallada de uso de Zustand y React Query
-- **CLAUDE.md** - Arquitectura del proyecto para desarrollo con Claude Code
+## Scripts
 
-## 🤝 Contribuir
+```bash
+npm start               # Dev server
+npm run build           # Build de producción (sale en /build)
+npm run preview         # Sirve el build
 
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+npm test                # Vitest
+npm run test:watch      # Vitest en modo watch
+npm run test:coverage   # Cobertura (v8)
 
-## 📝 Convenciones de Código
+npm run lint            # ESLint
+npm run lint:fix
+npm run prettier        # Verifica formato
+npm run prettier:fix
+npm run format          # prettier:fix + lint:fix
+```
 
-- **Imports**: Usar path alias `@/` para imports absolutos
-- **Componentes**: PascalCase para nombres de componentes
-- **Archivos**: PascalCase para componentes, camelCase para utilidades
-- **Hooks**: Prefijo `use` para hooks personalizados
-- **Stores**: Prefijo `use` y sufijo `Store` (ej: `useAuthStore`)
-- **TypeScript**: Usar tipos explícitos, evitar `any`
+## Arquitectura
 
-## 🐛 Problemas Conocidos
+El código está organizado en **feature modules verticales**: cada dominio es autocontenido y expone una sola superficie pública. Las decisiones y reglas completas están en [`docs/architecture.md`](docs/architecture.md).
 
-Revisar el panel de Issues en GitHub para ver problemas conocidos y reportar nuevos.
+```
+src/
+├── app/            # Bootstrap: AppViews (router), HomePage, routes
+├── features/       # Módulos de dominio (ver tabla de módulos)
+├── shared/         # Utilidades transversales, sin conocimiento de dominio
+│   ├── hooks/      # useCrudOperations
+│   ├── lib/
+│   │   ├── http/   # httpClient
+│   │   ├── auth/   # session, refreshManager, tokenStorage, navigationRef
+│   │   ├── schemas/# primitivas Zod compartidas (optionalEmail, taxTypeSchema)
+│   │   └── ...     # format, getErrorMessage, dateToIsoStartOfDay, react-query
+│   └── ui/         # notify (toasts)
+├── stores/         # Zustand global: auth, theme, locale, base
+├── components/     # UI de la plantilla: ui/ (kit), layouts/, template/, route/, shared/
+├── configs/        # app, routes, navigation, theme, zod
+├── constants/      # permisos, roles, códigos de IVA, etc.
+├── @types/         # tipos globales (api, auth, routes, ...)
+├── utils/          # ApiError, hooks de la plantilla, helpers
+├── mock/           # MirageJS: data/ + fakeApi/
+├── locales/        # i18next
+└── test/           # setup de Vitest
+```
 
-## 📄 Licencia
+### Estructura de un feature
 
-Este proyecto es privado.
+```
+features/<nombre>/
+├── api/client.ts     # Funciones puras que llaman a httpClient
+├── model/            # types.ts + *.schema.ts (Zod + FormValues)
+├── hooks/            # Hooks de React Query (+ __tests__/)
+├── components/       # UI propia del feature
+├── pages/            # Componentes de página (lazy)
+├── lib/ · store/     # Opcionales: lógica propia o store Zustand (p. ej. pos)
+├── routes.ts         # Rutas del feature con sus permisos
+└── index.ts          # Barrel público: la ÚNICA entrada para otros features
+```
 
-## 👥 Equipo
+**Reglas de frontera:**
 
-- Faclab Team
+1. Entre features solo se importa a través de `features/<x>/index.ts`, nunca rutas internas.
+2. `shared/` nunca importa de `features/`.
+3. `app/` orquesta; no contiene lógica de negocio.
+4. Los esquemas viven en el `model/` de su feature.
+5. Las APIs son funciones puras: nada de clases ni singletons.
 
-## 🔗 Links Útiles
+### Estado
 
-- [React Documentation](https://react.dev)
-- [TypeScript Documentation](https://www.typescriptlang.org/docs)
-- [Zustand Documentation](https://docs.pmnd.rs/zustand)
-- [React Query Documentation](https://tanstack.com/query/latest)
-- [Vite Documentation](https://vitejs.dev)
-- [Tailwind CSS Documentation](https://tailwindcss.com)
+- **Servidor → React Query.** Cada feature tiene sus hooks en `hooks/`. Defaults en `src/shared/lib/react-query.ts`: `staleTime` de 5 min, `retry: 1`, sin refetch al enfocar la ventana.
+- **Cliente → Zustand.**
+  - `useAuthStore`: tokens y sesión.
+  - `useThemeStore`: tema, modo y layout.
+  - `useLocaleStore`: idioma.
+  - `useBaseStore`: clave de la ruta actual.
+  - El POS tiene su propio store (`features/pos/store/usePOSStore.ts`).
 
----
+### Capa HTTP
 
-**Desarrollado con ❤️ por Faclab Team**
+Todas las llamadas usan `@shared/lib/http/httpClient`, que devuelve el body (`T`) directamente.
+
+**Envelope.** Los backends responden `{ data, meta }` y, en listados, agregan `meta.pagination = { total, limit, offset }`. Cada capa hace lo suyo:
+- `api/client.ts` tipa el envelope con `DataResponse<T>` o `PaginatedResponse<T>` (`src/@types/api.ts`).
+- El **hook** lo desenvuelve y expone `{ items, pagination }` o la entidad.
+- Los componentes nunca ven el envelope.
+
+```ts
+// api/client.ts
+export const getSuppliers = (params?: SupplierListParams) =>
+    httpClient.get<PaginatedResponse<Supplier>>(`${HOST}/suppliers`, { params })
+
+// hooks/useSuppliers.ts
+queryFn: async () => {
+    const response = await api.getSuppliers(params)
+    return { items: response.data, pagination: response.meta.pagination }
+}
+```
+
+**Errores.** Todo error se rechaza como `ApiError` (`src/utils/errors/ApiError.ts`), con `code`, `message`, `status` y `errors[]`. En la UI se muestran con `notifyError(error, 'Mensaje por defecto')` de `@shared/ui/notify`.
+
+### Autenticación
+
+- JWT con access y refresh token. La sesión (rol y permisos) se hidrata con `GET /api/auth/me` desde `AuthBootstrap`.
+- **Refresh proactivo:** `features/auth/lib/refreshScheduler.ts` renueva el token 60 s antes de que venza.
+- **Refresh reactivo:** si una petición responde `TOKEN_EXPIRED`, `httpClient` renueva el token y reintenta una vez. Las renovaciones concurrentes se deduplican en `refreshOnce`, porque el backend rota el refresh token.
+- `INVALID_TOKEN` o un refresh fallido → cierre de sesión (`forceSignOut`): limpia el store y la caché, y redirige a `/sign-in`.
+- `PASSWORD_CHANGE_REQUIRED` → redirige a `/change-password`.
+- **Regla:** los tokens se escriben solo a través de `useAuthStore` (`setTokens` / `clear`), que persiste en `localStorage`. Para renovar o cerrar sesión desde código usa `refreshSession()` / `forceSignOut()` de `@shared/lib/auth/session`.
+
+### Roles y permisos
+
+- Hay cinco roles: Administrador, Gerente, Operador, Consulta y Cajero (`src/constants/roles.constant.ts`).
+- Los permisos son granulares (`product:read`, `pos:operate`, `user:manage`, …) y están en `src/constants/permissions.constant.ts`.
+- En runtime, la fuente de verdad es la respuesta de `/api/auth/me`.
+- Cada ruta declara `authority: ['permiso']` y `AuthorityGuard` redirige a `/access-denied` si falta.
+- En componentes: `useCan(PERMISSION.X)` y `useHasRole(ROLE.ADMIN)` de `@/stores/useAuthStore`.
+- Al iniciar sesión, el cajero entra directo a `/pos`.
+
+### Formularios
+
+React Hook Form + Zod 4 con `zodResolver`. Hay adaptadores en `src/components/ui/Form/controlled/` (`ControlledSelect`, `ControlledSwitcher`) y helpers como `makeNumberRegister` y `dateToIsoStartOfDay`.
+
+Los formularios de crear y editar usan esquemas separados.
+
+## Agregar un feature
+
+1. Crea `src/features/<nombre>/` con `api/`, `model/`, `hooks/`, `components/` y `pages/`.
+2. Define las funciones de `api/client.ts` con `httpClient`, tipadas con el envelope.
+3. Escribe los hooks de React Query, que desenvuelven el envelope.
+4. Declara las rutas en `routes.ts` (con `lazy()` y `authority`) y expórtalas en `index.ts`.
+5. Registra las rutas en `src/configs/routes.config/routes.config.ts` y el menú en `src/configs/navigation.config/index.ts`.
+6. Agrega tests en `hooks/__tests__/` y `model/__tests__/`.
+
+El feature `suppliers` sirve como plantilla de referencia.
+
+## Mocks
+
+Con `enableMock: true` en `app.config.ts` (fuera de producción) se levanta MirageJS. Solo cubre auth, usuarios, productos, categorías, stock, movimientos y clientes; el resto de los módulos necesita el backend real.
+
+> **Ojo:** los handlers registran rutas relativas (`/api/auth/login`, `/products`, …) y Mirage deja pasar toda URL absoluta (`http…`). Con los hosts actuales de `app.config.ts`, que son absolutos, las peticiones llegan al backend real. Para usar los mocks hay que apuntar esos hosts a rutas relativas.
+
+Para agregar un mock:
+1. Agrega los datos en `src/mock/data`.
+2. Crea el handler en `src/mock/fakeApi`.
+3. Regístralo en `src/mock/mock.ts`.
+
+## Tests
+
+- Vitest + Testing Library en jsdom (`src/test/setup.ts`).
+- Los hooks se prueban mockeando su `api/client` (`vi.mock('../../api/client')`) y envolviéndolos en un `QueryClientProvider`.
+- La capa HTTP tiene tests propios en `src/shared/lib/http/__tests__/`.
+
+## Convenciones
+
+- Commits con [Conventional Commits](https://www.conventionalcommits.org/) (`feat(scope): …`, `fix(scope): …`).
+- PRs con la plantilla de `.github/pull_request_template.md`. Antes de abrirlos deben pasar `npm run lint`, `npm test` y `npm run build`.
+- Imports con alias: `@/`, `@app/`, `@features/`, `@shared/`, `@stores/`, `@configs/`.
+- Textos de UI en español.
