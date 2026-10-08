@@ -41,8 +41,8 @@ const UsersPage = () => {
         role: filterRole,
         isActive: filterIsActive,
     })
-    const items = usersData?.data ?? []
-    const total = usersData?.total ?? 0
+    const items = usersData?.items ?? []
+    const total = usersData?.pagination.total ?? 0
 
     const actions = useAdminUserActions()
 

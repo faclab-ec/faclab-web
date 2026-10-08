@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/useAuthStore'
-import { apiChangePassword, apiLogin, apiMe, apiRefresh } from '../api/client'
+import { apiChangePassword, apiLogin, apiMe } from '../api/client'
 import { navigateTo } from '@shared/lib/auth/navigationRef'
 import appConfig from '@/configs/app.config'
-import tokenStorage from '@shared/lib/auth/tokenStorage'
+import { refreshSession } from '@shared/lib/auth/session'
 import { refreshScheduler } from '../lib/refreshScheduler'
 import type {
     ChangePasswordRequest,
@@ -17,23 +17,18 @@ export const ME_QUERY_KEY = ['auth', 'me'] as const
 export function useMe() {
     const accessToken = useAuthStore((s) => s.accessToken)
     const setSession = useAuthStore((s) => s.setSession)
-    const setTokens = useAuthStore((s) => s.setTokens)
     const clear = useAuthStore((s) => s.clear)
 
     return useQuery<MeResponse>({
         queryKey: ME_QUERY_KEY,
         queryFn: async () => {
             try {
-                const expiresAt = tokenStorage.getAccessExpiresAt()
+                const expiresAt = useAuthStore.getState().accessExpiresAt
                 if (expiresAt && expiresAt < Date.now()) {
-                    const rt = useAuthStore.getState().refreshToken
-                    if (rt) {
-                        const newTokens = await apiRefresh({ refreshToken: rt })
-                        setTokens(newTokens)
-                        refreshScheduler.start(newTokens.expiresIn)
-                    }
+                    const newTokens = await refreshSession()
+                    refreshScheduler.start(newTokens.expiresIn)
                 }
-                const session = await apiMe()
+                const { data: session } = await apiMe()
                 setSession(session)
                 return session
             } catch (err) {
@@ -53,13 +48,13 @@ export function useLogin() {
     const setSession = useAuthStore((s) => s.setSession)
 
     return useMutation<LoginResponse, unknown, LoginRequest>({
-        mutationFn: (body) => apiLogin(body),
+        mutationFn: async (body) => (await apiLogin(body)).data,
         onSuccess: async (tokens) => {
             setTokens(tokens)
             refreshScheduler.start(tokens.expiresIn)
             const session = await qc.fetchQuery({
                 queryKey: ME_QUERY_KEY,
-                queryFn: apiMe,
+                queryFn: async () => (await apiMe()).data,
             })
             setSession(session)
         },
@@ -68,21 +63,18 @@ export function useLogin() {
 
 export function useChangePassword() {
     const qc = useQueryClient()
-    const setTokens = useAuthStore((s) => s.setTokens)
     const setSession = useAuthStore((s) => s.setSession)
 
     return useMutation<void, unknown, ChangePasswordRequest>({
         mutationFn: (body) => apiChangePassword(body),
         onSuccess: async () => {
-            const rt = useAuthStore.getState().refreshToken
-            if (rt) {
-                const newTokens = await apiRefresh({ refreshToken: rt })
-                setTokens(newTokens)
+            if (useAuthStore.getState().refreshToken) {
+                const newTokens = await refreshSession()
                 refreshScheduler.start(newTokens.expiresIn)
             }
             const session = await qc.fetchQuery({
                 queryKey: ME_QUERY_KEY,
-                queryFn: apiMe,
+                queryFn: async () => (await apiMe()).data,
             })
             setSession(session)
         },

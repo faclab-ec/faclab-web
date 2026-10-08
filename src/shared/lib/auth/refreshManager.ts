@@ -2,13 +2,20 @@ import axios, { AxiosError } from 'axios'
 import appConfig from '@/configs/app.config'
 import type { ApiEnvelope, RefreshResponse } from '@/@types/auth'
 import { ApiError, fromAxiosError } from '@/utils/errors/ApiError'
-import tokenStorage from './tokenStorage'
 
-let inFlight: Promise<string> | null = null
+/**
+ * Llamada de red a /auth/refresh, deduplicada: las peticiones concurrentes
+ * comparten la misma promesa para no rotar el refresh token dos veces.
+ *
+ * No persiste nada. Quien llama guarda los tokens vía `useAuthStore`
+ * (ver `refreshSession` en ./session.ts). Usa axios crudo para no pasar por
+ * los interceptores de `httpClient`.
+ */
+let inFlight: Promise<RefreshResponse> | null = null
 
-const doRefresh = async (): Promise<string> => {
-    const refreshToken = tokenStorage.getRefreshToken()
-
+const doRefresh = async (
+    refreshToken: string | null
+): Promise<RefreshResponse> => {
     if (!refreshToken) {
         throw new ApiError({
             code: 'INVALID_TOKEN',
@@ -23,23 +30,17 @@ const doRefresh = async (): Promise<string> => {
             { refreshToken },
             { headers: { 'Content-Type': 'application/json' } }
         )
-
-        const payload = response.data.data
-        tokenStorage.setTokens({
-            accessToken: payload.accessToken,
-            refreshToken: payload.refreshToken,
-            expiresIn: payload.expiresIn,
-        })
-        return payload.accessToken
+        return response.data.data
     } catch (err) {
-        tokenStorage.clearTokens()
         throw fromAxiosError(err as AxiosError)
     }
 }
 
-export const refreshOnce = (): Promise<string> => {
+export const refreshOnce = (
+    refreshToken: string | null
+): Promise<RefreshResponse> => {
     if (inFlight) return inFlight
-    inFlight = doRefresh().finally(() => {
+    inFlight = doRefresh(refreshToken).finally(() => {
         inFlight = null
     })
     return inFlight

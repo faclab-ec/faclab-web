@@ -1,6 +1,6 @@
 # Architecture Decision Record — Feature Module Migration
 
-**Status:** Active | **Date:** 2026-05-07 | **Applies from:** S0
+**Status:** Active — migration completed (S0–S6) | **Date:** 2026-05-07 | **Applies from:** S0
 
 ## Context
 
@@ -19,7 +19,7 @@ Each feature is self-contained and exposes a single public surface (`index.ts`).
 3. **`app/` orchestrates features**. Contains no business logic.
 
 4. **Schemas live with their feature** (`features/<x>/model/`). The legacy
-   `src/schemas/` directory is deleted after migration completes (S6).
+   `src/schemas/` directory was deleted in S6.
 
 5. **Services are pure functions**, not classes or singletons.
    `getSuppliers()`, not `new SupplierService().getSuppliers()`.
@@ -35,9 +35,6 @@ Each feature is self-contained and exposes a single public surface (`index.ts`).
    `PurchaseOrders` needing `Supplier` type uses
    `import type { Supplier } from '@features/suppliers'`, not internal paths.
 
-9. **`@legacy/*` is lint-warned** in `features/`, `shared/`, `app/`.
-   It maps to `src/views/` (temporary during migration). Remove the alias at S6.
-
 ## Path Aliases
 
 | Alias          | Resolves to      | Purpose                           |
@@ -48,17 +45,18 @@ Each feature is self-contained and exposes a single public surface (`index.ts`).
 | `@shared/*`    | `src/shared/*`   | Shared lib, utils, primitives     |
 | `@stores/*`    | `src/stores/*`   | Global Zustand stores             |
 | `@configs/*`   | `src/configs/*`  | App configuration                 |
-| `@legacy/*`    | `src/views/*`    | Temporary — remove at S6         |
 
 ## Key Shared Libraries
 
 | Path | Purpose |
 |---|---|
-| `shared/lib/http/httpClient.ts` | Axios wrapper returning `T`; token + 401 handled by `BaseService` interceptors |
-| `features/auth/lib/refreshScheduler.ts` | `start(expiresIn)` / `stop()` — proactive JWT refresh scheduler (auth-feature owned) |
+| `shared/lib/http/httpClient.ts` | The only HTTP client. Returns `T`; attaches the token, rejects with `ApiError`, refreshes on `TOKEN_EXPIRED` and retries once |
+| `shared/lib/auth/session.ts` | `refreshSession()` / `forceSignOut()` — the only way to renew or drop tokens; all token writes go through `useAuthStore` |
+| `shared/lib/auth/refreshManager.ts` | `refreshOnce()` — deduplicated `/auth/refresh` network call (no persistence) |
+| `features/auth/lib/refreshScheduler.ts` | `start(expiresIn)` / `stop()` — proactive JWT refresh scheduler (auth-feature owned), uses `refreshSession()` |
 | `shared/lib/format.ts` | `formatCurrency`, `formatDate`, `formatDatetime`, `formatPercent` |
 
-## Directory Structure (target state after S6)
+## Directory Structure
 
 ```
 src/
@@ -67,6 +65,10 @@ src/
 ├── shared/       # cross-cutting lib, ui, utils
 ├── stores/       # global Zustand state
 ├── configs/      # environment config
+├── components/   # template UI kit, layouts, route guards (Elstar)
+├── constants/    # permissions, roles, tax codes
+├── utils/        # ApiError, template hooks
+├── mock/         # MirageJS handlers
 └── @types/       # global types
 ```
 
@@ -92,10 +94,13 @@ The backend wraps every JSON response in an envelope:
 
 ```ts
 // list endpoint
-{ data: T[], meta: { pagination: { page, pageSize, total, totalPages } } }
+{ data: T[], meta: { requestId, timestamp, pagination: { total, limit, offset } } }
 
 // detail / mutation endpoint
-{ data: T }
+{ data: T, meta: { requestId, timestamp } }
+
+// error
+{ errors: [{ code, message, field }], meta: { requestId, timestamp } }
 ```
 
 `src/@types/api.ts` declares `PaginatedResponse<T>` and `DataResponse<T>` to type this raw shape.
@@ -123,3 +128,10 @@ The backend wraps every JSON response in an envelope:
 1. Type the `api/client` function with `PaginatedResponse<T>` or `DataResponse<T>`.
 2. In the hook, destructure `body.data` (and `body.meta.pagination` when paginated).
 3. Never expose the envelope past the hook boundary.
+
+### Errors
+
+`httpClient` rejects every failure as `ApiError` (`src/utils/errors/ApiError.ts`), built from the
+error envelope. Session decisions are made on `code`, not HTTP status: `TOKEN_EXPIRED` → refresh +
+retry once; `INVALID_TOKEN` or failed refresh → `forceSignOut()`; `PASSWORD_CHANGE_REQUIRED` →
+`/change-password`. Consumers branch with `isApiError(err) && err.code === '...'`.
