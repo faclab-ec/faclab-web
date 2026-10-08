@@ -1,5 +1,7 @@
 import { create } from 'zustand'
-import { TAX_CODE_RATES, type TaxCode } from '@/constants/tax.constant'
+import { type TaxCode } from '@/constants/tax.constant'
+import { roundMoney } from '@shared/lib/money'
+import { discountFactor, taxBreakdown } from '../model/totals'
 
 export interface POSCartItem {
     productId: number
@@ -146,13 +148,21 @@ export const usePOSStore = create<POSState>()((set) => ({
     setSearchTerm: (term) => set({ searchTerm: term }),
 }))
 
-/** Subtotal de items (precio × cantidad × (1 - descuento_item%)), sin impuesto */
+/*
+ * Totales del carrito. Replican `Sale.recalculate_totals` de faclab-core para que
+ * el monto a cobrar coincida al centavo con el que valida el backend: las líneas
+ * van a precisión completa y se redondean el subtotal, el descuento y el IVA
+ * (por código), y total = subtotal - descuento + IVA.
+ */
+
+/** Monto de una línea (precio × cantidad × (1 - descuento_item%)), sin impuesto */
+function lineSubtotal(item: POSCartItem): number {
+    return item.salePrice * item.quantity * (1 - item.discount / 100)
+}
+
+/** Subtotal de items, sin impuesto, redondeado a centavos */
 export function getCartSubtotal(items: POSCartItem[]): number {
-    return items.reduce((sum, item) => {
-        const lineTotal =
-            item.salePrice * item.quantity * (1 - item.discount / 100)
-        return sum + lineTotal
-    }, 0)
+    return roundMoney(items.reduce((sum, item) => sum + lineSubtotal(item), 0))
 }
 
 export function getCartDiscountAmount(
@@ -161,34 +171,32 @@ export function getCartDiscountAmount(
     discountValue: number
 ): number {
     if (!discountType) return 0
-    if (discountType === 'PERCENTAGE') return subtotal * (discountValue / 100)
-    return discountValue
+    if (discountType === 'PERCENTAGE') {
+        return roundMoney(subtotal * (discountValue / 100))
+    }
+    return Math.min(roundMoney(discountValue), subtotal)
 }
 
-/** Impuesto calculado por item según la tarifa de su taxCode, sobre la base después del descuento de venta */
+/**
+ * IVA sobre la base después del descuento de venta, que se prorratea entre los
+ * items. Se redondea por código de IVA, como en la factura.
+ */
 export function getCartTax(
     items: POSCartItem[],
     discountType: 'PERCENTAGE' | 'AMOUNT' | null,
     discountValue: number
 ): number {
     const subtotal = getCartSubtotal(items)
-    if (subtotal === 0) return 0
-
-    const discountAmount = getCartDiscountAmount(
+    const discount = getCartDiscountAmount(
         subtotal,
         discountType,
         discountValue
     )
-    const discountFactor =
-        subtotal > 0 ? Math.max(0, subtotal - discountAmount) / subtotal : 1
-
-    return items.reduce((sum, item) => {
-        const lineSubtotal =
-            item.salePrice * item.quantity * (1 - item.discount / 100)
-        const lineAfterDiscount = lineSubtotal * discountFactor
-        const lineTax = lineAfterDiscount * (TAX_CODE_RATES[item.taxCode] / 100)
-        return sum + lineTax
-    }, 0)
+    const lines = items.map((item) => ({
+        taxCode: item.taxCode,
+        subtotal: lineSubtotal(item),
+    }))
+    return taxBreakdown(lines, discountFactor(subtotal, discount)).tax
 }
 
 /** Total = subtotal - descuento_venta + impuesto */
@@ -204,5 +212,5 @@ export function getCartTotal(
         discountValue
     )
     const tax = getCartTax(items, discountType, discountValue)
-    return Math.max(0, subtotal - discount + tax)
+    return roundMoney(subtotal - discount + tax)
 }

@@ -4,9 +4,10 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Spinner from '@/components/ui/Spinner'
 import { notifySuccess, notifyWarning, notifyError } from '@shared/ui/notify'
-import { TAX_CODE_RATES } from '@/constants/tax.constant'
+import { roundMoney } from '@shared/lib/money'
 import { useCreateRefund, useProcessRefund } from '../hooks/usePOS'
 import { getSale, getSaleItems, getProduct } from '../api/client'
+import { discountFactor, taxBreakdown } from '../model/totals'
 import {
     POS_PAYMENT_METHOD_LABELS,
     POS_PAYMENT_METHODS,
@@ -37,6 +38,8 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
     const [step, setStep] = useState<'search' | 'select' | 'payment'>('search')
     const [paymentMethod, setPaymentMethod] = useState<POSPaymentMethod>('CASH')
     const [refundId, setRefundId] = useState<number | null>(null)
+    // Amount computed by the backend once the refund exists
+    const [refundTotal, setRefundTotal] = useState(0)
 
     const createRefund = useCreateRefund()
     const processRefund = useProcessRefund()
@@ -99,15 +102,19 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
 
     const selectedItems = items.filter((i) => i.selectedQuantity > 0)
 
-    const refundTotal = selectedItems.reduce((sum, item) => {
-        const lineSubtotal =
-            item.saleItem.unitPrice *
-            item.selectedQuantity *
-            (1 - item.saleItem.discount / 100)
-        const lineTax =
-            lineSubtotal * (TAX_CODE_RATES[item.saleItem.taxCode] / 100)
-        return sum + lineSubtotal + lineTax
-    }, 0)
+    // Preview: what was charged for these items, with the sale's global
+    // discount prorated, rounded like the backend refund
+    const preview = taxBreakdown(
+        selectedItems.map((item) => ({
+            taxCode: item.saleItem.taxCode,
+            subtotal:
+                item.saleItem.unitPrice *
+                item.selectedQuantity *
+                (1 - item.saleItem.discount / 100),
+        })),
+        sale ? discountFactor(sale.subtotal, sale.discount) : 1
+    )
+    const previewTotal = roundMoney(preview.base + preview.tax)
 
     const handleCreateRefund = async () => {
         if (selectedItems.length === 0 || !sale) return
@@ -122,6 +129,7 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
                 reason: reason || undefined,
             })
             setRefundId(refund.id)
+            setRefundTotal(refund.total)
             setStep('payment')
         } catch (error: unknown) {
             notifyError(error, 'Error al crear la devolución')
@@ -158,6 +166,7 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
         setStep('search')
         setPaymentMethod('CASH')
         setRefundId(null)
+        setRefundTotal(0)
         onClose()
     }
 
@@ -264,13 +273,13 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
                         onChange={(e) => setReason(e.target.value)}
                     />
 
-                    {refundTotal > 0 && (
+                    {previewTotal > 0 && (
                         <div className="text-right">
                             <p className="text-sm text-gray-500 dark:text-gray-400">
                                 Total a devolver
                             </p>
                             <p className="text-xl font-bold text-red-500">
-                                ${refundTotal.toFixed(2)}
+                                ${previewTotal.toFixed(2)}
                             </p>
                         </div>
                     )}
