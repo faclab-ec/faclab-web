@@ -1,12 +1,13 @@
 import { describe, it, expect } from 'vitest'
 import { locationSchema } from '../location.schema'
+import { LOCATION_TYPES } from '../types'
 
 describe('locationSchema', () => {
     const valid = {
         warehouseId: 1,
         name: 'Estante A1',
         code: 'EST-A1',
-        type: 'STORAGE' as const,
+        type: 'storage' as const,
         isActive: true,
         capacity: 100,
     }
@@ -44,8 +45,7 @@ describe('locationSchema', () => {
     })
 
     it('accepts all valid location types', () => {
-        const types = ['STORAGE', 'RECEIVING', 'SHIPPING', 'RETURN'] as const
-        for (const type of types) {
+        for (const type of LOCATION_TYPES) {
             expect(locationSchema.safeParse({ ...valid, type }).success).toBe(
                 true
             )

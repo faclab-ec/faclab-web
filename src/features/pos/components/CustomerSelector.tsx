@@ -8,6 +8,7 @@ import { usePOSStore } from '../store/usePOSStore'
 import { useCartTotals } from '../hooks/useCartTotals'
 import { usePOSCustomerSearch, useQuickCreateCustomer } from '../hooks/usePOS'
 import { HiOutlineUser } from 'react-icons/hi'
+import { TAX_TYPE_LABELS, type TaxType } from '@features/customers'
 
 const FINAL_CONSUMER_MAX = 50
 
@@ -26,7 +27,7 @@ const CustomerSelector = () => {
     const [showCreateForm, setShowCreateForm] = useState(false)
     const [newName, setNewName] = useState('')
     const [newTaxId, setNewTaxId] = useState('')
-    const [newTaxType, setNewTaxType] = useState('RUC')
+    const [newTaxType, setNewTaxType] = useState<TaxType>(1)
 
     const { data: foundCustomer, isLoading: searching } =
         usePOSCustomerSearch(taxId)
@@ -66,7 +67,7 @@ const CustomerSelector = () => {
         setShowCreateForm(false)
         setNewName('')
         setNewTaxId('')
-        setNewTaxType('RUC')
+        setNewTaxType(1)
     }
 
     const handleClose = () => {
@@ -236,24 +237,20 @@ const CustomerSelector = () => {
                                 <Button
                                     size="sm"
                                     variant={
-                                        newTaxType === 'RUC'
-                                            ? 'solid'
-                                            : 'default'
+                                        newTaxType === 1 ? 'solid' : 'default'
                                     }
-                                    onClick={() => setNewTaxType('RUC')}
+                                    onClick={() => setNewTaxType(1)}
                                 >
-                                    RUC
+                                    {TAX_TYPE_LABELS[1]}
                                 </Button>
                                 <Button
                                     size="sm"
                                     variant={
-                                        newTaxType === 'CEDULA'
-                                            ? 'solid'
-                                            : 'default'
+                                        newTaxType === 2 ? 'solid' : 'default'
                                     }
-                                    onClick={() => setNewTaxType('CEDULA')}
+                                    onClick={() => setNewTaxType(2)}
                                 >
-                                    Cedula
+                                    {TAX_TYPE_LABELS[2]}
                                 </Button>
                             </div>
                             <Button

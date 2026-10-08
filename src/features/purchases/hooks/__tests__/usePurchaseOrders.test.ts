@@ -18,6 +18,7 @@ const PAGINATION = { total: 2, limit: 10, offset: 0 }
 const ORDER = {
     id: 1,
     supplierId: 10,
+    supplierName: 'Distribuidora Andina',
     orderNumber: 'PO-001',
     status: 'draft' as const,
     subtotal: 90,

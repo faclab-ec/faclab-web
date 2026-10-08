@@ -9,6 +9,7 @@ import { useCreateRefund, useProcessRefund } from '../hooks/usePOS'
 import { getSale, getSaleItems, getProduct } from '../api/client'
 import {
     POS_PAYMENT_METHOD_LABELS,
+    POS_PAYMENT_METHODS,
     type POSSale,
     type POSSaleItem,
     type POSPaymentMethod,
@@ -26,13 +27,6 @@ interface RefundItemSelection {
     maxQuantity: number
     selectedQuantity: number
 }
-
-const PAYMENT_METHODS: POSPaymentMethod[] = [
-    'CASH',
-    'CARD',
-    'TRANSFER',
-    'CREDIT',
-]
 
 const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
     const [saleIdInput, setSaleIdInput] = useState('')
@@ -319,8 +313,8 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
                         <p className="text-sm font-medium mb-2">
                             Método de pago:
                         </p>
-                        <div className="grid grid-cols-4 gap-2">
-                            {PAYMENT_METHODS.map((method) => (
+                        <div className="grid grid-cols-3 gap-2">
+                            {POS_PAYMENT_METHODS.map((method) => (
                                 <Button
                                     key={method}
                                     block

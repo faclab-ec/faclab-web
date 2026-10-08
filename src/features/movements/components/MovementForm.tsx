@@ -20,8 +20,8 @@ interface MovementFormProps {
 }
 
 const typeOptions = [
-    { value: 'in' as const, label: 'Entrada' },
-    { value: 'out' as const, label: 'Salida' },
+    { value: 'IN' as const, label: 'Entrada' },
+    { value: 'OUT' as const, label: 'Salida' },
 ]
 
 const MovementForm = ({ open, onClose }: MovementFormProps) => {
@@ -35,18 +35,18 @@ const MovementForm = ({ open, onClose }: MovementFormProps) => {
         formState: { errors, isSubmitting },
     } = useForm<MovementFormValues>({
         resolver: zodResolver(movementSchema),
-        defaultValues: { type: 'in', reason: '', date: '' },
+        defaultValues: { type: 'IN', reason: '', date: '' },
     })
 
     const numberRegister = makeNumberRegister(register)
 
     useEffect(() => {
-        if (open) reset({ type: 'in', reason: '', date: '' })
+        if (open) reset({ type: 'IN', reason: '', date: '' })
     }, [open, reset])
 
     const onSubmit = async (values: MovementFormValues) => {
         const signedQuantity =
-            Math.abs(values.quantity) * (values.type === 'in' ? 1 : -1)
+            Math.abs(values.quantity) * (values.type === 'IN' ? 1 : -1)
         try {
             await create.mutateAsync({
                 ...values,

@@ -7,7 +7,7 @@ import type {
     MovementListParams,
 } from '../model/types'
 
-const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
+const HOST = appConfig.inventoryApiHost
 
 export const validateMovement = (
     movement: MovementInput
@@ -15,13 +15,13 @@ export const validateMovement = (
     if (movement.quantity === 0) {
         return { valid: false, error: 'La cantidad no puede ser cero' }
     }
-    if (movement.type === 'in' && movement.quantity < 0) {
+    if (movement.type === 'IN' && movement.quantity < 0) {
         return {
             valid: false,
             error: 'La cantidad debe ser positiva para movimientos de entrada',
         }
     }
-    if (movement.type === 'out' && movement.quantity > 0) {
+    if (movement.type === 'OUT' && movement.quantity > 0) {
         return {
             valid: false,
             error: 'La cantidad debe ser negativa para movimientos de salida',

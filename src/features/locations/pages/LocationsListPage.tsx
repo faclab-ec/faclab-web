@@ -9,15 +9,8 @@ import { useWarehousesList } from '@features/warehouses'
 import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
 import { useLocationsList, useLocationMutations } from '../hooks/useLocations'
 import LocationForm from '../components/LocationForm'
-import type { Location } from '../model/types'
+import { LOCATION_TYPE_LABELS, type Location } from '../model/types'
 import type { LocationFormValues } from '../model/location.schema'
-
-const LOCATION_TYPE_LABELS: Record<string, string> = {
-    STORAGE: 'Almacenamiento',
-    RECEIVING: 'Recepción',
-    SHIPPING: 'Despacho',
-    RETURN: 'Devolución',
-}
 
 const LocationsListPage = () => {
     const crud = useCrudOperations<Location>()

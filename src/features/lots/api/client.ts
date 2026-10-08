@@ -8,7 +8,7 @@ import type {
     LotListParams,
 } from '../model/types'
 
-const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
+const HOST = appConfig.inventoryApiHost
 
 export const getLots = (params?: LotListParams) =>
     httpClient.get<PaginatedResponse<Lot>>(`${HOST}/lots`, { params })

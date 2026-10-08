@@ -12,7 +12,7 @@ const mockLocation = {
     warehouseId: 1,
     name: 'Estante A1',
     code: 'EST-A1',
-    type: 'STORAGE' as const,
+    type: 'storage' as const,
     isActive: true,
     capacity: 100,
 }
@@ -79,7 +79,7 @@ describe('useLocationMutations.create', () => {
             warehouseId: 1,
             name: 'Estante A1',
             code: 'EST-A1',
-            type: 'STORAGE',
+            type: 'storage',
         })
 
         await waitFor(() => expect(result.current.create.isSuccess).toBe(true))
@@ -88,7 +88,7 @@ describe('useLocationMutations.create', () => {
             warehouseId: 1,
             name: 'Estante A1',
             code: 'EST-A1',
-            type: 'STORAGE',
+            type: 'storage',
         })
         expect(result.current.create.data?.name).toBe('Estante A1')
     })

@@ -1,4 +1,5 @@
 import type { PaginationParams } from '@/@types/api'
+import type { MovementType } from '@features/movements'
 
 export interface ValuationItem {
     productId: number
@@ -43,7 +44,7 @@ export interface MovementHistoryItem {
     productName: string
     sku: string
     quantity: number
-    type: 'in' | 'out'
+    type: MovementType
     locationId: number | null
     sourceLocationId: number | null
     referenceType: string | null
@@ -55,7 +56,7 @@ export interface MovementHistoryItem {
 
 export interface MovementHistoryParams extends PaginationParams {
     productId?: number
-    type?: 'in' | 'out'
+    type?: MovementType
     fromDate?: string
     toDate?: string
     warehouseId?: number

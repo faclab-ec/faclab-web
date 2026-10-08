@@ -8,14 +8,18 @@ export type AppConfig = {
     tourPath: string
     locale: string
     enableMock: boolean
-    inventoryApiHost?: string
-    posApiHost?: string
-    invoicingApiHost?: string
+    inventoryApiHost: string
+    posApiHost: string
+    invoicingApiHost: string
 }
 
 const apiBaseUrl =
     (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
     'http://localhost:3000'
+
+const invoicingApiUrl =
+    (import.meta.env.VITE_INVOICING_API_URL as string | undefined) ??
+    'http://localhost:3173'
 
 const appConfig: AppConfig = {
     apiPrefix: '',
@@ -27,9 +31,9 @@ const appConfig: AppConfig = {
     tourPath: '/',
     locale: 'en',
     enableMock: false,
-    inventoryApiHost: 'http://localhost:3000/api/admin',
-    posApiHost: 'http://localhost:3000/api/pos',
-    invoicingApiHost: 'http://localhost:3173',
+    inventoryApiHost: `${apiBaseUrl}/api/admin`,
+    posApiHost: `${apiBaseUrl}/api/pos`,
+    invoicingApiHost: invoicingApiUrl,
 }
 
 export default appConfig

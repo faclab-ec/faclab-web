@@ -56,7 +56,7 @@ const mockMovementsResponse = {
             productName: 'Producto A',
             sku: 'SKU-001',
             quantity: 10,
-            type: 'in' as const,
+            type: 'IN' as const,
             locationId: null,
             sourceLocationId: null,
             referenceType: 'purchase_order',
@@ -164,7 +164,7 @@ describe('useMovementHistory', () => {
         await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
         expect(result.current.data?.items).toHaveLength(1)
-        expect(result.current.data?.items[0].type).toBe('in')
+        expect(result.current.data?.items[0].type).toBe('IN')
         expect(result.current.data?.pagination.total).toBe(1)
     })
 

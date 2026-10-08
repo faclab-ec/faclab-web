@@ -8,7 +8,7 @@ import type {
     SerialStatus,
 } from '../model/types'
 
-const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
+const HOST = appConfig.inventoryApiHost
 
 export const getSerialNumbers = (params?: SerialNumberListParams) =>
     httpClient.get<PaginatedResponse<SerialNumber>>(`${HOST}/serials`, {

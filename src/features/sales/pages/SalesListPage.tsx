@@ -64,11 +64,6 @@ const SalesListPage = () => {
         setPageIndex(1)
     }
 
-    const getCustomerName = (customerId: number) => {
-        const customer = customers.find((c) => c.id === customerId)
-        return customer ? customer.name : `#${customerId}`
-    }
-
     const columns: ColumnDef<Sale>[] = [
         {
             header: 'ID',
@@ -79,8 +74,9 @@ const SalesListPage = () => {
         },
         {
             header: 'Cliente',
-            accessorKey: 'customerId',
-            cell: (props) => getCustomerName(props.row.original.customerId),
+            accessorKey: 'customerName',
+            cell: (props) =>
+                props.row.original.customerName ?? 'Consumidor final',
         },
         {
             header: 'Estado',

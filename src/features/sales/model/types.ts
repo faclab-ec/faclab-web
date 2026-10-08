@@ -2,7 +2,15 @@ import type { TaxCode } from '@/constants/tax.constant'
 
 export type SaleStatus = 'DRAFT' | 'CONFIRMED' | 'INVOICED' | 'CANCELLED'
 export type PaymentStatus = 'PENDING' | 'PARTIAL' | 'PAID'
-export type PaymentMethod = 'CASH' | 'CARD' | 'TRANSFER' | 'CREDIT'
+// SRI forms of payment, as defined by faclab-core
+export const PAYMENT_METHODS = [
+    'CASH',
+    'CREDIT_CARD',
+    'DEBIT_CARD',
+    'TRANSFER',
+    'OTHER',
+] as const
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number]
 
 export const SALE_STATUS_LABELS: Record<SaleStatus, string> = {
     DRAFT: 'Borrador',
@@ -35,9 +43,10 @@ export const PAYMENT_STATUS_CLASSES: Record<PaymentStatus, string> = {
 
 export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
     CASH: 'Efectivo',
-    CARD: 'Tarjeta',
+    CREDIT_CARD: 'Tarjeta crédito',
+    DEBIT_CARD: 'Tarjeta débito',
     TRANSFER: 'Transferencia',
-    CREDIT: 'Crédito',
+    OTHER: 'Otro',
 }
 
 export type InvoiceStatus =
@@ -80,7 +89,8 @@ export interface Invoice {
 
 export interface Sale {
     id: number
-    customerId: number
+    customerId: number | null
+    customerName: string | null
     status: SaleStatus
     saleDate: string | null
     subtotal: number

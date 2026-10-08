@@ -4,7 +4,7 @@ import type { PaginatedResponse, DataResponse } from '@/@types/api'
 import type { Warehouse, WarehouseListParams } from '../model/types'
 import type { WarehouseFormValues } from '../model/warehouse.schema'
 
-const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
+const HOST = appConfig.inventoryApiHost
 
 export const getWarehouses = (params?: WarehouseListParams) =>
     httpClient.get<PaginatedResponse<Warehouse>>(`${HOST}/warehouses`, {

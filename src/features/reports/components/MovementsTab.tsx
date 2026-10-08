@@ -8,8 +8,8 @@ import type { MovementHistoryItem, MovementHistoryParams } from '../model/types'
 
 const movementTypeOptions = [
     { value: '', label: 'Todos' },
-    { value: 'in', label: 'Entrada' },
-    { value: 'out', label: 'Salida' },
+    { value: 'IN', label: 'Entrada' },
+    { value: 'OUT', label: 'Salida' },
 ]
 
 const referenceTypeLabels: Record<string, string> = {
@@ -41,7 +41,7 @@ const MovementsTab = ({ warehouseOptions, productOptions }: Props) => {
         offset: movOffset,
         warehouseId: movWarehouse ? parseInt(movWarehouse) : undefined,
         productId: movProduct ? parseInt(movProduct) : undefined,
-        type: movType ? (movType as 'in' | 'out') : undefined,
+        type: movType ? (movType as 'IN' | 'OUT') : undefined,
         fromDate: movFromDate || undefined,
         toDate: movToDate || undefined,
     }
@@ -76,9 +76,9 @@ const MovementsTab = ({ warehouseOptions, productOptions }: Props) => {
                 const type = props.row.original.type
                 return (
                     <Badge
-                        content={type === 'in' ? 'Entrada' : 'Salida'}
+                        content={type === 'IN' ? 'Entrada' : 'Salida'}
                         className={
-                            type === 'in'
+                            type === 'IN'
                                 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'
                                 : 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300'
                         }
@@ -94,13 +94,13 @@ const MovementsTab = ({ warehouseOptions, productOptions }: Props) => {
                 return (
                     <span
                         className={
-                            type === 'in'
+                            type === 'IN'
                                 ? 'text-emerald-600 dark:text-emerald-400 font-medium'
                                 : 'text-red-600 dark:text-red-400 font-medium'
                         }
                     >
-                        {type === 'in' ? '+' : '-'}
-                        {quantity}
+                        {type === 'IN' ? '+' : '-'}
+                        {Math.abs(quantity)}
                     </span>
                 )
             },

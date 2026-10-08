@@ -1,11 +1,20 @@
 import type { Meta } from '@/@types/api'
 import type { TaxCode } from '@/constants/tax.constant'
+import type { TaxType } from '@features/customers'
 
 // === ENUMS ===
 export type ShiftStatus = 'OPEN' | 'CLOSED'
 export type POSSaleStatus = 'DRAFT' | 'CONFIRMED' | 'INVOICED' | 'CANCELLED'
 export type POSPaymentStatus = 'PENDING' | 'PARTIAL' | 'PAID'
-export type POSPaymentMethod = 'CASH' | 'CARD' | 'TRANSFER' | 'CREDIT'
+// SRI forms of payment, as defined by faclab-core
+export const POS_PAYMENT_METHODS = [
+    'CASH',
+    'CREDIT_CARD',
+    'DEBIT_CARD',
+    'TRANSFER',
+    'OTHER',
+] as const
+export type POSPaymentMethod = (typeof POS_PAYMENT_METHODS)[number]
 export type CashMovementType = 'IN' | 'OUT'
 export type RefundStatus = 'PENDING' | 'COMPLETED' | 'CANCELLED'
 export type DiscountType = 'PERCENTAGE' | 'AMOUNT'
@@ -52,9 +61,10 @@ export const POS_PAYMENT_STATUS_CLASSES: Record<POSPaymentStatus, string> = {
 
 export const POS_PAYMENT_METHOD_LABELS: Record<POSPaymentMethod, string> = {
     CASH: 'Efectivo',
-    CARD: 'Tarjeta',
+    CREDIT_CARD: 'Tarjeta crédito',
+    DEBIT_CARD: 'Tarjeta débito',
     TRANSFER: 'Transferencia',
-    CREDIT: 'Crédito',
+    OTHER: 'Otro',
 }
 
 export const CASH_MOVEMENT_TYPE_LABELS: Record<CashMovementType, string> = {
@@ -399,7 +409,7 @@ export interface POSCustomer {
 export interface QuickCustomerInput {
     name: string
     taxId: string
-    taxType: string
+    taxType: TaxType
 }
 
 // === SHARED ===

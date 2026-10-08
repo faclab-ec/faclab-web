@@ -12,7 +12,7 @@ import type {
     SummaryParams,
 } from '../model/types'
 
-const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
+const HOST = appConfig.inventoryApiHost
 
 export const getValuation = (params?: ValuationParams) =>
     httpClient.get<DataResponse<InventoryValuation>>(

@@ -66,11 +66,6 @@ const PurchaseOrdersListPage = () => {
         setPageIndex(1)
     }
 
-    const getSupplierName = (supplierId: number) => {
-        const supplier = suppliers.find((s) => s.id === supplierId)
-        return supplier ? supplier.name : `#${supplierId}`
-    }
-
     const handleCreated = (id: number) => {
         navigate(`/purchase-orders/${id}`)
     }
@@ -87,8 +82,10 @@ const PurchaseOrdersListPage = () => {
         },
         {
             header: 'Proveedor',
-            accessorKey: 'supplierId',
-            cell: (props) => getSupplierName(props.row.original.supplierId),
+            accessorKey: 'supplierName',
+            cell: (props) =>
+                props.row.original.supplierName ??
+                `#${props.row.original.supplierId}`,
         },
         {
             header: 'Estado',

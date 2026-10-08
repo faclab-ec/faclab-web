@@ -9,9 +9,8 @@ import type {
     Invoice,
 } from '../model/types'
 
-const INVENTORY_HOST =
-    appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
-const INVOICING_HOST = appConfig.invoicingApiHost || 'http://localhost:3173'
+const INVENTORY_HOST = appConfig.inventoryApiHost
+const INVOICING_HOST = appConfig.invoicingApiHost
 
 interface SaleItemsResponse {
     data: SaleItem[]

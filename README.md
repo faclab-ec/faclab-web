@@ -55,10 +55,11 @@ npm start              # http://localhost:5173
 
 ```env
 NODE_ENV=local
-VITE_API_BASE_URL=http://localhost:3000   # base de /api/auth y /api/admin/users
+VITE_API_BASE_URL=http://localhost:3000        # faclab-core: /api/auth, /api/admin, /api/pos
+VITE_INVOICING_API_URL=http://localhost:3173   # faclab-invoicing
 ```
 
-Los hosts de inventario, POS y facturación están en `src/configs/app.config.ts` (`inventoryApiHost`, `posApiHost`, `invoicingApiHost`). En ese archivo también está `enableMock` para activar MirageJS.
+`src/configs/app.config.ts` arma los hosts de cada API (`inventoryApiHost`, `posApiHost`, `invoicingApiHost`) a partir de estas variables. En ese archivo también está `enableMock` para activar MirageJS.
 
 ## Scripts
 
@@ -70,6 +71,7 @@ npm run preview         # Sirve el build
 npm test                # Vitest
 npm run test:watch      # Vitest en modo watch
 npm run test:coverage   # Cobertura (v8)
+npm run check:contract  # Compara los enums del front con el OpenAPI de faclab-core
 
 npm run lint            # ESLint
 npm run lint:fix
@@ -77,6 +79,8 @@ npm run prettier        # Verifica formato
 npm run prettier:fix
 npm run format          # prettier:fix + lint:fix
 ```
+
+`check:contract` lee `http://localhost:3000/openapi.json` (faclab-core con `DOCS_ENABLED=true`); para otra fuente usa `OPENAPI_URL=<url o ruta a un JSON> npm run check:contract`. Córrelo cuando cambie un enum en el backend o en el front.
 
 ## Arquitectura
 

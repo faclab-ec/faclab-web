@@ -9,7 +9,7 @@ import type {
 import type { CustomerFormValues } from '../model/customer.schema'
 import type { ContactFormValues } from '../model/contact.schema'
 
-const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
+const HOST = appConfig.inventoryApiHost
 
 export const getCustomers = (params?: CustomerListParams) =>
     httpClient.get<PaginatedResponse<Customer>>(`${HOST}/customers`, { params })
@@ -21,7 +21,7 @@ export const searchCustomerByTaxId = (taxId: string) =>
     httpClient.get<DataResponse<Customer>>(
         `${HOST}/customers/search/by-tax-id`,
         {
-            params: { tax_id: taxId },
+            params: { taxId },
         }
     )
 

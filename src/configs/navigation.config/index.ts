@@ -267,7 +267,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.settings.companyConfig',
                 icon: 'settingsCompanyConfig',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['user:manage'],
                 subMenu: [],
             },
             {
@@ -277,7 +277,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.settings.certificates',
                 icon: 'settingsCertificates',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['user:manage'],
                 subMenu: [],
             },
         ],

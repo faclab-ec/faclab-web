@@ -3,7 +3,7 @@ import appConfig from '@/configs/app.config'
 import type { PaginatedResponse, DataResponse } from '@/@types/api'
 import type { Product, ProductInput, ProductListParams } from '../model/types'
 
-const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
+const HOST = appConfig.inventoryApiHost
 
 export const getProducts = (params?: ProductListParams) =>
     httpClient.get<PaginatedResponse<Product>>(`${HOST}/products`, { params })

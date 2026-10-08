@@ -7,7 +7,15 @@ import * as api from '../../api/client'
 
 vi.mock('../../api/client')
 
-const mockStock = { id: 1, productId: 5, quantity: 42, location: 'A1' }
+const mockStock = {
+    id: 1,
+    productId: 5,
+    productName: 'Cable HDMI',
+    quantity: 42,
+    locationId: 3,
+    locationName: 'A1',
+    reservedQuantity: 0,
+}
 
 const mockPaginatedResponse = {
     data: [mockStock],

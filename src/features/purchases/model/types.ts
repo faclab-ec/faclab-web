@@ -32,6 +32,7 @@ export const PURCHASE_ORDER_STATUS_CLASSES: Record<
 export interface PurchaseOrder {
     id: number
     supplierId: number
+    supplierName: string | null
     orderNumber: string
     status: PurchaseOrderStatus
     subtotal: number
