@@ -49,7 +49,7 @@ const ParkedSalesDrawer = ({ isOpen, onClose }: ParkedSalesDrawerProps) => {
                     name: product.name,
                     sku: product.sku,
                     salePrice: item.unitPrice,
-                    taxRate: item.taxRate,
+                    taxCode: item.taxCode,
                 })
                 if (item.quantity > 1) {
                     usePOSStore

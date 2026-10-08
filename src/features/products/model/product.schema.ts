@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { TAX_CODES } from '@/constants/tax.constant'
 
 export const productSchema = z.object({
     name: z
@@ -20,6 +21,7 @@ export const productSchema = z.object({
         .min(0, 'Debe ser mayor o igual a 0')
         .optional()
         .nullable(),
+    taxCode: z.enum(TAX_CODES),
     isActive: z.boolean().optional(),
     isService: z.boolean().optional(),
     minStock: z

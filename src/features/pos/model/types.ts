@@ -1,4 +1,5 @@
 import type { Meta } from '@/@types/api'
+import type { TaxCode } from '@/constants/tax.constant'
 
 // === ENUMS ===
 export type ShiftStatus = 'OPEN' | 'CLOSED'
@@ -134,7 +135,7 @@ export interface POSSaleItem {
     quantity: number
     unitPrice: number
     discount: number
-    taxRate: number
+    taxCode: TaxCode
     taxAmount: number
     subtotal: number
     priceOverride: number | null
@@ -234,7 +235,7 @@ export interface RefundItem {
     quantity: number
     unitPrice: number
     discount: number
-    taxRate: number
+    taxCode: TaxCode
     taxAmount: number
     subtotal: number
 }
@@ -289,7 +290,7 @@ export interface ReceiptItem {
     unitPrice: number
     discount: number
     discountAmount: number
-    taxRate: number
+    taxCode: TaxCode
     taxAmount: number
     subtotal: number
     priceOverride: number | null
@@ -305,6 +306,7 @@ export interface Receipt {
     isFinalConsumer: boolean
     items: ReceiptItem[]
     taxBreakdown: {
+        taxCode: TaxCode
         taxRate: number
         taxableBase: number
         taxAmount: number
@@ -381,7 +383,7 @@ export interface POSProduct {
     barcode: string | null
     categoryId: number | null
     salePrice: number | null
-    taxRate: number
+    taxCode: TaxCode
     isActive: boolean
     image: string | null
 }

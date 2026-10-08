@@ -9,6 +9,11 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useCategoriesList } from '@features/categories'
 import { useUnitsOfMeasureList } from '@features/unitsOfMeasure'
+import {
+    DEFAULT_TAX_CODE,
+    TAX_CODE_LABELS,
+    TAX_CODES,
+} from '@/constants/tax.constant'
 import { productSchema, type ProductFormValues } from '../model/product.schema'
 import type { Product } from '../model/types'
 
@@ -28,6 +33,7 @@ const emptyValues: ProductFormValues = {
     unitOfMeasureId: undefined,
     purchasePrice: undefined,
     salePrice: undefined,
+    taxCode: DEFAULT_TAX_CODE,
     isActive: true,
     isService: false,
     minStock: 0,
@@ -35,6 +41,11 @@ const emptyValues: ProductFormValues = {
     reorderPoint: 0,
     leadTimeDays: undefined,
 }
+
+const taxCodeOptions = TAX_CODES.map((value) => ({
+    value,
+    label: TAX_CODE_LABELS[value],
+}))
 
 export const ProductForm = ({
     formId,
@@ -75,6 +86,7 @@ export const ProductForm = ({
               unitOfMeasureId: product.unitOfMeasureId ?? undefined,
               purchasePrice: product.purchasePrice ?? undefined,
               salePrice: product.salePrice ?? undefined,
+              taxCode: product.taxCode ?? DEFAULT_TAX_CODE,
               isActive: product.isActive,
               isService: product.isService,
               minStock: product.minStock,
@@ -237,6 +249,22 @@ export const ProductForm = ({
                         />
                     </FormItem>
                 </div>
+
+                <FormItem
+                    asterisk
+                    htmlFor="taxCode"
+                    label="IVA"
+                    invalid={!!errors.taxCode}
+                    errorMessage={errors.taxCode?.message}
+                >
+                    <ControlledSelect
+                        name="taxCode"
+                        control={control}
+                        options={taxCodeOptions}
+                        isDisabled={isSubmitting}
+                        placeholder="Seleccione el IVA"
+                    />
+                </FormItem>
 
                 <div className="flex gap-6">
                     <div className="flex items-center gap-3">

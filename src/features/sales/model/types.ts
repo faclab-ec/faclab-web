@@ -1,3 +1,5 @@
+import type { TaxCode } from '@/constants/tax.constant'
+
 export type SaleStatus = 'DRAFT' | 'CONFIRMED' | 'INVOICED' | 'CANCELLED'
 export type PaymentStatus = 'PENDING' | 'PARTIAL' | 'PAID'
 export type PaymentMethod = 'CASH' | 'CARD' | 'TRANSFER' | 'CREDIT'
@@ -99,6 +101,8 @@ export interface SaleItem {
     quantity: number
     unitPrice: number
     discount: number
+    taxCode: TaxCode
+    taxAmount: number
     subtotal: number
 }
 

@@ -1,11 +1,12 @@
 import { create } from 'zustand'
+import { TAX_CODE_RATES, type TaxCode } from '@/constants/tax.constant'
 
 export interface POSCartItem {
     productId: number
     name: string
     sku: string
     salePrice: number
-    taxRate: number
+    taxCode: TaxCode
     quantity: number
     discount: number
 }
@@ -27,7 +28,7 @@ interface POSState {
         name: string
         sku: string
         salePrice: number
-        taxRate: number
+        taxCode: TaxCode
     }) => void
     updateItemQuantity: (productId: number, quantity: number) => void
     updateItemDiscount: (productId: number, discount: number) => void
@@ -164,7 +165,7 @@ export function getCartDiscountAmount(
     return discountValue
 }
 
-/** Impuesto calculado por item usando su taxRate, sobre la base después del descuento de venta */
+/** Impuesto calculado por item según la tarifa de su taxCode, sobre la base después del descuento de venta */
 export function getCartTax(
     items: POSCartItem[],
     discountType: 'PERCENTAGE' | 'AMOUNT' | null,
@@ -185,7 +186,7 @@ export function getCartTax(
         const lineSubtotal =
             item.salePrice * item.quantity * (1 - item.discount / 100)
         const lineAfterDiscount = lineSubtotal * discountFactor
-        const lineTax = lineAfterDiscount * (item.taxRate / 100)
+        const lineTax = lineAfterDiscount * (TAX_CODE_RATES[item.taxCode] / 100)
         return sum + lineTax
     }, 0)
 }

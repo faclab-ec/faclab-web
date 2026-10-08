@@ -16,7 +16,7 @@ const ProductCard = memo(({ product }: ProductCardProps) => {
             name: product.name,
             sku: product.sku,
             salePrice: product.salePrice ?? 0,
-            taxRate: product.taxRate ?? 0,
+            taxCode: product.taxCode,
         })
     }, [addItem, product])
 
