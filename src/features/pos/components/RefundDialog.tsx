@@ -11,6 +11,7 @@ import { discountFactor, taxBreakdown } from '../model/totals'
 import {
     POS_PAYMENT_METHOD_LABELS,
     POS_PAYMENT_METHODS,
+    REFUNDABLE_SALE_STATUSES,
     type POSSale,
     type POSSaleItem,
     type POSPaymentMethod,
@@ -53,8 +54,8 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
             const saleResponse = await getSale(id)
             const saleData = saleResponse.data
 
-            if (saleData.status !== 'CONFIRMED') {
-                notifyWarning('La venta debe estar confirmada para devolver')
+            if (!REFUNDABLE_SALE_STATUSES.includes(saleData.status)) {
+                notifyWarning('Solo se pueden devolver ventas confirmadas o facturadas')
                 setLoading(false)
                 return
             }

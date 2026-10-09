@@ -5,6 +5,12 @@ import type { TaxType } from '@features/customers'
 // === ENUMS ===
 export type ShiftStatus = 'OPEN' | 'CLOSED'
 export type POSSaleStatus = 'DRAFT' | 'CONFIRMED' | 'INVOICED' | 'CANCELLED'
+// Confirmed sales can be refunded whether or not the SRI already authorized
+// their invoice (faclab-core then marks them INVOICED)
+export const REFUNDABLE_SALE_STATUSES: readonly POSSaleStatus[] = [
+    'CONFIRMED',
+    'INVOICED',
+]
 export type POSPaymentStatus = 'PENDING' | 'PARTIAL' | 'PAID'
 // SRI forms of payment, as defined by faclab-core
 export const POS_PAYMENT_METHODS = [
