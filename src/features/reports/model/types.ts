@@ -87,4 +87,6 @@ export interface Dashboard {
         reorderPoint: number
         expiringSoon: number
     }
+    // CONFIRMED sales: the SRI hasn't authorized their invoice yet
+    uninvoicedSales: number
 }

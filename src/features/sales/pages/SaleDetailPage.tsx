@@ -87,7 +87,10 @@ const SaleDetailPage = () => {
                             />
                         </TabContent>
                         <TabContent value="invoices">
-                            <SaleInvoicesTab saleId={saleId} />
+                            <SaleInvoicesTab
+                                saleId={saleId}
+                                saleStatus={sale.status}
+                            />
                         </TabContent>
                     </div>
                 </Tabs>

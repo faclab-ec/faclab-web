@@ -3,6 +3,7 @@ import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import { useReceipt } from '../hooks/usePOS'
 import { HiOutlineCheckCircle } from 'react-icons/hi'
+import { InvoiceReceiptNote } from '@features/invoicing'
 
 interface ReceiptDialogProps {
     isOpen: boolean
@@ -27,6 +28,10 @@ const ReceiptDialog = ({ isOpen, saleId, onClose }: ReceiptDialogProps) => {
             <div className="text-center mb-4">
                 <HiOutlineCheckCircle className="text-5xl text-emerald-500 mx-auto" />
                 <h4 className="text-lg font-bold mt-2">Venta Completada</h4>
+            </div>
+
+            <div className="mb-4">
+                <InvoiceReceiptNote />
             </div>
 
             {isLoading && (

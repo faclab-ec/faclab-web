@@ -2,11 +2,9 @@ export type {
     Sale,
     SaleItem,
     Payment,
-    Invoice,
     SaleStatus,
     PaymentStatus,
     PaymentMethod,
-    InvoiceStatus,
     SaleQueryParams,
 } from './model/types'
 
@@ -16,8 +14,6 @@ export {
     PAYMENT_STATUS_LABELS,
     PAYMENT_STATUS_CLASSES,
     PAYMENT_METHOD_LABELS,
-    INVOICE_STATUS_LABELS,
-    INVOICE_STATUS_CLASSES,
 } from './model/types'
 
 export {
@@ -25,7 +21,7 @@ export {
     useSale,
     useSaleItems,
     useSalePayments,
-    useInvoicesBySale,
+    useRequestInvoice,
 } from './hooks/useSales'
 
 export { salesRoutes } from './routes'

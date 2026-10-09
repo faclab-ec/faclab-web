@@ -9,6 +9,7 @@ import Button from '@/components/ui/Button'
 import View from '@app/AppViews'
 import { HiOutlineShoppingCart } from 'react-icons/hi'
 import { useCan } from '@/stores'
+import { InvoicingReadinessAlert } from '@features/invoicing'
 
 const HeaderActionsStart = () => {
     return (
@@ -51,6 +52,11 @@ const ModernLayout = () => {
                         className="border-b border-gray-200 dark:border-gray-700"
                         headerEnd={<HeaderActionsEnd />}
                         headerStart={<HeaderActionsStart />}
+                    />
+                    {/* Before selling: invoices can't go out until this is fixed */}
+                    <InvoicingReadinessAlert
+                        rounded={false}
+                        className="border-b border-gray-200 dark:border-gray-700"
                     />
                     <View />
                 </div>

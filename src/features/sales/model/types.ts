@@ -49,44 +49,6 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
     OTHER: 'Otro',
 }
 
-export type InvoiceStatus =
-    | 'created'
-    | 'signed'
-    | 'sent'
-    | 'authorized'
-    | 'rejected'
-
-export const INVOICE_STATUS_LABELS: Record<InvoiceStatus, string> = {
-    created: 'Creada',
-    signed: 'Firmada',
-    sent: 'Enviada',
-    authorized: 'Autorizada',
-    rejected: 'Rechazada',
-}
-
-export const INVOICE_STATUS_CLASSES: Record<InvoiceStatus, string> = {
-    created: 'bg-gray-100 text-gray-600',
-    signed: 'bg-blue-100 text-blue-600',
-    sent: 'bg-yellow-100 text-yellow-600',
-    authorized: 'bg-emerald-100 text-emerald-600',
-    rejected: 'bg-red-100 text-red-600',
-}
-
-export interface InvoiceStatusHistoryEntry {
-    name: string
-    statusDate: string
-    description?: string
-}
-
-export interface Invoice {
-    id: string
-    saleId: string
-    accessCode: string
-    status: InvoiceStatus
-    signatureId: string
-    statusHistory: InvoiceStatusHistoryEntry[]
-}
-
 export interface Sale {
     id: number
     customerId: number | null
@@ -134,19 +96,4 @@ export interface SaleQueryParams {
     status?: SaleStatus
     limit?: number
     offset?: number
-}
-
-// The SRI number (establecimiento-punto de emisión-secuencial) is part of the
-// 49-digit access code
-export function invoiceNumber(accessCode: string): string {
-    if (accessCode.length !== 49) return accessCode
-    return `${accessCode.slice(24, 27)}-${accessCode.slice(
-        27,
-        30
-    )}-${accessCode.slice(30, 39)}`
-}
-
-// When faclab-invoicing created the invoice
-export function invoiceIssuedAt(invoice: Invoice): string | null {
-    return invoice.statusHistory[0]?.statusDate ?? null
 }

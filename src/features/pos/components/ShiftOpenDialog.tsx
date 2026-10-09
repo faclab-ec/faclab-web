@@ -7,6 +7,7 @@ import { FormItem, FormContainer } from '@/components/ui/Form'
 import { makeNumberRegister } from '@/components/ui/Form/utils'
 import { useOpenShift } from '../hooks/usePOS'
 import { useSession } from '@/stores/useAuthStore'
+import { InvoicingReadinessAlert } from '@features/invoicing'
 import { shiftOpenSchema, type ShiftOpenFormValues } from '../model/schemas'
 
 const ShiftOpenDialog = () => {
@@ -46,6 +47,8 @@ const ShiftOpenDialog = () => {
                 <p className="text-sm text-gray-500 text-center mb-6">
                     Debe abrir un turno para usar el POS
                 </p>
+                {/* Doesn't block: sales go through, invoices wait */}
+                <InvoicingReadinessAlert className="mb-6 text-sm" />
 
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <FormContainer>

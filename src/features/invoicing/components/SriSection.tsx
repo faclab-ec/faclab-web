@@ -42,7 +42,7 @@ const SriSection = ({
                 >
                     <Input
                         placeholder="001"
-                        maxLength={4}
+                        maxLength={3}
                         disabled={isSubmitting}
                         invalid={!!errors.branchCode}
                         {...register('branchCode')}
@@ -56,7 +56,7 @@ const SriSection = ({
                 >
                     <Input
                         placeholder="001"
-                        maxLength={4}
+                        maxLength={3}
                         disabled={isSubmitting}
                         invalid={!!errors.salePointCode}
                         {...register('salePointCode')}

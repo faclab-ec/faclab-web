@@ -7,7 +7,7 @@ import {
     useSale,
     useSaleItems,
     useSalePayments,
-    useInvoicesBySale,
+    useRequestInvoice,
 } from '../useSales'
 import * as api from '../../api/client'
 
@@ -56,15 +56,6 @@ const PAYMENT = {
     reference: null,
     notes: null,
     createdAt: '2025-01-15T10:00:00Z',
-}
-
-const INVOICE = {
-    id: 'inv-1',
-    saleId: '1',
-    accessCode: '1234567890',
-    status: 'authorized' as const,
-    signatureId: 'sig-1',
-    statusHistory: [{ name: 'authorized', statusDate: '2025-01-15T10:05:00Z' }],
 }
 
 function wrapper({ children }: { children: React.ReactNode }) {
@@ -161,18 +152,19 @@ describe('useSalePayments', () => {
     })
 })
 
-describe('useInvoicesBySale', () => {
-    it('returns invoices for a sale', async () => {
-        vi.mocked(api.getInvoicesBySale).mockResolvedValue({
-            data: [INVOICE],
+describe('useRequestInvoice', () => {
+    it('sends the sale to invoicing again and returns it', async () => {
+        vi.mocked(api.requestInvoice).mockResolvedValue({
+            data: SALE,
             meta: META,
         })
 
-        const { result } = renderHook(() => useInvoicesBySale(1), { wrapper })
+        const { result } = renderHook(() => useRequestInvoice(), { wrapper })
+        result.current.mutate(1)
 
         await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-        expect(result.current.data).toHaveLength(1)
-        expect(result.current.data![0].status).toBe('authorized')
+        expect(api.requestInvoice).toHaveBeenCalledWith(1)
+        expect(result.current.data?.status).toBe('CONFIRMED')
     })
 })

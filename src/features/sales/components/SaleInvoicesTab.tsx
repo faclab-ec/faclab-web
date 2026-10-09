@@ -1,24 +1,59 @@
 import { useState } from 'react'
 import Table from '@/components/ui/Table'
 import Badge from '@/components/ui/Badge'
+import Button from '@/components/ui/Button'
+import { HiOutlineRefresh } from 'react-icons/hi'
 import { formatDatetime } from '@shared/lib/format'
+import { notifyError, notifySuccess } from '@shared/ui/notify'
+import { useCan } from '@/stores'
 import {
-    INVOICE_STATUS_LABELS,
     INVOICE_STATUS_CLASSES,
+    INVOICE_STATUS_LABELS,
+    InvoiceReason,
+    invoiceNumber,
+    isFinalInvoice,
+    useInvoiceRetryAction,
+    useInvoicesBySale,
     type Invoice,
-} from '../model/types'
-import { useInvoicesBySale } from '../hooks/useSales'
+} from '@features/invoicing'
+import { useRequestInvoice } from '../hooks/useSales'
+import type { SaleStatus } from '../model/types'
 import InvoicePreviewDialog from './InvoicePreviewDialog'
 
 const { Tr, Th, Td, THead, TBody } = Table
 
 interface SaleInvoicesTabProps {
     saleId: number
+    saleStatus: SaleStatus
 }
 
-const SaleInvoicesTab = ({ saleId }: SaleInvoicesTabProps) => {
-    const { data: invoices = [], isLoading } = useInvoicesBySale(saleId)
+const SaleInvoicesTab = ({ saleId, saleStatus }: SaleInvoicesTabProps) => {
+    const {
+        data: invoices = [],
+        isLoading,
+        isError,
+    } = useInvoicesBySale(saleId)
     const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
+    const canWrite = useCan('sale:write')
+    const retry = useInvoiceRetryAction()
+    const requestInvoice = useRequestInvoice()
+
+    // A new invoice only makes sense when there is none, or all were rejected
+    const hasActiveInvoice = invoices.some((i) => i.status !== 'rejected')
+    const canRequest =
+        canWrite && saleStatus === 'CONFIRMED' && !hasActiveInvoice && !isError
+
+    const handleRequest = async () => {
+        try {
+            await requestInvoice.mutateAsync(saleId)
+            notifySuccess(
+                'Venta reenviada a facturación',
+                'La factura aparecerá aquí en unos momentos'
+            )
+        } catch (error) {
+            notifyError(error, 'No se pudo reenviar la venta a facturación')
+        }
+    }
 
     if (isLoading) {
         return (
@@ -28,38 +63,60 @@ const SaleInvoicesTab = ({ saleId }: SaleInvoicesTabProps) => {
         )
     }
 
-    if (invoices.length === 0) {
+    if (isError) {
         return (
-            <div className="text-center py-8 text-gray-500">
-                No hay facturas asociadas a esta venta
+            <div className="text-center py-8 text-red-500">
+                No se pudieron cargar las facturas: el servicio de facturación
+                no responde
             </div>
         )
     }
 
     return (
         <>
-            <Table>
-                <THead>
-                    <Tr>
-                        <Th>Código de Acceso</Th>
-                        <Th>Estado</Th>
-                        <Th>Último Cambio</Th>
-                    </Tr>
-                </THead>
-                <TBody>
-                    {invoices.map((invoice) => {
-                        const lastEntry =
-                            invoice.statusHistory[
-                                invoice.statusHistory.length - 1
-                            ]
-                        return (
+            {canRequest && (
+                <div className="flex flex-wrap items-center justify-between gap-4 mb-4 p-3 rounded-lg bg-amber-50 text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
+                    <p className="text-sm">
+                        {invoices.length === 0
+                            ? 'Esta venta no tiene factura. Si no aparece en unos minutos, reenvíala a facturación.'
+                            : 'El SRI rechazó la factura. Corrige los datos (por ejemplo, los del cliente) y reenvía la venta para emitir una nueva.'}
+                    </p>
+                    <Button
+                        size="sm"
+                        loading={requestInvoice.isPending}
+                        onClick={handleRequest}
+                    >
+                        Reenviar a facturación
+                    </Button>
+                </div>
+            )}
+
+            {invoices.length === 0 ? (
+                !canRequest && (
+                    <div className="text-center py-8 text-gray-500">
+                        No hay facturas asociadas a esta venta
+                    </div>
+                )
+            ) : (
+                <Table>
+                    <THead>
+                        <Tr>
+                            <Th>Número</Th>
+                            <Th>Estado</Th>
+                            <Th>Motivo</Th>
+                            <Th>Último Cambio</Th>
+                            <Th />
+                        </Tr>
+                    </THead>
+                    <TBody>
+                        {invoices.map((invoice) => (
                             <Tr
                                 key={invoice.id}
                                 className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
                                 onClick={() => setSelectedInvoice(invoice)}
                             >
-                                <Td className="font-mono text-xs break-all">
-                                    {invoice.accessCode}
+                                <Td className="font-mono text-sm">
+                                    {invoiceNumber(invoice.accessCode)}
                                 </Td>
                                 <Td>
                                     <Badge
@@ -76,15 +133,31 @@ const SaleInvoicesTab = ({ saleId }: SaleInvoicesTabProps) => {
                                     />
                                 </Td>
                                 <Td>
-                                    {lastEntry
-                                        ? formatDatetime(lastEntry.statusDate)
-                                        : '-'}
+                                    <InvoiceReason invoice={invoice} />
+                                </Td>
+                                <Td>{formatDatetime(invoice.updatedAt)}</Td>
+                                <Td>
+                                    {canWrite && !isFinalInvoice(invoice) && (
+                                        <Button
+                                            size="sm"
+                                            variant="plain"
+                                            title="Reintentar ahora"
+                                            icon={<HiOutlineRefresh />}
+                                            loading={
+                                                retry.retryingId === invoice.id
+                                            }
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                retry.run(invoice)
+                                            }}
+                                        />
+                                    )}
                                 </Td>
                             </Tr>
-                        )
-                    })}
-                </TBody>
-            </Table>
+                        ))}
+                    </TBody>
+                </Table>
+            )}
 
             <InvoicePreviewDialog
                 invoice={selectedInvoice}
