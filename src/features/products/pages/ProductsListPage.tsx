@@ -7,6 +7,8 @@ import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { useCategoriesList } from '@features/categories'
 import { useUnitsOfMeasureList } from '@features/unitsOfMeasure'
 import useCrudOperations from '@shared/hooks/useCrudOperations'
+import { useDebouncedValue } from '@shared/hooks/useDebouncedValue'
+import ListSearchInput from '@shared/ui/ListSearchInput'
 import { FormModal, DeleteConfirmDialog } from '@/components/shared'
 import type { Product, ProductInput } from '../model/types'
 import { ProductForm } from '../components/ProductForm'
@@ -18,12 +20,15 @@ const ProductsListPage = () => {
     const [filterCategoryId, setFilterCategoryId] = useState<
         number | undefined
     >(undefined)
+    const [search, setSearch] = useState('')
+    const searchTerm = useDebouncedValue(search.trim())
     const offset = (crud.pageIndex - 1) * crud.pageSize
 
     const { data, isLoading } = useProductsList({
         limit: crud.pageSize,
         offset,
         categoryId: filterCategoryId,
+        search: searchTerm || undefined,
     })
     const items = data?.items ?? []
     const total = data?.pagination?.total ?? 0
@@ -217,6 +222,14 @@ const ProductsListPage = () => {
                             </p>
                         </div>
                         <div className="flex items-center gap-3">
+                            <ListSearchInput
+                                placeholder="Buscar por nombre, SKU o código"
+                                value={search}
+                                onChange={(value) => {
+                                    setSearch(value)
+                                    crud.onPaginationChange(1, crud.pageSize)
+                                }}
+                            />
                             <Select
                                 isClearable
                                 size="sm"

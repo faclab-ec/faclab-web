@@ -4,7 +4,6 @@ import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Tabs from '@/components/ui/Tabs'
 import { HiOutlineArrowLeft } from 'react-icons/hi'
-import { useProductsList } from '@features/products'
 import { useSale } from '../hooks/useSales'
 import {
     SALE_STATUS_LABELS,
@@ -25,8 +24,6 @@ const SaleDetailPage = () => {
     const saleId = parseInt(id || '0')
 
     const { data: sale, isLoading } = useSale(saleId)
-    const { data: productsData } = useProductsList()
-    const products = productsData?.items ?? []
 
     if (isLoading) {
         return (
@@ -81,7 +78,7 @@ const SaleDetailPage = () => {
                     </TabList>
                     <div className="mt-4">
                         <TabContent value="items">
-                            <SaleItemsTab saleId={saleId} products={products} />
+                            <SaleItemsTab saleId={saleId} />
                         </TabContent>
                         <TabContent value="payments">
                             <SalePaymentsTab

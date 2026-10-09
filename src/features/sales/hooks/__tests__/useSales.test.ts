@@ -37,6 +37,8 @@ const SALE_ITEM = {
     id: 1,
     saleId: 1,
     productId: 5,
+    productName: 'Laptop',
+    productSku: 'LAP-1',
     quantity: 2,
     unitPrice: 45,
     discount: 0,

@@ -1,5 +1,8 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useCrudOperations from '@shared/hooks/useCrudOperations'
+import { useDebouncedValue } from '@shared/hooks/useDebouncedValue'
+import ListSearchInput from '@shared/ui/ListSearchInput'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -23,11 +26,14 @@ import type { CustomerFormValues } from '../model/customer.schema'
 const CustomersListPage = () => {
     const navigate = useNavigate()
     const crud = useCrudOperations<Customer>()
+    const [search, setSearch] = useState('')
+    const searchTerm = useDebouncedValue(search.trim())
     const offset = (crud.pageIndex - 1) * crud.pageSize
 
     const { data, isLoading } = useCustomersList({
         limit: crud.pageSize,
         offset,
+        search: searchTerm || undefined,
     })
     const customers = data?.items ?? []
     const total = data?.pagination?.total ?? 0
@@ -209,14 +215,24 @@ const CustomersListPage = () => {
                                 Gestiona los clientes registrados
                             </p>
                         </div>
-                        <Button
-                            variant="solid"
-                            size="sm"
-                            icon={<HiOutlinePlus />}
-                            onClick={crud.openCreate}
-                        >
-                            Nuevo Cliente
-                        </Button>
+                        <div className="flex items-center gap-3">
+                            <ListSearchInput
+                                placeholder="Buscar por nombre o identificación"
+                                value={search}
+                                onChange={(value) => {
+                                    setSearch(value)
+                                    crud.onPaginationChange(1, crud.pageSize)
+                                }}
+                            />
+                            <Button
+                                variant="solid"
+                                size="sm"
+                                icon={<HiOutlinePlus />}
+                                onClick={crud.openCreate}
+                            >
+                                Nuevo Cliente
+                            </Button>
+                        </div>
                     </div>
 
                     <DataTable

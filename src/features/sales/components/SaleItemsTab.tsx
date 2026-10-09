@@ -1,27 +1,15 @@
 import Table from '@/components/ui/Table'
-import { formatCurrency } from '@shared/lib/format'
+import { formatCurrency, formatProductLabel } from '@shared/lib/format'
 import { useSaleItems } from '../hooks/useSales'
 
 const { Tr, Th, Td, THead, TBody, TFoot } = Table
 
-interface Product {
-    id: number
-    name: string
-    sku: string
-}
-
 interface SaleItemsTabProps {
     saleId: number
-    products: Product[]
 }
 
-const SaleItemsTab = ({ saleId, products }: SaleItemsTabProps) => {
+const SaleItemsTab = ({ saleId }: SaleItemsTabProps) => {
     const { data: items = [], isLoading } = useSaleItems(saleId)
-
-    const getProductName = (productId: number) => {
-        const p = products.find((p) => p.id === productId)
-        return p ? `${p.name} (${p.sku})` : `#${productId}`
-    }
 
     const itemsTotal = items.reduce((sum, item) => sum + item.subtotal, 0)
 
@@ -55,7 +43,7 @@ const SaleItemsTab = ({ saleId, products }: SaleItemsTabProps) => {
             <TBody>
                 {items.map((item) => (
                     <Tr key={item.id}>
-                        <Td>{getProductName(item.productId)}</Td>
+                        <Td>{formatProductLabel(item)}</Td>
                         <Td>{item.quantity}</Td>
                         <Td>{formatCurrency(item.unitPrice)}</Td>
                         <Td>{item.discount > 0 ? `${item.discount}%` : '-'}</Td>

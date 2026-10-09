@@ -4,7 +4,7 @@ import Badge from '@/components/ui/Badge'
 import Table from '@/components/ui/Table'
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi'
 import { notifySuccess, notifyError } from '@shared/ui/notify'
-import { useProductsList } from '@features/products'
+import { formatProductLabel } from '@shared/lib/format'
 import {
     useSupplierProducts,
     useSupplierProductMutations,
@@ -22,8 +22,6 @@ interface SupplierProductsTabProps {
 const SupplierProductsTab = ({ supplierId }: SupplierProductsTabProps) => {
     const { data: supplierProducts = [], isLoading } =
         useSupplierProducts(supplierId)
-    const { data: productsData } = useProductsList()
-    const products = productsData?.items ?? []
     const { delete: deleteSupplierProduct } =
         useSupplierProductMutations(supplierId)
 
@@ -31,11 +29,6 @@ const SupplierProductsTab = ({ supplierId }: SupplierProductsTabProps) => {
     const [selected, setSelected] = useState<SupplierProduct | null>(null)
     const [deleteOpen, setDeleteOpen] = useState(false)
     const [toDelete, setToDelete] = useState<SupplierProduct | null>(null)
-
-    const getProductName = (productId: number) => {
-        const product = products.find((p) => p.id === productId)
-        return product ? `${product.name} (${product.sku})` : `#${productId}`
-    }
 
     const handleCreate = () => {
         setSelected(null)
@@ -108,7 +101,7 @@ const SupplierProductsTab = ({ supplierId }: SupplierProductsTabProps) => {
                     <TBody>
                         {supplierProducts.map((sp) => (
                             <Tr key={sp.id}>
-                                <Td>{getProductName(sp.productId)}</Td>
+                                <Td>{formatProductLabel(sp)}</Td>
                                 <Td>{sp.supplierSku || '-'}</Td>
                                 <Td>${Number(sp.purchasePrice).toFixed(2)}</Td>
                                 <Td>{sp.minOrderQuantity || '-'}</Td>

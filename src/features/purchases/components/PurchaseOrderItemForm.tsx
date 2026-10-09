@@ -4,14 +4,13 @@ import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 import { FormItem } from '@/components/ui/Form'
 import { makeNumberRegister } from '@/components/ui/Form/utils'
-import { ControlledSelect } from '@/components/ui/Form/controlled'
-import { useForm, useWatch } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
     useAddPurchaseOrderItem,
     useUpdatePurchaseOrderItem,
 } from '../hooks/usePurchaseOrders'
-import { useProductsList } from '@features/products'
+import { ProductSelect } from '@features/products'
 import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { formatCurrency } from '@shared/lib/format'
 import {
@@ -36,8 +35,6 @@ const PurchaseOrderItemCreateForm = ({
     orderId,
 }: CreateFormProps) => {
     const addItem = useAddPurchaseOrderItem()
-    const { data: productsData } = useProductsList()
-    const products = productsData?.items ?? []
 
     const {
         register,
@@ -76,11 +73,6 @@ const PurchaseOrderItemCreateForm = ({
         if (!isSubmitting) onClose()
     }
 
-    const productOptions = products.map((p) => ({
-        value: p.id,
-        label: `${p.name} (${p.sku})`,
-    }))
-
     const onSubmit = async (values: PurchaseOrderItemCreateFormValues) => {
         try {
             await addItem.mutateAsync({
@@ -113,12 +105,18 @@ const PurchaseOrderItemCreateForm = ({
                             invalid={!!errors.productId}
                             errorMessage={errors.productId?.message}
                         >
-                            <ControlledSelect
+                            <Controller
                                 name="productId"
                                 control={control}
-                                options={productOptions}
-                                placeholder="Seleccionar producto"
-                                isDisabled={isSubmitting}
+                                render={({ field }) => (
+                                    <ProductSelect
+                                        inputId="productId"
+                                        value={field.value}
+                                        isDisabled={isSubmitting}
+                                        onChange={field.onChange}
+                                        onBlur={field.onBlur}
+                                    />
+                                )}
                             />
                         </FormItem>
 

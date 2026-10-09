@@ -1,17 +1,14 @@
 import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
 import Input from '@/components/ui/Input'
-import Select from '@/components/ui/Select'
+import { SupplierSelect } from '@features/suppliers'
 import type { PurchaseOrderUpdateInput } from '../model/types'
 
 type EditData = PurchaseOrderUpdateInput & { supplierId: number }
 
-type SupplierOption = { value: string; label: string }
-
 type Props = {
     open: boolean
     editData: EditData
-    supplierOptions: SupplierOption[]
     isPending: boolean
     onClose: () => void
     onChange: (data: EditData) => void
@@ -21,7 +18,6 @@ type Props = {
 export const EditOrderDialog = ({
     open,
     editData,
-    supplierOptions,
     isPending,
     onClose,
     onChange,
@@ -39,17 +35,11 @@ export const EditOrderDialog = ({
                 <label className="block text-sm font-medium mb-2">
                     Proveedor <span className="text-red-500">*</span>
                 </label>
-                <Select
-                    placeholder="Seleccionar proveedor"
-                    options={supplierOptions}
-                    value={supplierOptions.find(
-                        (o) => o.value === editData.supplierId.toString()
-                    )}
-                    onChange={(option) =>
-                        onChange({
-                            ...editData,
-                            supplierId: option ? parseInt(option.value) : 0,
-                        })
+                <SupplierSelect
+                    activeOnly
+                    value={editData.supplierId}
+                    onChange={(supplierId) =>
+                        onChange({ ...editData, supplierId: supplierId ?? 0 })
                     }
                 />
             </div>

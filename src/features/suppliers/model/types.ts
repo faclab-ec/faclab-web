@@ -36,6 +36,9 @@ export interface SupplierProduct {
     id: number
     supplierId: number
     productId: number
+    // Only in the product list of a supplier
+    productName?: string | null
+    productSku?: string | null
     purchasePrice: number
     supplierSku?: string | null
     minOrderQuantity?: number | null
@@ -47,4 +50,6 @@ export interface SupplierListParams {
     limit?: number
     offset?: number
     isActive?: boolean
+    /** Name or tax ID containing the text */
+    search?: string
 }

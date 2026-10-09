@@ -4,6 +4,7 @@ import {
     formatDate,
     formatDatetime,
     formatPercent,
+    formatProductLabel,
 } from './format'
 
 describe('formatCurrency', () => {
@@ -88,5 +89,23 @@ describe('formatPercent', () => {
     it('handles values already in percent units (not fractions)', () => {
         // 12.5 should render as "12.5%", not "1250.0%"
         expect(formatPercent(12.5)).toBe('12.5%')
+    })
+})
+
+describe('formatProductLabel', () => {
+    it('shows the product name and SKU', () => {
+        expect(
+            formatProductLabel({
+                productId: 3,
+                productName: 'Laptop',
+                productSku: 'LAP-1',
+            })
+        ).toBe('Laptop (LAP-1)')
+    })
+
+    it('falls back to the id when the name is missing', () => {
+        expect(formatProductLabel({ productId: 3, productName: null })).toBe(
+            '#3'
+        )
     })
 })

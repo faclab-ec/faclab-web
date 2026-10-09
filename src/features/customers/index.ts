@@ -23,4 +23,6 @@ export {
     useCustomerContactMutations,
 } from './hooks/useCustomerContacts'
 
+export { default as CustomerSelect } from './components/CustomerSelect'
+
 export { customersRoutes } from './routes'

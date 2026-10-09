@@ -60,6 +60,9 @@ export interface PurchaseOrderItem {
     id: number
     purchaseOrderId: number
     productId: number
+    // Only in the item list of an order
+    productName?: string | null
+    productSku?: string | null
     quantityOrdered: number
     quantityReceived: number
     unitCost: number

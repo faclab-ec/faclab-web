@@ -4,8 +4,6 @@ import {
     usePurchaseOrderItems,
     usePurchaseOrderReceipts,
 } from '../hooks/usePurchaseOrders'
-import { useProductsList } from '@features/products'
-import { useSuppliersList } from '@features/suppliers'
 import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
 import { HiOutlineArrowLeft } from 'react-icons/hi'
@@ -18,6 +16,7 @@ import { EditOrderDialog } from '../components/EditOrderDialog'
 import { SendOrderDialog } from '../components/SendOrderDialog'
 import PurchaseOrderItemForm from '../components/PurchaseOrderItemForm'
 import ReceiveForm from '../components/ReceiveForm'
+import { formatProductLabel } from '@shared/lib/format'
 
 const PurchaseOrderDetailPage = () => {
     const { id } = useParams<{ id: string }>()
@@ -29,12 +28,6 @@ const PurchaseOrderDetailPage = () => {
         usePurchaseOrderItems(orderId)
     const { data: receipts = [] } = usePurchaseOrderReceipts(orderId)
 
-    const { data: productsData } = useProductsList()
-    const products = productsData?.items ?? []
-
-    const { data: suppliersData } = useSuppliersList({ limit: 100 })
-    const suppliers = suppliersData?.items ?? []
-
     const actions = usePurchaseOrderActions(orderId, order)
 
     const isDraft = order?.status === 'draft'
@@ -43,14 +36,10 @@ const PurchaseOrderDetailPage = () => {
     const canReceive = isSent || isPartial
     const canCancel = isDraft || isSent || isPartial
 
-    const supplierOptions = suppliers
-        .filter((s) => s.isActive)
-        .map((s) => ({ value: s.id.toString(), label: s.name }))
-
-    const getProductName = (productId: number) => {
-        const p = products.find((p) => p.id === productId)
-        return p ? `${p.name} (${p.sku})` : `#${productId}`
-    }
+    const getProductName = (productId: number) =>
+        formatProductLabel(
+            items.find((item) => item.productId === productId) ?? { productId }
+        )
 
     if (orderLoading) {
         return (
@@ -128,7 +117,6 @@ const PurchaseOrderDetailPage = () => {
             <EditOrderDialog
                 open={actions.editDialogOpen}
                 editData={actions.editData}
-                supplierOptions={supplierOptions}
                 isPending={actions.updateOrder.isPending}
                 onClose={() => actions.setEditDialogOpen(false)}
                 onChange={actions.setEditData}

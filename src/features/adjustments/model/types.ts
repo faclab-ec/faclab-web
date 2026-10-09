@@ -61,6 +61,9 @@ export interface AdjustmentItem {
     id: number
     adjustmentId: number
     productId: number
+    // Only in the item list of an adjustment
+    productName?: string | null
+    productSku?: string | null
     locationId: number
     expectedQuantity: number
     actualQuantity: number

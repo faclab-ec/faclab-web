@@ -1,7 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAdjustment, useAdjustmentItems } from '../hooks/useAdjustments'
 import { useWarehousesList } from '@features/warehouses'
-import { useProductsList } from '@features/products'
 import { useLocationsList } from '@features/locations'
 import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
@@ -13,6 +12,7 @@ import { AdjustmentItems } from '../components/AdjustmentItems'
 import { EditAdjustmentDialog } from '../components/EditAdjustmentDialog'
 import { ConfirmAdjustmentDialog } from '../components/ConfirmAdjustmentDialog'
 import AdjustmentItemForm from '../components/AdjustmentItemForm'
+import { formatProductLabel } from '@shared/lib/format'
 
 const AdjustmentDetailPage = () => {
     const { id } = useParams<{ id: string }>()
@@ -26,9 +26,6 @@ const AdjustmentDetailPage = () => {
 
     const { data: warehousesData } = useWarehousesList({ limit: 100 })
     const warehouses = warehousesData?.items ?? []
-
-    const { data: productsData } = useProductsList()
-    const products = productsData?.items ?? []
 
     const warehouseId = adjustment?.warehouseId ?? 0
     const { data: locationsData } = useLocationsList(
@@ -46,10 +43,10 @@ const AdjustmentDetailPage = () => {
         return w ? `${w.name} (${w.code})` : `#${wId}`
     }
 
-    const getProductName = (productId: number) => {
-        const p = products.find((p) => p.id === productId)
-        return p ? `${p.name} (${p.sku})` : `#${productId}`
-    }
+    const getProductName = (productId: number) =>
+        formatProductLabel(
+            items.find((item) => item.productId === productId) ?? { productId }
+        )
 
     const getLocationName = (locationId: number) => {
         const l = locations.find((l) => l.id === locationId)

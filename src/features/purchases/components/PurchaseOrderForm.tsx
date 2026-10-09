@@ -3,12 +3,11 @@ import Dialog from '@/components/ui/Dialog'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 import { FormItem, FormContainer } from '@/components/ui/Form'
-import { ControlledSelect } from '@/components/ui/Form/controlled'
 import { useCreatePurchaseOrder } from '../hooks/usePurchaseOrders'
-import { useSuppliersList } from '@features/suppliers'
+import { SupplierSelect } from '@features/suppliers'
 import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { dateToIsoStartOfDay } from '@shared/lib/dateToIsoStartOfDay'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
     purchaseOrderSchema,
@@ -27,13 +26,6 @@ const PurchaseOrderForm = ({
     onCreated,
 }: PurchaseOrderFormProps) => {
     const createOrder = useCreatePurchaseOrder()
-    const { data: suppliersData } = useSuppliersList({ limit: 100 })
-    const suppliers = suppliersData?.items ?? []
-
-    const supplierOptions = suppliers
-        .filter((s) => s.isActive)
-        .map((s) => ({ value: s.id, label: s.name }))
-
     const {
         register,
         handleSubmit,
@@ -103,11 +95,18 @@ const PurchaseOrderForm = ({
                             invalid={!!errors.supplierId}
                             errorMessage={errors.supplierId?.message}
                         >
-                            <ControlledSelect
+                            <Controller
                                 name="supplierId"
                                 control={control}
-                                options={supplierOptions}
-                                placeholder="Seleccionar proveedor"
+                                render={({ field }) => (
+                                    <SupplierSelect
+                                        activeOnly
+                                        inputId="supplierId"
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        onBlur={field.onBlur}
+                                    />
+                                )}
                             />
                         </FormItem>
 
