@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { notifySuccess, notifyError } from '@shared/ui/notify'
+import { notifySuccess, notifyError, notifyWarning } from '@shared/ui/notify'
+import { isApiError } from '@/utils/errors/ApiError'
 import type { AdminUserResponse } from '@/@types/auth'
 import type { RoleCode } from '@/constants/roles.constant'
 import generatePassword from '../lib/generatePassword'
@@ -33,6 +34,12 @@ const closedDeactivate: DeactivateDialogState = {
     username: '',
 }
 
+// faclab-core rejects leaving the system without an active admin
+const notifyUserError = (err: unknown, title: string) =>
+    isApiError(err) && err.code === 'LAST_ADMIN'
+        ? notifyWarning(title, 'Debe quedar al menos un administrador activo')
+        : notifyError(err, title)
+
 export function useAdminUserActions() {
     const [resetDialog, setResetDialog] =
         useState<ResetDialogState>(closedReset)
@@ -51,7 +58,7 @@ export function useAdminUserActions() {
             await updateRole.mutateAsync({ id: userId, role })
             notifySuccess('Rol actualizado')
         } catch (err) {
-            notifyError(err, 'Error al actualizar el rol')
+            notifyUserError(err, 'Error al actualizar el rol')
         } finally {
             setUpdatingRoleId(null)
         }
@@ -78,7 +85,7 @@ export function useAdminUserActions() {
             await deactivateUser.mutateAsync(userId)
             notifySuccess('Usuario desactivado')
         } catch (err) {
-            notifyError(err, 'Error al desactivar el usuario')
+            notifyUserError(err, 'Error al desactivar el usuario')
         } finally {
             setTogglingId(null)
         }
