@@ -1,9 +1,13 @@
-import { useQuery, keepPreviousData } from '@tanstack/react-query'
+import {
+    useQuery,
+    useMutation,
+    useQueryClient,
+    keepPreviousData,
+} from '@tanstack/react-query'
 import * as api from '../api/client'
 import type { SaleQueryParams } from '../model/types'
 
 const SALES_KEY = ['sales'] as const
-const INVOICES_KEY = ['invoicing', 'invoices', 'by-sale'] as const
 
 export const useSalesList = (params?: SaleQueryParams) =>
     useQuery({
@@ -45,21 +49,15 @@ export const useSalePayments = (saleId: number) =>
         enabled: saleId > 0,
     })
 
-export const useInvoices = () =>
-    useQuery({
-        queryKey: ['invoicing', 'invoices'],
-        queryFn: async () => {
-            const body = await api.getInvoices()
+export const useRequestInvoice = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: async (saleId: number) => {
+            const body = await api.requestInvoice(saleId)
             return body.data
         },
+        // faclab-invoicing picks it up from Kafka in a moment
+        onSuccess: () =>
+            queryClient.invalidateQueries({ queryKey: ['invoicing'] }),
     })
-
-export const useInvoicesBySale = (saleId: number) =>
-    useQuery({
-        queryKey: [...INVOICES_KEY, saleId],
-        queryFn: async () => {
-            const body = await api.getInvoicesBySale(saleId)
-            return body.data
-        },
-        enabled: saleId > 0,
-    })
+}

@@ -10,6 +10,7 @@ import {
 } from 'react-icons/hi'
 import { useCan, useHasRole } from '@/stores'
 import { ROLE } from '@/constants/roles.constant'
+import { InvoicingStatusChip } from '@features/invoicing'
 
 interface POSHeaderProps {
     onOpenCloseShift?: () => void
@@ -59,6 +60,7 @@ const POSHeader = ({
                 <span className="px-2 py-1 text-xs rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 font-medium">
                     Turno #{shift.id}
                 </span>
+                <InvoicingStatusChip />
             </div>
 
             <span className="text-2xl font-bold text-gray-700 dark:text-gray-300 hidden md:block">

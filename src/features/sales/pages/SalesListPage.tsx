@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -29,8 +29,12 @@ const statusOptions = [
 
 const SalesListPage = () => {
     const navigate = useNavigate()
+    // Links can open the list filtered, e.g. ?status=CONFIRMED (not invoiced yet)
+    const [searchParams] = useSearchParams()
 
-    const [statusFilter, setStatusFilter] = useState<string>('')
+    const [statusFilter, setStatusFilter] = useState<string>(
+        searchParams.get('status') ?? ''
+    )
     const [customerFilter, setCustomerFilter] = useState<number | null>(null)
     const [pageIndex, setPageIndex] = useState(1)
     const [pageSize, setPageSize] = useState(10)

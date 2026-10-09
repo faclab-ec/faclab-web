@@ -1,13 +1,14 @@
 import { z } from 'zod'
 
 export const companyConfigSchema = z.object({
-    taxId: z.string().min(1, 'RUC requerido').max(13),
+    taxId: z.string().regex(/^\d{13}$/, 'El RUC tiene 13 dígitos'),
     name: z.string().min(1, 'Razón social requerida').max(300),
     tradeName: z.string().min(1, 'Nombre comercial requerido').max(300),
     mainAddress: z.string().min(1).max(300),
     branchAddress: z.string().min(1).max(300),
-    branchCode: z.string().min(1).max(4),
-    salePointCode: z.string().min(1).max(4),
+    // The SRI requires exactly 3 digits (e.g. 001)
+    branchCode: z.string().regex(/^\d{3}$/, 'Tres dígitos, por ejemplo 001'),
+    salePointCode: z.string().regex(/^\d{3}$/, 'Tres dígitos, por ejemplo 001'),
     environment: z.union([z.literal(1), z.literal(2)]),
     emissionType: z.literal(1),
     invoiceSequence: z.number().int().positive().optional(),

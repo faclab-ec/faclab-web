@@ -10,7 +10,7 @@ Frontend administrativo de **Faclab**, un sistema de gestión comercial para pym
 | Inventario | `warehouses`, `locations`, `stock`, `movements`, `lots`, `serialNumbers`, `adjustments`, `transfers`, `alerts` |
 | Compras | `suppliers` (contactos y productos por proveedor), `purchases` (órdenes, envío, recepción) |
 | Ventas | `customers`, `sales`, `pos` (turnos de caja, movimientos de efectivo, ventas en espera, pagos, devoluciones) |
-| Facturación | `invoicing` (certificados `.p12`, configuración de la empresa: establecimiento, punto de emisión, secuencial, ambiente) |
+| Facturación | `invoicing` (certificados `.p12`, configuración de la empresa: establecimiento, punto de emisión, secuencial, ambiente; estado de la facturación con avisos en el layout, el POS y el inicio; facturas pendientes o con error y reintentos) |
 | Análisis | `reports` (valoración, rotación, movimientos, resumen por bodega) |
 | Administración | `auth` (login, cambio de contraseña), `admin-users` (usuarios y roles) |
 

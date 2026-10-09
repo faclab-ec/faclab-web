@@ -2,13 +2,14 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
 import { HiOutlineUpload } from 'react-icons/hi'
-import { useCertificates } from '../hooks/useInvoicing'
+import { useCertificates, useCompanyConfig } from '../hooks/useInvoicing'
 import { useCertificateActions } from '../hooks/useCertificateActions'
 import CertificatesTable from '../components/CertificatesTable'
 import UploadCertificateDialog from '../components/UploadCertificateDialog'
 
 const CertificatesPage = () => {
     const { data: certificates = [], isLoading } = useCertificates()
+    const { data: config } = useCompanyConfig()
     const actions = useCertificateActions()
 
     return (
@@ -37,9 +38,15 @@ const CertificatesPage = () => {
 
                     <CertificatesTable
                         certificates={certificates}
+                        activeCertificateId={config?.signingCertId ?? null}
                         isLoading={isLoading}
                         onDelete={actions.openDelete}
                     />
+                    <p className="text-xs text-gray-500 mt-3">
+                        Después de subir un certificado, selecciónalo en la
+                        Configuración Fiscal. El certificado en uso no se puede
+                        eliminar.
+                    </p>
                 </div>
             </Card>
 

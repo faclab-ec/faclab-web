@@ -4,9 +4,10 @@ import { formatDatetime } from '@shared/lib/format'
 import {
     INVOICE_STATUS_LABELS,
     INVOICE_STATUS_CLASSES,
+    InvoiceReason,
     type Invoice,
     type InvoiceStatus,
-} from '../model/types'
+} from '@features/invoicing'
 
 interface InvoicePreviewDialogProps {
     invoice: Invoice | null
@@ -27,7 +28,8 @@ const InvoicePreviewDialog = ({
                             Código de Acceso
                         </p>
                         <p className="font-mono text-xs break-all mt-1">
-                            {invoice.accessCode}
+                            {invoice.accessCode ??
+                                'Se genera al construir la factura'}
                         </p>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
@@ -49,6 +51,20 @@ const InvoicePreviewDialog = ({
                             </p>
                         </div>
                     </div>
+                    {(invoice.issue || invoice.status === 'pending') && (
+                        <div>
+                            <p className="text-sm text-gray-500">Motivo</p>
+                            <div className="mt-1">
+                                <InvoiceReason invoice={invoice} />
+                            </div>
+                            {invoice.issue && (
+                                <p className="text-xs text-gray-400 mt-1 break-words">
+                                    {invoice.issue.message} (intentos:{' '}
+                                    {invoice.attempts})
+                                </p>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 <h6 className="mb-3">Historial de Estados</h6>

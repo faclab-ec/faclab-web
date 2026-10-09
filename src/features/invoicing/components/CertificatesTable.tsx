@@ -1,5 +1,6 @@
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Button from '@/components/ui/Button'
+import Badge from '@/components/ui/Badge'
 import { HiOutlineTrash } from 'react-icons/hi'
 import type { Certificate } from '../model/types'
 
@@ -14,12 +15,15 @@ const isExpired = (validTo: string) => new Date(validTo) < new Date()
 
 interface CertificatesTableProps {
     certificates: Certificate[]
+    // The one selected in the company config: signs invoices, can't be deleted
+    activeCertificateId: string | null
     isLoading: boolean
     onDelete: (cert: Certificate) => void
 }
 
 const CertificatesTable = ({
     certificates,
+    activeCertificateId,
     isLoading,
     onDelete,
 }: CertificatesTableProps) => {
@@ -28,8 +32,14 @@ const CertificatesTable = ({
             header: 'Archivo',
             accessorKey: 'fileName',
             cell: (props) => (
-                <span className="font-medium">
+                <span className="inline-flex items-center gap-2 font-medium">
                     {props.row.original.fileName}
+                    {props.row.original.id === activeCertificateId && (
+                        <Badge
+                            content="En uso"
+                            className="bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
+                        />
+                    )}
                 </span>
             ),
         },
@@ -82,14 +92,23 @@ const CertificatesTable = ({
         {
             header: 'Acciones',
             id: 'actions',
-            cell: (props) => (
-                <Button
-                    size="sm"
-                    variant="plain"
-                    icon={<HiOutlineTrash />}
-                    onClick={() => onDelete(props.row.original)}
-                />
-            ),
+            cell: (props) => {
+                const inUse = props.row.original.id === activeCertificateId
+                return (
+                    <Button
+                        size="sm"
+                        variant="plain"
+                        icon={<HiOutlineTrash />}
+                        disabled={inUse}
+                        title={
+                            inUse
+                                ? 'En uso: selecciona otro certificado en la Configuración Fiscal antes de eliminarlo'
+                                : undefined
+                        }
+                        onClick={() => onDelete(props.row.original)}
+                    />
+                )
+            },
         },
     ]
 

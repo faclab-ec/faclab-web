@@ -1,16 +1,9 @@
 import appConfig from '@/configs/app.config'
 import { httpClient } from '@shared/lib/http/httpClient'
 import type { PaginatedResponse, DataResponse } from '@/@types/api'
-import type {
-    Sale,
-    SaleItem,
-    SaleQueryParams,
-    Payment,
-    Invoice,
-} from '../model/types'
+import type { Sale, SaleItem, SaleQueryParams, Payment } from '../model/types'
 
 const INVENTORY_HOST = appConfig.inventoryApiHost
-const INVOICING_HOST = appConfig.invoicingApiHost
 
 interface SaleItemsResponse {
     data: SaleItem[]
@@ -19,11 +12,6 @@ interface SaleItemsResponse {
 
 interface PaymentsResponse {
     data: Payment[]
-    meta: { requestId: string; timestamp: string }
-}
-
-interface InvoicesResponse {
-    data: Invoice[]
     meta: { requestId: string; timestamp: string }
 }
 
@@ -53,11 +41,9 @@ export const getSalePayments = (saleId: number) =>
         `${INVENTORY_HOST}/sales/${saleId}/payments`
     )
 
-// faclab-invoicing returns every invoice (no pagination yet)
-export const getInvoices = () =>
-    httpClient.get<InvoicesResponse>(`${INVOICING_HOST}/api/invoices`)
-
-export const getInvoicesBySale = (saleId: number) =>
-    httpClient.get<InvoicesResponse>(
-        `${INVOICING_HOST}/api/invoices/by-sale/${saleId}`
+// Sends a CONFIRMED sale to faclab-invoicing again (its invoice never arrived
+// or the SRI rejected it); ignored there while it has a non-rejected invoice
+export const requestInvoice = (saleId: number) =>
+    httpClient.post<DataResponse<Sale>>(
+        `${INVENTORY_HOST}/sales/${saleId}/request-invoice`
     )

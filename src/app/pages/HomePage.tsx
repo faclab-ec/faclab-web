@@ -3,6 +3,7 @@ import Card from '@/components/ui/Card'
 import Table from '@/components/ui/Table'
 import Spinner from '@/components/ui/Spinner'
 import { useDashboard } from '@features/reports'
+import { InvoicingSummaryCard } from '@features/invoicing'
 
 const { THead, TBody, Th, Tr, Td } = Table
 
@@ -73,6 +74,10 @@ const HomePage = () => {
     return (
         <div className="flex flex-col gap-6">
             <h3>Dashboard</h3>
+
+            <InvoicingSummaryCard
+                uninvoicedSales={dashboard?.uninvoicedSales}
+            />
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card>

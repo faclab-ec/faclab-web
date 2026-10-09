@@ -13,7 +13,9 @@ import {
     useCompanyConfig,
     useUpdateCompanyConfig,
     useCertificates,
+    useInvoicingStatus,
 } from '../hooks/useInvoicing'
+import InvoicingChecklist from '../components/InvoicingChecklist'
 import CompanyInfoSection from '../components/CompanyInfoSection'
 import AddressSection from '../components/AddressSection'
 import SriSection from '../components/SriSection'
@@ -39,6 +41,7 @@ const emptyValues: CompanyConfigFormValues = {
 const CompanyConfigPage = () => {
     const { data: config, isLoading } = useCompanyConfig()
     const { data: certificates = [] } = useCertificates()
+    const { data: status } = useInvoicingStatus()
     const updateConfig = useUpdateCompanyConfig()
 
     const {
@@ -88,9 +91,12 @@ const CompanyConfigPage = () => {
                     values.withholdingAgentResolution || undefined,
             }
             await updateConfig.mutateAsync(payload)
+            const waiting = status?.pendingInvoices ?? 0
             notifySuccess(
                 'Configuración guardada',
-                'La configuración fiscal se guardó correctamente'
+                waiting > 0
+                    ? `Si la facturación quedó lista, las ${waiting} facturas pendientes se emiten automáticamente`
+                    : 'La configuración fiscal se guardó correctamente'
             )
         } catch (error: unknown) {
             notifyError(error, 'Error al guardar la configuración')
@@ -119,6 +125,17 @@ const CompanyConfigPage = () => {
                         facturas electrónicas
                     </p>
                 </div>
+
+                {status && (
+                    <div className="mb-6 p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                        <p className="text-sm font-semibold mb-3">
+                            {status.ready
+                                ? 'La facturación electrónica está lista'
+                                : 'Falta completar para emitir facturas'}
+                        </p>
+                        <InvoicingChecklist status={status} />
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <div className="space-y-6">

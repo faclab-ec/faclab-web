@@ -6,6 +6,7 @@ import type {
     CompanyConfig,
     CompanyConfigInput,
     Invoice,
+    InvoicingStatus,
 } from '../model/types'
 
 const HOST = appConfig.invoicingApiHost
@@ -46,5 +47,30 @@ export const updateCompanyConfig = (data: CompanyConfigInput) =>
         data
     )
 
+// Whether the issuer can invoice (config, certificate) and unfinished counts
+export const getInvoicingStatus = () =>
+    httpClient.get<DataResponse<InvoicingStatus>>(
+        `${HOST}/api/invoicing/status`
+    )
+
+// faclab-invoicing returns every invoice (no pagination yet). `attention`:
+// only pending ones or those whose last attempt failed
+export const getInvoices = (params?: { attention?: boolean }) =>
+    httpClient.get<InvoicesResponse>(
+        params?.attention
+            ? `${HOST}/api/invoices?attention=true`
+            : `${HOST}/api/invoices`
+    )
+
 export const getInvoicesBySale = (saleId: string | number) =>
     httpClient.get<InvoicesResponse>(`${HOST}/api/invoices/by-sale/${saleId}`)
+
+// Runs the next step of an unfinished invoice now
+export const retryInvoice = (id: string) =>
+    httpClient.post<DataResponse<Invoice>>(`${HOST}/api/invoices/${id}/retry`)
+
+// Retries every invoice that needs attention, in the background
+export const retryInvoices = () =>
+    httpClient.post<DataResponse<{ queued: number }>>(
+        `${HOST}/api/invoices/retry`
+    )
