@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
@@ -6,6 +7,8 @@ import Badge from '@/components/ui/Badge'
 import { FormModal, DeleteConfirmDialog } from '@/components/shared'
 import { notifySuccess, notifyInfo, notifyError } from '@shared/ui/notify'
 import useCrudOperations from '@shared/hooks/useCrudOperations'
+import { useDebouncedValue } from '@shared/hooks/useDebouncedValue'
+import ListSearchInput from '@shared/ui/ListSearchInput'
 import {
     HiOutlinePlus,
     HiOutlinePencil,
@@ -23,11 +26,14 @@ import type { SupplierFormValues } from '../model/supplier.schema'
 const SuppliersListPage = () => {
     const navigate = useNavigate()
     const crud = useCrudOperations<Supplier>()
+    const [search, setSearch] = useState('')
+    const searchTerm = useDebouncedValue(search.trim())
     const offset = (crud.pageIndex - 1) * crud.pageSize
 
     const { data, isLoading } = useSuppliersList({
         limit: crud.pageSize,
         offset,
+        search: searchTerm || undefined,
     })
     const suppliers = data?.items ?? []
     const total = data?.pagination?.total ?? 0
@@ -217,14 +223,24 @@ const SuppliersListPage = () => {
                                 Gestiona los proveedores registrados
                             </p>
                         </div>
-                        <Button
-                            variant="solid"
-                            size="sm"
-                            icon={<HiOutlinePlus />}
-                            onClick={crud.openCreate}
-                        >
-                            Nuevo Proveedor
-                        </Button>
+                        <div className="flex items-center gap-3">
+                            <ListSearchInput
+                                placeholder="Buscar por nombre o identificación"
+                                value={search}
+                                onChange={(value) => {
+                                    setSearch(value)
+                                    crud.onPaginationChange(1, crud.pageSize)
+                                }}
+                            />
+                            <Button
+                                variant="solid"
+                                size="sm"
+                                icon={<HiOutlinePlus />}
+                                onClick={crud.openCreate}
+                            >
+                                Nuevo Proveedor
+                            </Button>
+                        </div>
                     </div>
 
                     <DataTable

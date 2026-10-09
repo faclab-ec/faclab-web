@@ -2,7 +2,6 @@ import { useState } from 'react'
 import Card from '@/components/ui/Card'
 import Tabs from '@/components/ui/Tabs'
 import { useWarehousesList } from '@features/warehouses'
-import { useProductsList } from '@features/products'
 import ValuationTab from '../components/ValuationTab'
 import RotationTab from '../components/RotationTab'
 import MovementsTab from '../components/MovementsTab'
@@ -20,16 +19,6 @@ const ReportsPage = () => {
         ...warehouses.map((w) => ({
             value: w.id.toString(),
             label: `${w.name} (${w.code})`,
-        })),
-    ]
-
-    const { data: productsData } = useProductsList({ limit: 200 })
-    const products = productsData?.items ?? []
-    const productOptions = [
-        { value: '', label: 'Todos los productos' },
-        ...products.map((p) => ({
-            value: p.id.toString(),
-            label: `${p.name} (${p.sku})`,
         })),
     ]
 
@@ -54,10 +43,7 @@ const ReportsPage = () => {
                         </TabContent>
 
                         <TabContent value="movements">
-                            <MovementsTab
-                                warehouseOptions={warehouseOptions}
-                                productOptions={productOptions}
-                            />
+                            <MovementsTab warehouseOptions={warehouseOptions} />
                         </TabContent>
 
                         <TabContent value="summary">

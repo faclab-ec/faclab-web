@@ -26,6 +26,8 @@ export type Customer = {
 export type CustomerListParams = {
     limit?: number
     offset?: number
+    /** Name or tax ID containing the text */
+    search?: string
 }
 
 export type CustomerContact = {

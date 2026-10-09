@@ -40,4 +40,6 @@ export type ProductInput = {
 
 export type ProductListParams = PaginationParams & {
     categoryId?: number
+    /** Name or SKU containing the text, or an exact barcode */
+    search?: string
 }

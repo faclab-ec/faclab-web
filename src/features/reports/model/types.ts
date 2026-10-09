@@ -76,3 +76,15 @@ export interface WarehouseSummary {
 export interface SummaryParams {
     warehouseId?: number
 }
+
+// Home page summary (GET /dashboard)
+export interface Dashboard {
+    inventoryValue: number
+    warehouses: WarehouseSummary[]
+    alerts: {
+        lowStock: number
+        outOfStock: number
+        reorderPoint: number
+        expiringSoon: number
+    }
+}

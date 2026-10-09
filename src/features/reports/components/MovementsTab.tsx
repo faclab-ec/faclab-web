@@ -3,6 +3,7 @@ import Badge from '@/components/ui/Badge'
 import Select from '@/components/ui/Select'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import { formatDatetime } from '@shared/lib/format'
+import { ProductSelect } from '@features/products'
 import { useMovementHistory } from '../hooks/useReports'
 import type { MovementHistoryItem, MovementHistoryParams } from '../model/types'
 
@@ -23,12 +24,11 @@ type Option = { value: string; label: string }
 
 type Props = {
     warehouseOptions: Option[]
-    productOptions: Option[]
 }
 
-const MovementsTab = ({ warehouseOptions, productOptions }: Props) => {
+const MovementsTab = ({ warehouseOptions }: Props) => {
     const [movWarehouse, setMovWarehouse] = useState('')
-    const [movProduct, setMovProduct] = useState('')
+    const [movProduct, setMovProduct] = useState<number | null>(null)
     const [movType, setMovType] = useState('')
     const [movFromDate, setMovFromDate] = useState('')
     const [movToDate, setMovToDate] = useState('')
@@ -40,7 +40,7 @@ const MovementsTab = ({ warehouseOptions, productOptions }: Props) => {
         limit: movPageSize,
         offset: movOffset,
         warehouseId: movWarehouse ? parseInt(movWarehouse) : undefined,
-        productId: movProduct ? parseInt(movProduct) : undefined,
+        productId: movProduct ?? undefined,
         type: movType ? (movType as 'IN' | 'OUT') : undefined,
         fromDate: movFromDate || undefined,
         toDate: movToDate || undefined,
@@ -166,14 +166,12 @@ const MovementsTab = ({ warehouseOptions, productOptions }: Props) => {
                     <label className="block text-sm font-medium mb-2">
                         Producto
                     </label>
-                    <Select
+                    <ProductSelect
+                        isClearable
                         placeholder="Todos"
-                        options={productOptions}
-                        value={productOptions.find(
-                            (o) => o.value === movProduct
-                        )}
-                        onChange={(option) => {
-                            setMovProduct(option?.value || '')
+                        value={movProduct}
+                        onChange={(id) => {
+                            setMovProduct(id)
                             setMovPageIndex(1)
                         }}
                     />

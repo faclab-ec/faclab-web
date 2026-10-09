@@ -6,7 +6,7 @@ import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Select from '@/components/ui/Select'
 import { usePurchaseOrders } from '../hooks/usePurchaseOrders'
-import { useSuppliersList } from '@features/suppliers'
+import { SupplierSelect } from '@features/suppliers'
 import { formatCurrency } from '@shared/lib/format'
 import {
     PURCHASE_ORDER_STATUS_LABELS,
@@ -31,27 +31,16 @@ const PurchaseOrdersListPage = () => {
     const [isFormOpen, setIsFormOpen] = useState(false)
 
     const [statusFilter, setStatusFilter] = useState<string>('')
-    const [supplierFilter, setSupplierFilter] = useState<string>('')
+    const [supplierFilter, setSupplierFilter] = useState<number | null>(null)
     const [pageIndex, setPageIndex] = useState(1)
     const [pageSize, setPageSize] = useState(10)
     const offset = (pageIndex - 1) * pageSize
-
-    const { data: suppliersData } = useSuppliersList({ limit: 100 })
-    const suppliers = suppliersData?.items ?? []
-
-    const supplierOptions = [
-        { value: '', label: 'Todos' },
-        ...suppliers.map((s) => ({
-            value: s.id.toString(),
-            label: s.name,
-        })),
-    ]
 
     const queryParams: PurchaseOrderQueryParams = {
         status: statusFilter
             ? (statusFilter as PurchaseOrderStatus)
             : undefined,
-        supplierId: supplierFilter ? parseInt(supplierFilter) : undefined,
+        supplierId: supplierFilter ?? undefined,
         limit: pageSize,
         offset,
     }
@@ -62,7 +51,7 @@ const PurchaseOrdersListPage = () => {
 
     const handleReset = () => {
         setStatusFilter('')
-        setSupplierFilter('')
+        setSupplierFilter(null)
         setPageIndex(1)
     }
 
@@ -178,14 +167,12 @@ const PurchaseOrdersListPage = () => {
                             <label className="block text-sm font-medium mb-2">
                                 Proveedor
                             </label>
-                            <Select
-                                placeholder="Filtrar por proveedor"
-                                options={supplierOptions}
-                                value={supplierOptions.find(
-                                    (o) => o.value === supplierFilter
-                                )}
-                                onChange={(option) => {
-                                    setSupplierFilter(option?.value || '')
+                            <SupplierSelect
+                                isClearable
+                                placeholder="Todos"
+                                value={supplierFilter}
+                                onChange={(id) => {
+                                    setSupplierFilter(id)
                                     setPageIndex(1)
                                 }}
                             />

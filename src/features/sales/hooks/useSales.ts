@@ -45,6 +45,15 @@ export const useSalePayments = (saleId: number) =>
         enabled: saleId > 0,
     })
 
+export const useInvoices = () =>
+    useQuery({
+        queryKey: ['invoicing', 'invoices'],
+        queryFn: async () => {
+            const body = await api.getInvoices()
+            return body.data
+        },
+    })
+
 export const useInvoicesBySale = (saleId: number) =>
     useQuery({
         queryKey: [...INVOICES_KEY, saleId],

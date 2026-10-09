@@ -1,6 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTransfer, useTransferItems } from '../hooks/useTransfers'
-import { useProductsList } from '@features/products'
 import { useLocationsList } from '@features/locations'
 import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
@@ -13,6 +12,7 @@ import { EditTransferDialog } from '../components/EditTransferDialog'
 import { ConfirmTransferDialog } from '../components/ConfirmTransferDialog'
 import { ReceiveTransferDialog } from '../components/ReceiveTransferDialog'
 import TransferItemForm from '../components/TransferItemForm'
+import { formatProductLabel } from '@shared/lib/format'
 
 const TransferDetailPage = () => {
     const { id } = useParams<{ id: string }>()
@@ -23,9 +23,6 @@ const TransferDetailPage = () => {
         useTransfer(transferId)
     const { data: items = [], isLoading: itemsLoading } =
         useTransferItems(transferId)
-
-    const { data: productsData } = useProductsList()
-    const products = productsData?.items ?? []
 
     const { data: locationsData } = useLocationsList({ limit: 100 })
     const locations = locationsData?.items ?? []
@@ -41,10 +38,10 @@ const TransferDetailPage = () => {
         return l ? `${l.name} (${l.code})` : `#${locationId}`
     }
 
-    const getProductName = (productId: number) => {
-        const p = products.find((p) => p.id === productId)
-        return p ? `${p.name} (${p.sku})` : `#${productId}`
-    }
+    const getProductName = (productId: number) =>
+        formatProductLabel(
+            items.find((item) => item.productId === productId) ?? { productId }
+        )
 
     if (transferLoading) {
         return (

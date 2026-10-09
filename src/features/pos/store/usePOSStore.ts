@@ -8,10 +8,16 @@ export interface POSCartItem {
     name: string
     sku: string
     salePrice: number
+    // Product price; selling at another one is an override with a reason
+    listPrice: number
+    overrideReason?: string
     taxCode: TaxCode
     quantity: number
     discount: number
 }
+
+export const isPriceOverridden = (item: POSCartItem): boolean =>
+    item.salePrice !== item.listPrice
 
 interface POSState {
     cartItems: POSCartItem[]
@@ -31,10 +37,13 @@ interface POSState {
         sku: string
         salePrice: number
         taxCode: TaxCode
+        // Defaults to salePrice (no override)
+        listPrice?: number
+        overrideReason?: string
     }) => void
     updateItemQuantity: (productId: number, quantity: number) => void
     updateItemDiscount: (productId: number, discount: number) => void
-    updateItemPrice: (productId: number, price: number) => void
+    updateItemPrice: (productId: number, price: number, reason?: string) => void
     removeItem: (productId: number) => void
     setCustomer: (id: number | null, name: string | null) => void
     setFinalConsumer: (value: boolean) => void
@@ -74,7 +83,12 @@ export const usePOSStore = create<POSState>()((set) => ({
             return {
                 cartItems: [
                     ...state.cartItems,
-                    { ...product, quantity: 1, discount: 0 },
+                    {
+                        ...product,
+                        listPrice: product.listPrice ?? product.salePrice,
+                        quantity: 1,
+                        discount: 0,
+                    },
                 ],
             }
         }),
@@ -102,11 +116,16 @@ export const usePOSStore = create<POSState>()((set) => ({
             ),
         })),
 
-    updateItemPrice: (productId, price) =>
+    updateItemPrice: (productId, price, reason) =>
         set((state) => ({
             cartItems: state.cartItems.map((item) =>
                 item.productId === productId
-                    ? { ...item, salePrice: price }
+                    ? {
+                          ...item,
+                          salePrice: price,
+                          overrideReason:
+                              price === item.listPrice ? undefined : reason,
+                      }
                     : item
             ),
         })),

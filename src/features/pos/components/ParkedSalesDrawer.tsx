@@ -49,6 +49,8 @@ const ParkedSalesDrawer = ({ isOpen, onClose }: ParkedSalesDrawerProps) => {
                     name: product.name,
                     sku: product.sku,
                     salePrice: item.unitPrice,
+                    listPrice: product.salePrice ?? item.unitPrice,
+                    overrideReason: item.overrideReason ?? undefined,
                     taxCode: item.taxCode,
                 })
                 if (item.quantity > 1) {

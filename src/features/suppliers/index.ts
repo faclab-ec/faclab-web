@@ -32,4 +32,6 @@ export {
     useSupplierProductMutations,
 } from './hooks/useSupplierProducts'
 
+export { default as SupplierSelect } from './components/SupplierSelect'
+
 export { suppliersRoutes } from './routes'

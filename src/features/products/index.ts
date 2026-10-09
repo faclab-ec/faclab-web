@@ -8,4 +8,6 @@ export {
     useProductMutations,
 } from './hooks/useProducts'
 
+export { default as ProductSelect } from './components/ProductSelect'
+
 export { productsRoutes } from './routes'

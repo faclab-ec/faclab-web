@@ -4,14 +4,11 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import { FormItem } from '@/components/ui/Form'
 import { makeNumberRegister } from '@/components/ui/Form/utils'
-import {
-    ControlledSelect,
-    ControlledSwitcher,
-} from '@/components/ui/Form/controlled'
-import { useForm } from 'react-hook-form'
+import { ControlledSwitcher } from '@/components/ui/Form/controlled'
+import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { notifySuccess, notifyError } from '@shared/ui/notify'
-import { useProductsList } from '@features/products'
+import { ProductSelect } from '@features/products'
 import {
     supplierProductSchema,
     type SupplierProductFormValues,
@@ -33,8 +30,6 @@ const SupplierProductForm = ({
     supplierProduct,
 }: SupplierProductFormProps) => {
     const { create, update } = useSupplierProductMutations(supplierId)
-    const { data: productsData } = useProductsList()
-    const products = productsData?.items ?? []
     const isEdit = !!supplierProduct
 
     const {
@@ -90,11 +85,6 @@ const SupplierProductForm = ({
         }
     }
 
-    const productOptions = products.map((p) => ({
-        value: p.id,
-        label: `${p.name} (${p.sku})`,
-    }))
-
     const onSubmit = async (values: SupplierProductFormValues) => {
         try {
             if (isEdit && supplierProduct) {
@@ -132,12 +122,18 @@ const SupplierProductForm = ({
                             invalid={!!errors.productId}
                             errorMessage={errors.productId?.message}
                         >
-                            <ControlledSelect
+                            <Controller
                                 name="productId"
                                 control={control}
-                                options={productOptions}
-                                placeholder="Seleccionar producto..."
-                                isDisabled={isEdit || isSubmitting}
+                                render={({ field }) => (
+                                    <ProductSelect
+                                        inputId="productId"
+                                        value={field.value}
+                                        isDisabled={isEdit || isSubmitting}
+                                        onChange={field.onChange}
+                                        onBlur={field.onBlur}
+                                    />
+                                )}
                             />
                         </FormItem>
 

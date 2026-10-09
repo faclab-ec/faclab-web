@@ -21,3 +21,7 @@ export const apiMe = () =>
 
 export const apiChangePassword = (body: ChangePasswordRequest) =>
     httpClient.post<void>(`${AUTH}/change-password`, body)
+
+// Revoca la sesión en el servidor: el refresh token deja de servir
+export const apiLogout = (refreshToken: string) =>
+    httpClient.post<void>(`${AUTH}/logout`, { refreshToken })

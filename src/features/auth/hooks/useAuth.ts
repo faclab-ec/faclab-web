@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/useAuthStore'
-import { apiChangePassword, apiLogin, apiMe } from '../api/client'
+import { apiChangePassword, apiLogin, apiLogout, apiMe } from '../api/client'
 import { navigateTo } from '@shared/lib/auth/navigationRef'
 import appConfig from '@/configs/app.config'
 import { refreshSession } from '@shared/lib/auth/session'
@@ -87,7 +87,13 @@ export function useLogout() {
 
     return useMutation<void, unknown, void>({
         mutationFn: async () => {
-            /* El backend no define logout server-side. */
+            const refreshToken = useAuthStore.getState().refreshToken
+            if (!refreshToken) return
+            try {
+                await apiLogout(refreshToken)
+            } catch {
+                /* Sin red o con el token ya inválido, la sesión local se cierra igual */
+            }
         },
         onSuccess: () => {
             refreshScheduler.stop()

@@ -5,7 +5,7 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Select from '@/components/ui/Select'
-import { useCustomersList } from '@features/customers'
+import { CustomerSelect } from '@features/customers'
 import { formatCurrency } from '@shared/lib/format'
 import { useSalesList } from '../hooks/useSales'
 import {
@@ -31,25 +31,14 @@ const SalesListPage = () => {
     const navigate = useNavigate()
 
     const [statusFilter, setStatusFilter] = useState<string>('')
-    const [customerFilter, setCustomerFilter] = useState<string>('')
+    const [customerFilter, setCustomerFilter] = useState<number | null>(null)
     const [pageIndex, setPageIndex] = useState(1)
     const [pageSize, setPageSize] = useState(10)
     const offset = (pageIndex - 1) * pageSize
 
-    const { data: customersData } = useCustomersList({ limit: 100 })
-    const customers = customersData?.items ?? []
-
-    const customerOptions = [
-        { value: '', label: 'Todos' },
-        ...customers.map((c) => ({
-            value: c.id.toString(),
-            label: c.name,
-        })),
-    ]
-
     const queryParams: SaleQueryParams = {
         status: statusFilter ? (statusFilter as SaleStatus) : undefined,
-        customerId: customerFilter ? parseInt(customerFilter) : undefined,
+        customerId: customerFilter ?? undefined,
         limit: pageSize,
         offset,
     }
@@ -60,7 +49,7 @@ const SalesListPage = () => {
 
     const handleReset = () => {
         setStatusFilter('')
-        setCustomerFilter('')
+        setCustomerFilter(null)
         setPageIndex(1)
     }
 
@@ -175,14 +164,12 @@ const SalesListPage = () => {
                             <label className="block text-sm font-medium mb-2">
                                 Cliente
                             </label>
-                            <Select
-                                placeholder="Filtrar por cliente"
-                                options={customerOptions}
-                                value={customerOptions.find(
-                                    (o) => o.value === customerFilter
-                                )}
-                                onChange={(option) => {
-                                    setCustomerFilter(option?.value || '')
+                            <CustomerSelect
+                                isClearable
+                                placeholder="Todos"
+                                value={customerFilter}
+                                onChange={(id) => {
+                                    setCustomerFilter(id)
                                     setPageIndex(1)
                                 }}
                             />

@@ -53,6 +53,10 @@ export const getSalePayments = (saleId: number) =>
         `${INVENTORY_HOST}/sales/${saleId}/payments`
     )
 
+// faclab-invoicing returns every invoice (no pagination yet)
+export const getInvoices = () =>
+    httpClient.get<InvoicesResponse>(`${INVOICING_HOST}/api/invoices`)
+
 export const getInvoicesBySale = (saleId: number) =>
     httpClient.get<InvoicesResponse>(
         `${INVOICING_HOST}/api/invoices/by-sale/${saleId}`

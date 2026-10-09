@@ -45,6 +45,9 @@ export interface TransferItem {
     id: number
     transferId: number
     productId: number
+    // Only in the item list of a transfer
+    productName?: string | null
+    productSku?: string | null
     quantity: number
     lotId: number | null
     notes: string | null

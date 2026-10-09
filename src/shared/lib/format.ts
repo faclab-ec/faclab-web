@@ -25,3 +25,17 @@ export function formatDatetime(
 export function formatPercent(value: number, decimals = 1): string {
     return `${value.toFixed(decimals)}%`
 }
+
+interface ProductRef {
+    productId: number
+    productName?: string | null
+    productSku?: string | null
+}
+
+// Item lists from faclab-core carry the product name and SKU
+export function formatProductLabel(item: ProductRef): string {
+    if (!item.productName) return `#${item.productId}`
+    return item.productSku
+        ? `${item.productName} (${item.productSku})`
+        : item.productName
+}

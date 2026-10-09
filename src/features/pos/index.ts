@@ -18,6 +18,11 @@ export type {
     POSPaymentStatus,
     CashMovementType,
     RefundStatus,
+    ShiftInfo,
+    XReport,
+    ZReport,
+    DailyReport,
+    PaymentMethodSummary,
 } from './model/types'
 
 export {
@@ -49,6 +54,13 @@ export {
     useReceipt,
     useCashSummary,
     useXReport,
+    useZReport,
+    useDailyReport,
+    useByPaymentMethodReport,
+    useShifts,
+    useShift,
+    useRefunds,
+    useCancelRefund,
     usePOSCustomerSearch,
     useOpenShift,
     useCloseShift,

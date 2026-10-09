@@ -1,9 +1,11 @@
-import { describe, it, expect } from 'vitest'
+import { beforeEach, describe, it, expect } from 'vitest'
 import {
     getCartDiscountAmount,
     getCartSubtotal,
     getCartTax,
     getCartTotal,
+    isPriceOverridden,
+    usePOSStore,
     type POSCartItem,
 } from '../usePOSStore'
 
@@ -12,6 +14,7 @@ const item = (overrides: Partial<POSCartItem>): POSCartItem => ({
     name: 'Producto',
     sku: 'SKU',
     salePrice: 100,
+    listPrice: 100,
     taxCode: 'VAT_15',
     quantity: 1,
     discount: 0,
@@ -87,5 +90,44 @@ describe('cart totals match the backend rounding', () => {
         const items = [item({ salePrice: 100 })]
         expect(getCartDiscountAmount(100, 'AMOUNT', 500)).toBe(100)
         expect(getCartTotal(items, 'AMOUNT', 500)).toBe(0)
+    })
+})
+
+describe('price overrides', () => {
+    const product = {
+        productId: 1,
+        name: 'Producto',
+        sku: 'SKU',
+        salePrice: 10,
+        taxCode: 'VAT_15' as const,
+    }
+
+    beforeEach(() => {
+        usePOSStore.getState().clearCart()
+        usePOSStore.getState().addItem(product)
+    })
+
+    it('keeps the product price as the list price', () => {
+        const [cartItem] = usePOSStore.getState().cartItems
+        expect(cartItem.listPrice).toBe(10)
+        expect(isPriceOverridden(cartItem)).toBe(false)
+    })
+
+    it('stores the reason of another price', () => {
+        usePOSStore.getState().updateItemPrice(1, 8, 'Empaque dañado')
+
+        const [cartItem] = usePOSStore.getState().cartItems
+        expect(cartItem.salePrice).toBe(8)
+        expect(cartItem.overrideReason).toBe('Empaque dañado')
+        expect(isPriceOverridden(cartItem)).toBe(true)
+    })
+
+    it('drops the reason when going back to the list price', () => {
+        usePOSStore.getState().updateItemPrice(1, 8, 'Empaque dañado')
+        usePOSStore.getState().updateItemPrice(1, 10, 'Empaque dañado')
+
+        const [cartItem] = usePOSStore.getState().cartItems
+        expect(cartItem.overrideReason).toBeUndefined()
+        expect(isPriceOverridden(cartItem)).toBe(false)
     })
 })

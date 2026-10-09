@@ -108,6 +108,8 @@ export interface SaleItem {
     id: number
     saleId: number
     productId: number
+    productName: string | null
+    productSku: string | null
     quantity: number
     unitPrice: number
     discount: number
@@ -132,4 +134,19 @@ export interface SaleQueryParams {
     status?: SaleStatus
     limit?: number
     offset?: number
+}
+
+// The SRI number (establecimiento-punto de emisión-secuencial) is part of the
+// 49-digit access code
+export function invoiceNumber(accessCode: string): string {
+    if (accessCode.length !== 49) return accessCode
+    return `${accessCode.slice(24, 27)}-${accessCode.slice(
+        27,
+        30
+    )}-${accessCode.slice(30, 39)}`
+}
+
+// When faclab-invoicing created the invoice
+export function invoiceIssuedAt(invoice: Invoice): string | null {
+    return invoice.statusHistory[0]?.statusDate ?? null
 }
