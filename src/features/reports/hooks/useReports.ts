@@ -45,3 +45,12 @@ export const useWarehouseSummary = (params?: SummaryParams) =>
             return response.data
         },
     })
+
+export const useDashboard = (expiringDays = 30) =>
+    useQuery({
+        queryKey: [...KEY, 'dashboard', expiringDays],
+        queryFn: async () => {
+            const response = await api.getDashboard(expiringDays)
+            return response.data
+        },
+    })

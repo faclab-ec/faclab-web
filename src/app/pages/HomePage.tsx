@@ -2,13 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import Card from '@/components/ui/Card'
 import Table from '@/components/ui/Table'
 import Spinner from '@/components/ui/Spinner'
-import { useValuation, useWarehouseSummary } from '@features/reports'
-import {
-    useLowStock,
-    useOutOfStock,
-    useReorderPoint,
-    useExpiringLots,
-} from '@features/alerts'
+import { useDashboard } from '@features/reports'
 
 const { THead, TBody, Th, Tr, Td } = Table
 
@@ -21,25 +15,27 @@ const formatCurrency = (value: number) =>
 const HomePage = () => {
     const navigate = useNavigate()
 
-    const { data: valuation, isLoading: loadingValuation } = useValuation()
-    const { data: warehouseSummary = [], isLoading: loadingWarehouses } =
-        useWarehouseSummary()
-    const { data: lowStock = [] } = useLowStock()
-    const { data: outOfStock = [] } = useOutOfStock()
-    const { data: reorderPoint = [] } = useReorderPoint()
-    const { data: expiringLots = [] } = useExpiringLots({ days: 30 })
+    // One call: inventory value, warehouse summary and alert counts
+    const { data: dashboard, isLoading } = useDashboard(30)
+    const warehouseSummary = dashboard?.warehouses ?? []
+    const alerts = dashboard?.alerts ?? {
+        lowStock: 0,
+        outOfStock: 0,
+        reorderPoint: 0,
+        expiringSoon: 0,
+    }
 
     const totalAlerts =
-        lowStock.length +
-        outOfStock.length +
-        reorderPoint.length +
-        expiringLots.length
+        alerts.lowStock +
+        alerts.outOfStock +
+        alerts.reorderPoint +
+        alerts.expiringSoon
 
     const alertSummary = [
         {
             tab: 'low_stock',
             label: 'Stock Bajo',
-            count: lowStock.length,
+            count: alerts.lowStock,
             colorClass:
                 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20',
             textClass: 'text-amber-700 dark:text-amber-300',
@@ -48,7 +44,7 @@ const HomePage = () => {
         {
             tab: 'out_of_stock',
             label: 'Sin Stock',
-            count: outOfStock.length,
+            count: alerts.outOfStock,
             colorClass:
                 'bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20',
             textClass: 'text-red-700 dark:text-red-300',
@@ -57,7 +53,7 @@ const HomePage = () => {
         {
             tab: 'reorder_point',
             label: 'Punto de Reorden',
-            count: reorderPoint.length,
+            count: alerts.reorderPoint,
             colorClass:
                 'bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/20',
             textClass: 'text-blue-700 dark:text-blue-300',
@@ -66,7 +62,7 @@ const HomePage = () => {
         {
             tab: 'expiring_soon',
             label: 'Por Vencer',
-            count: expiringLots.length,
+            count: alerts.expiringSoon,
             colorClass:
                 'bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20',
             textClass: 'text-orange-700 dark:text-orange-300',
@@ -84,11 +80,11 @@ const HomePage = () => {
                         <p className="text-sm text-gray-500 dark:text-gray-400">
                             Valor del Inventario
                         </p>
-                        {loadingValuation ? (
+                        {isLoading ? (
                             <Spinner size={20} className="mt-2" />
                         ) : (
                             <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
-                                {formatCurrency(valuation?.totalValue ?? 0)}
+                                {formatCurrency(dashboard?.inventoryValue ?? 0)}
                             </p>
                         )}
                     </div>
@@ -98,7 +94,7 @@ const HomePage = () => {
                         <p className="text-sm text-gray-500 dark:text-gray-400">
                             Almacenes
                         </p>
-                        {loadingWarehouses ? (
+                        {isLoading ? (
                             <Spinner size={20} className="mt-2" />
                         ) : (
                             <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">
@@ -143,12 +139,12 @@ const HomePage = () => {
                             </p>
                             <p
                                 className={`text-2xl font-bold mt-1 ${
-                                    expiringLots.length > 0
+                                    alerts.expiringSoon > 0
                                         ? 'text-orange-600 dark:text-orange-400'
                                         : 'text-gray-600 dark:text-gray-400'
                                 }`}
                             >
-                                {expiringLots.length}
+                                {alerts.expiringSoon}
                             </p>
                         </div>
                     </Card>
@@ -196,7 +192,7 @@ const HomePage = () => {
             <Card>
                 <div className="p-4">
                     <h5 className="mb-4">Resumen por Almacen</h5>
-                    {loadingWarehouses ? (
+                    {isLoading ? (
                         <div className="flex justify-center py-8">
                             <Spinner size={30} />
                         </div>

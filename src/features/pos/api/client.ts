@@ -1,10 +1,6 @@
 import appConfig from '@/configs/app.config'
 import { httpClient } from '@shared/lib/http/httpClient'
-import type {
-    DataResponse,
-    PaginatedResponse,
-    PaginationParams,
-} from '@/@types/api'
+import type { DataResponse, PaginatedResponse } from '@/@types/api'
 import type {
     Shift,
     OpenShiftInput,
@@ -24,11 +20,14 @@ import type {
     PaymentInput,
     Receipt,
     Refund,
+    RefundListParams,
     CreateRefundInput,
     ProcessRefundInput,
     XReport,
     ZReport,
     DailyReport,
+    PaymentMethodSummary,
+    ShiftListParams,
     CashSummary,
     POSProduct,
     POSCustomer,
@@ -54,7 +53,7 @@ export const closeShift = (shiftId: number, data: CloseShiftInput) =>
 export const getShift = (id: number) =>
     httpClient.get<DataResponse<Shift>>(`${HOST}/shifts/${id}`)
 
-export const getShifts = (params?: PaginationParams) =>
+export const getShifts = (params?: ShiftListParams) =>
     httpClient.get<PaginatedResponse<Shift>>(`${HOST}/shifts`, { params })
 
 export const addCashMovement = (shiftId: number, data: CashMovementInput) =>
@@ -176,7 +175,7 @@ export const cancelRefund = (refundId: number) =>
 export const getRefund = (id: number) =>
     httpClient.get<DataResponse<Refund>>(`${HOST}/refunds/${id}`)
 
-export const getRefunds = (params?: PaginationParams) =>
+export const getRefunds = (params?: RefundListParams) =>
     httpClient.get<PaginatedResponse<Refund>>(`${HOST}/refunds`, { params })
 
 // === REPORTS ===
@@ -202,15 +201,10 @@ export const getDailyReport = (date: string) =>
     })
 
 export const getByPaymentMethod = (fromDate: string, toDate: string) =>
-    httpClient.get<
-        DataResponse<
-            {
-                paymentMethod: string
-                count: number
-                total: number
-            }[]
-        >
-    >(`${HOST}/reports/by-payment-method`, { params: { fromDate, toDate } })
+    httpClient.get<DataResponse<PaymentMethodSummary[]>>(
+        `${HOST}/reports/by-payment-method`,
+        { params: { fromDate, toDate } }
+    )
 
 // === PRODUCTS ===
 

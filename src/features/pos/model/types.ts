@@ -111,6 +111,12 @@ export interface Shift {
     notes: string | null
 }
 
+export interface ShiftListParams {
+    status?: ShiftStatus
+    limit?: number
+    offset?: number
+}
+
 export interface OpenShiftInput {
     cashierName: string
     openingBalance: number
@@ -191,6 +197,8 @@ export interface QuickSaleItemInput {
     quantity: number
     unitPrice?: number
     discount?: number
+    // Required by faclab-core when unitPrice differs from the product price
+    overrideReason?: string
 }
 
 export interface QuickSalePaymentInput {
@@ -241,6 +249,14 @@ export interface Refund {
     reason: string | null
     status: RefundStatus
     refundedBy: string | null
+    createdAt: string | null
+}
+
+export interface RefundListParams {
+    saleId?: number
+    status?: RefundStatus
+    limit?: number
+    offset?: number
 }
 
 export interface RefundItem {
@@ -343,8 +359,15 @@ export interface Receipt {
 }
 
 // === REPORTS ===
+export interface ShiftInfo {
+    id: number
+    cashierName: string
+    openedAt: string
+    status: ShiftStatus
+}
+
 export interface XReport {
-    shift: Shift
+    shift: ShiftInfo
     salesSummary: {
         count: number
         subtotal: number
@@ -367,7 +390,7 @@ export interface XReport {
 
 export interface ZReport extends XReport {
     refundSummary: { count: number; total: number }
-    cashReconciliation: CashSummary & {
+    cashReconciliation: Omit<CashSummary, 'shiftId'> & {
         closingBalance: number
         discrepancy: number
     }
@@ -389,6 +412,12 @@ export interface DailyReport {
         total: number
     }[]
     refundSummary: { count: number; total: number }
+}
+
+export interface PaymentMethodSummary {
+    paymentMethod: string
+    salesCount: number
+    totalAmount: number
 }
 
 // === POS PRODUCT ===

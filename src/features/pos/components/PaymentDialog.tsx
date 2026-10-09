@@ -3,7 +3,7 @@ import Dialog from '@/components/ui/Dialog'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import { notifyError } from '@shared/ui/notify'
-import { usePOSStore } from '../store/usePOSStore'
+import { usePOSStore, isPriceOverridden } from '../store/usePOSStore'
 import { useCartTotals } from '../hooks/useCartTotals'
 import { useQuickSale } from '../hooks/usePOS'
 import {
@@ -81,6 +81,9 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
                     quantity: item.quantity,
                     unitPrice: item.salePrice,
                     discount: item.discount > 0 ? item.discount : undefined,
+                    overrideReason: isPriceOverridden(item)
+                        ? item.overrideReason
+                        : undefined,
                 })),
                 payments: finalPayments,
                 ...(discountType && discountValue > 0

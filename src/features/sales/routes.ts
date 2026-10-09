@@ -9,6 +9,12 @@ export const salesRoutes: Routes = [
         authority: ['sale:read'],
     },
     {
+        key: 'sales.invoices',
+        path: '/invoices',
+        component: lazy(() => import('./pages/InvoicesListPage')),
+        authority: ['sale:read'],
+    },
+    {
         key: 'sales.saleDetail',
         path: '/sales/:id',
         component: lazy(() => import('./pages/SaleDetailPage')),

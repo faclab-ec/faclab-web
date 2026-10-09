@@ -8,6 +8,7 @@ export type {
     MovementHistoryParams,
     WarehouseSummary,
     SummaryParams,
+    Dashboard,
 } from './model/types'
 
 export {
@@ -15,6 +16,7 @@ export {
     useRotation,
     useMovementHistory,
     useWarehouseSummary,
+    useDashboard,
 } from './hooks/useReports'
 
 export { reportsRoutes } from './routes'

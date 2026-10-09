@@ -1,4 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+    keepPreviousData,
+    useQuery,
+    useMutation,
+    useQueryClient,
+} from '@tanstack/react-query'
 import * as api from '../api/client'
 import type {
     OpenShiftInput,
@@ -14,6 +19,8 @@ import type {
     ProcessRefundInput,
     CashMovementInput,
     QuickCustomerInput,
+    RefundListParams,
+    ShiftListParams,
 } from '../model/types'
 
 // === QUERIES ===
@@ -89,6 +96,79 @@ export function useXReport(shiftId: number) {
             return response.data
         },
         enabled: shiftId > 0,
+    })
+}
+
+export function useZReport(shiftId: number) {
+    return useQuery({
+        queryKey: ['pos', 'zReport', shiftId],
+        queryFn: async () => {
+            const response = await api.getZReport(shiftId)
+            return response.data
+        },
+        enabled: shiftId > 0,
+    })
+}
+
+export function useDailyReport(date: string) {
+    return useQuery({
+        queryKey: ['pos', 'dailyReport', date],
+        queryFn: async () => {
+            const response = await api.getDailyReport(date)
+            return response.data
+        },
+        enabled: !!date,
+    })
+}
+
+export function useByPaymentMethodReport(fromDate: string, toDate: string) {
+    return useQuery({
+        queryKey: ['pos', 'byPaymentMethod', fromDate, toDate],
+        queryFn: async () => {
+            const response = await api.getByPaymentMethod(fromDate, toDate)
+            return response.data
+        },
+        enabled: !!fromDate && !!toDate,
+    })
+}
+
+// Shift and refund history, read from the back office (report:pos:read)
+export function useShifts(params: ShiftListParams) {
+    return useQuery({
+        queryKey: ['pos', 'shifts', params],
+        queryFn: async () => {
+            const response = await api.getShifts(params)
+            return {
+                items: response.data,
+                pagination: response.meta.pagination,
+            }
+        },
+        placeholderData: keepPreviousData,
+    })
+}
+
+export function useShift(id: number) {
+    return useQuery({
+        queryKey: ['pos', 'shift', id],
+        queryFn: async () => {
+            const response = await api.getShift(id)
+            return response.data
+        },
+        enabled: id > 0,
+    })
+}
+
+export function useRefunds(params: RefundListParams) {
+    return useQuery({
+        queryKey: ['pos', 'refunds', params],
+        queryFn: async () => {
+            const response = await api.getRefunds(params)
+            return {
+                items: response.data,
+                pagination: response.meta.pagination,
+            }
+        },
+        placeholderData: keepPreviousData,
     })
 }
 
@@ -347,6 +427,19 @@ export function useProcessRefund() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['pos', 'products'] })
+        },
+    })
+}
+
+export function useCancelRefund() {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: async (refundId: number) => {
+            const response = await api.cancelRefund(refundId)
+            return response.data
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['pos', 'refunds'] })
         },
     })
 }

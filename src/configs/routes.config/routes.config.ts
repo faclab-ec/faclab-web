@@ -21,6 +21,7 @@ import { adjustmentsRoutes } from '@features/adjustments'
 import { transfersRoutes } from '@features/transfers'
 import { adminUsersRoutes } from '@features/admin-users'
 import { invoicingRoutes } from '@features/invoicing'
+import { posAdminRoutes } from '@features/posAdmin'
 
 export const publicRoutes: Routes = [...authRoute]
 
@@ -49,6 +50,7 @@ export const protectedRoutes: Routes = [
     ...reportsRoutes,
     ...alertsRoutes,
     ...posRoutes,
+    ...posAdminRoutes,
     ...adminUsersRoutes,
     ...invoicingRoutes,
     {

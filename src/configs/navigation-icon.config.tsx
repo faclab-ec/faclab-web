@@ -1,6 +1,8 @@
 import { BiHome, BiPackage } from 'react-icons/bi'
 import {
     HiOutlineBell,
+    HiOutlineCash,
+    HiOutlineChartBar,
     HiOutlineClipboardCheck,
     HiOutlineCollection,
     HiOutlineCube,
@@ -10,6 +12,8 @@ import {
     HiOutlineLockClosed,
     HiOutlineOfficeBuilding,
     HiOutlineQrcode,
+    HiOutlineReceiptRefund,
+    HiOutlineReceiptTax,
     HiOutlineScale,
     HiOutlineShoppingCart,
     HiOutlineSwitchHorizontal,
@@ -40,6 +44,10 @@ const navigationIcon: NavigationIcons = {
     inventoryTransfers: <HiOutlineSwitchVertical />,
     inventoryReports: <HiOutlineDocumentText />,
     salesSales: <HiOutlineShoppingCart />,
+    salesInvoices: <HiOutlineReceiptTax />,
+    posAdminShifts: <HiOutlineCash />,
+    posAdminRefunds: <HiOutlineReceiptRefund />,
+    posAdminReports: <HiOutlineChartBar />,
     inventoryAlerts: <HiOutlineBell />,
     settingsUsers: <HiOutlineUsers />,
     settingsCompanyConfig: <HiOutlineOfficeBuilding />,

@@ -59,7 +59,14 @@
         "sales": {
             "title": "Ventas",
             "customers": "Clientes",
-            "sales": "Ventas"
+            "sales": "Ventas",
+            "invoices": "Facturas"
+        },
+        "posAdmin": {
+            "title": "Punto de Venta",
+            "shifts": "Turnos",
+            "refunds": "Devoluciones",
+            "reports": "Reportes POS"
         },
         "purchases": {
             "title": "Compras",

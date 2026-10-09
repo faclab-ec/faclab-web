@@ -10,6 +10,7 @@ import type {
     MovementHistoryParams,
     WarehouseSummary,
     SummaryParams,
+    Dashboard,
 } from '../model/types'
 
 const HOST = appConfig.inventoryApiHost
@@ -37,3 +38,8 @@ export const getWarehouseSummary = (params?: SummaryParams) =>
         `${HOST}/reports/inventory/summary`,
         { params }
     )
+
+export const getDashboard = (expiringDays = 30) =>
+    httpClient.get<DataResponse<Dashboard>>(`${HOST}/dashboard`, {
+        params: { expiringDays },
+    })
