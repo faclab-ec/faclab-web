@@ -24,9 +24,8 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
     const { cartItems, customerId, discountType, discountValue, clearCart } =
         usePOSStore()
     const quickSale = useQuickSale()
-    const { total: cartTotal } = useCartTotals()
-    // Charge whole cents: the cart total comes from float arithmetic
-    const total = Math.round(cartTotal * 100) / 100
+    // Already in whole cents, computed like the backend total
+    const { total } = useCartTotals()
 
     const [selectedMethod, setSelectedMethod] =
         useState<POSPaymentMethod>('CASH')
