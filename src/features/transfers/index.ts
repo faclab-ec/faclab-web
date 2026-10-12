@@ -9,7 +9,7 @@ export type {
     TransferListParams,
 } from './model/types'
 
-export { TRANSFER_STATUS_LABELS, TRANSFER_STATUS_CLASSES } from './model/types'
+export { TRANSFER_STATUS_LABELS, TRANSFER_STATUS_TONES } from './model/types'
 
 export {
     transferSchema,

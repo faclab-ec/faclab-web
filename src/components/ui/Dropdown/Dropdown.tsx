@@ -13,9 +13,10 @@ import { PLACEMENT } from '../utils/constants'
 import type { CommonProps } from '../@types/common'
 import type { DropdownToggleSharedProps } from './DropdownToggle'
 import type { DropdownPlacement } from '../@types/placement'
-import type { SyntheticEvent, CSSProperties, Ref } from 'react'
+import type { SyntheticEvent, CSSProperties, KeyboardEvent, Ref } from 'react'
 
 export interface DropdownProps extends CommonProps, DropdownToggleSharedProps {
+    'aria-label'?: string
     title?: string
     menuClass?: string
     menuStyle?: CSSProperties
@@ -99,6 +100,24 @@ const Dropdown = (props: DropdownProps) => {
         [disabled, handleToggle]
     )
 
+    // El disparador es un `div`: se comporta como botón también con el teclado
+    const handleKeyDown = useCallback(
+        (e: KeyboardEvent) => {
+            if (disabled) {
+                return
+            }
+            if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+                e.preventDefault()
+                handleToggle(e.key === 'ArrowDown' ? true : undefined)
+            }
+            if (e.key === 'Escape' && open) {
+                e.preventDefault()
+                handleToggle(false)
+            }
+        },
+        [disabled, handleToggle, open]
+    )
+
     const handleMouseEnter = useCallback(() => {
         if (!disabled) {
             handleToggle(true)
@@ -164,10 +183,15 @@ const Dropdown = (props: DropdownProps) => {
             {...toggleEventHandlers}
             ref={triggerTarget}
             id={buttonId}
+            role="button"
+            tabIndex={disabled ? -1 : 0}
+            aria-haspopup="menu"
+            aria-expanded={open}
             className={toggleClassName}
             renderTitle={renderTitle}
             disabled={disabled}
             placement={placement}
+            onKeyDown={handleKeyDown}
         >
             {title}
         </DropdownToggle>

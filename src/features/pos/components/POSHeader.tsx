@@ -11,6 +11,8 @@ import {
 import { useCan, useHasRole } from '@/stores'
 import { ROLE } from '@/constants/roles.constant'
 import { InvoicingStatusChip } from '@features/invoicing'
+import StatusBadge from '@/components/shared/StatusBadge'
+import { LogoMark } from '@/components/template/Logo'
 
 interface POSHeaderProps {
     onOpenCloseShift?: () => void
@@ -47,65 +49,74 @@ const POSHeader = ({
     })
 
     return (
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-            <div className="flex items-center gap-4">
-                <div>
-                    <h2 className="font-semibold text-lg leading-tight">
-                        Bienvenido, {shift.cashierName}
-                    </h2>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
+        <header className="flex items-center justify-between gap-3 border-b border-gray-200 bg-white px-4 py-2.5 dark:border-gray-700 dark:bg-gray-800">
+            <div className="flex min-w-0 items-center gap-3">
+                <LogoMark
+                    size={30}
+                    className="hidden shrink-0 text-gray-900 dark:text-white sm:block"
+                />
+                <div className="min-w-0">
+                    <h1 className="truncate text-base leading-tight">
+                        Hola, {shift.cashierName}
+                    </h1>
+                    <p className="hidden truncate text-xs text-gray-500 first-letter:uppercase dark:text-gray-400 sm:block">
                         {formattedDate}
                     </p>
                 </div>
-                <span className="px-2 py-1 text-xs rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 font-medium">
+                <StatusBadge tone="success" className="shrink-0">
                     Turno #{shift.id}
-                </span>
+                </StatusBadge>
                 <InvoicingStatusChip />
             </div>
 
-            <span className="text-2xl font-bold text-gray-700 dark:text-gray-300 hidden md:block">
+            <span className="hidden text-xl font-semibold tabular-nums text-gray-700 dark:text-gray-200 xl:block">
                 {formattedTime}
             </span>
 
-            <div className="flex items-center gap-2">
+            {/* En pantallas pequeñas solo queda el ícono; el nombre va en aria-label */}
+            <div className="flex shrink-0 items-center gap-1 sm:gap-2">
                 {canRefund && (
                     <Button
                         size="sm"
                         variant="plain"
+                        aria-label="Devolución"
                         icon={<HiOutlineReceiptRefund />}
                         onClick={onOpenRefund}
                     >
-                        Devolución
+                        <span className="hidden md:inline">Devolución</span>
                     </Button>
                 )}
                 <Button
                     size="sm"
                     variant="plain"
+                    aria-label="Caja"
                     icon={<HiOutlineCash />}
                     onClick={onOpenCashMovement}
                 >
-                    Caja
+                    <span className="hidden md:inline">Caja</span>
                 </Button>
                 <Button
                     size="sm"
                     variant="default"
+                    aria-label="Cerrar turno"
                     icon={<HiOutlineLockClosed />}
                     onClick={onOpenCloseShift}
                 >
-                    Cerrar Turno
+                    <span className="hidden md:inline">Cerrar turno</span>
                 </Button>
                 {!isCashier && (
                     <Button
                         size="sm"
-                        variant="solid"
+                        variant="default"
+                        aria-label="Administración"
                         icon={<HiOutlineHome />}
                         onClick={() => navigate('/home')}
                     >
-                        Administración
+                        <span className="hidden md:inline">Administración</span>
                     </Button>
                 )}
             </div>
-        </div>
+        </header>
     )
 }
 

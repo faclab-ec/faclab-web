@@ -9,6 +9,7 @@ import {
     HiOutlineTrash,
     HiOutlinePencil,
 } from 'react-icons/hi'
+import { formatCurrency } from '@shared/lib/format'
 
 interface OrderItemRowProps {
     item: POSCartItem
@@ -83,10 +84,10 @@ const OrderItemRow = memo(({ item }: OrderItemRowProps) => {
                                     className="line-through mr-1"
                                     title={item.overrideReason}
                                 >
-                                    ${item.listPrice.toFixed(2)}
+                                    {formatCurrency(item.listPrice)}
                                 </span>
                             )}
-                            ${item.salePrice.toFixed(2)}
+                            {formatCurrency(item.salePrice)}
                             {item.discount > 0 && (
                                 <span className="text-red-500 ml-1">
                                     -{item.discount}%
@@ -94,7 +95,10 @@ const OrderItemRow = memo(({ item }: OrderItemRowProps) => {
                             )}
                         </p>
                         <button
-                            className="text-gray-400 hover:text-primary-500"
+                            type="button"
+                            className="rounded p-0.5 text-gray-400 hover:text-primary-600"
+                            aria-label={`Cambiar precio de ${item.name}`}
+                            aria-expanded={editingPrice}
                             onClick={handleToggleEdit}
                         >
                             <HiOutlinePencil className="text-xs" />
@@ -106,27 +110,33 @@ const OrderItemRow = memo(({ item }: OrderItemRowProps) => {
                     <Button
                         size="xs"
                         variant="plain"
+                        aria-label={`Disminuir cantidad de ${item.name}`}
                         icon={<HiMinus />}
                         onClick={handleDecreaseQty}
                     />
-                    <span className="w-8 text-center text-sm font-medium">
+                    <span
+                        className="w-8 text-center text-sm font-medium tabular-nums"
+                        aria-label={`Cantidad: ${item.quantity}`}
+                    >
                         {item.quantity}
                     </span>
                     <Button
                         size="xs"
                         variant="plain"
+                        aria-label={`Aumentar cantidad de ${item.name}`}
                         icon={<HiPlus />}
                         onClick={handleIncreaseQty}
                     />
                 </div>
 
                 <span className="text-sm font-medium w-16 text-right">
-                    ${lineTotal.toFixed(2)}
+                    {formatCurrency(lineTotal)}
                 </span>
 
                 <Button
                     size="xs"
                     variant="plain"
+                    aria-label={`Quitar ${item.name}`}
                     icon={<HiOutlineTrash className="text-red-500" />}
                     onClick={handleRemove}
                 />

@@ -4,7 +4,7 @@ import useCallbackRef from '../hooks/useCallbackRef'
 import { useConfig } from '../ConfigProvider'
 import type { CommonProps } from '../@types/common'
 import type { TabsValue } from './context'
-import type { ReactNode, Ref } from 'react'
+import type { KeyboardEvent, ReactNode, Ref } from 'react'
 
 export interface TabNavProps extends CommonProps {
     disabled?: boolean
@@ -35,21 +35,32 @@ const TabNav = (props: TabNavProps) => {
         }
     })
 
+    // Solo Enter y Espacio activan: antes cualquier tecla (también Tab)
+    // cambiaba de pestaña al recorrerlas con el teclado.
+    const onTabNavKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            onTabNavClick()
+        }
+    }
+
     const color = `${themeColor}-${primaryColorLevel}`
 
     const tabNavClass = classNames(
         'tab-nav',
         `tab-nav-${variant}`,
         isSelected &&
-            `tab-nav-active text-${color} dark:text-${themeColor}-100`,
-        isSelected && variant === 'underline' && `border-${color}`,
+            `tab-nav-active text-${color} dark:text-${themeColor}-300`,
+        isSelected &&
+            variant === 'underline' &&
+            `border-${color} dark:border-${themeColor}-400`,
         isSelected &&
             variant === 'pill' &&
-            `bg-${themeColor}-50 dark:bg-${color} dark:text-gray-100`,
+            `bg-${themeColor}-50 dark:bg-${themeColor}-500/20 dark:text-${themeColor}-100`,
         disabled && 'tab-nav-disabled',
         !disabled &&
             !isSelected &&
-            `hover:text-${color} dark:hover:text-${themeColor}-100`,
+            `text-gray-600 dark:text-gray-400 hover:text-${color} dark:hover:text-${themeColor}-300`,
         className
     )
 
@@ -59,9 +70,10 @@ const TabNav = (props: TabNavProps) => {
             className={tabNavClass}
             role="tab"
             aria-selected={isSelected}
-            tabIndex={0}
+            aria-disabled={disabled || undefined}
+            tabIndex={disabled ? -1 : 0}
             onClick={onTabNavClick}
-            onKeyDown={onTabNavClick}
+            onKeyDown={onTabNavKeyDown}
             {...rest}
         >
             {icon && <div className="tab-nav-icon">{icon}</div>}

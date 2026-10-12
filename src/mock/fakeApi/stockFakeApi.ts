@@ -1,9 +1,14 @@
 import { Server, Response } from 'miragejs'
+import { singleQueryParams } from './queryParams'
 import { stockData } from '../data/stockData'
 
 export default function stockFakeApi(server: Server) {
     server.get('/stock', (schema, request) => {
-        const { productId, limit = '100', offset = '0' } = request.queryParams
+        const {
+            productId,
+            limit = '100',
+            offset = '0',
+        } = singleQueryParams(request)
 
         let filteredStock = [...stockData]
 

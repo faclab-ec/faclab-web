@@ -12,21 +12,13 @@ interface NextProps extends CommonProps {
         active: string
         disabled: string
     }
-    onNext: (e: MouseEvent<HTMLSpanElement>) => void
+    onNext: (e: MouseEvent<HTMLButtonElement>) => void
 }
 
 const Next = (props: NextProps) => {
     const { currentPage, pageCount, pagerClass, onNext } = props
 
     const disabled = currentPage === pageCount || pageCount === 0
-
-    const onNextClick = (e: MouseEvent<HTMLSpanElement>) => {
-        e.preventDefault()
-        if (disabled) {
-            return
-        }
-        onNext(e)
-    }
 
     const pagerNextClass = classNames(
         pagerClass.default,
@@ -35,13 +27,15 @@ const Next = (props: NextProps) => {
     )
 
     return (
-        <span
+        <button
+            type="button"
             className={pagerNextClass}
-            role="presentation"
-            onClick={onNextClick}
+            aria-label="Página siguiente"
+            disabled={disabled}
+            onClick={onNext}
         >
             <HiChevronRight />
-        </span>
+        </button>
     )
 }
 

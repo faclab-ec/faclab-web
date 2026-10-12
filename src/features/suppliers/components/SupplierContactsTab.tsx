@@ -10,6 +10,7 @@ import {
 import ContactForm from './ContactForm'
 import DeleteConfirmDialog from './DeleteConfirmDialog'
 import type { SupplierContact } from '../model/types'
+import EmptyState from '@/components/shared/EmptyState'
 
 const { Tr, Th, Td, THead, TBody } = Table
 
@@ -78,9 +79,10 @@ const SupplierContactsTab = ({ supplierId }: SupplierContactsTabProps) => {
             </div>
 
             {contacts.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                    No hay contactos registrados para este proveedor
-                </div>
+                <EmptyState
+                    className="!py-8"
+                    title="No hay contactos registrados para este proveedor"
+                />
             ) : (
                 <Table>
                     <THead>
@@ -104,12 +106,14 @@ const SupplierContactsTab = ({ supplierId }: SupplierContactsTabProps) => {
                                         <Button
                                             size="sm"
                                             variant="plain"
+                                            aria-label="Editar"
                                             icon={<HiOutlinePencil />}
                                             onClick={() => handleEdit(contact)}
                                         />
                                         <Button
                                             size="sm"
                                             variant="plain"
+                                            aria-label="Eliminar"
                                             icon={<HiOutlineTrash />}
                                             onClick={() => {
                                                 setToDelete(contact)

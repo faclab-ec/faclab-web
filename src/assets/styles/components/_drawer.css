@@ -1,5 +1,5 @@
 .drawer-content {
-  @apply bg-white dark:bg-gray-800 shadow-xl absolute flex flex-col;
+  @apply bg-white dark:bg-gray-800 shadow-pop absolute flex flex-col;
 
   &.vertical {
     @apply h-full;
@@ -30,7 +30,7 @@
 
 .drawer-overlay {
   transition: all 0.3s ease-in-out;
-  @apply bg-black bg-opacity-80 inset-0 fixed z-30;
+  @apply bg-gray-900/60 inset-0 fixed z-30 backdrop-blur-[2px] dark:bg-black/70;
 }
 
 .drawer-overlay-after-open {

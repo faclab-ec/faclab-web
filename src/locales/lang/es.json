@@ -36,7 +36,7 @@
         }
     },
     "nav": {
-        "home": "Home",
+        "home": "Inicio",
         "catalog": {
             "title": "Catálogo",
             "categories": "Categorías",
@@ -75,6 +75,7 @@
         },
         "settings": {
             "title": "Configuración",
+            "users": "Usuarios",
             "companyConfig": "Configuración Fiscal",
             "certificates": "Certificados Digitales"
         }

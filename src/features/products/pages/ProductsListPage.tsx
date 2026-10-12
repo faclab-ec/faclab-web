@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
+import PageHeader from '@/components/shared/PageHeader'
 import Button from '@/components/ui/Button'
 import { useProductsList, useProductMutations } from '../hooks/useProducts'
 import { notifySuccess, notifyError } from '@shared/ui/notify'
@@ -14,6 +15,8 @@ import type { Product, ProductInput } from '../model/types'
 import { ProductForm } from '../components/ProductForm'
 import Select from '@/components/ui/Select'
 import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
+import StatusBadge, { ActiveBadge } from '@/components/shared/StatusBadge'
+import { formatCurrency } from '@shared/lib/format'
 
 const ProductsListPage = () => {
     const crud = useCrudOperations<Product>()
@@ -24,7 +27,12 @@ const ProductsListPage = () => {
     const searchTerm = useDebouncedValue(search.trim())
     const offset = (crud.pageIndex - 1) * crud.pageSize
 
-    const { data, isLoading } = useProductsList({
+    const {
+        data,
+        isLoading,
+        error: listError,
+        refetch,
+    } = useProductsList({
         limit: crud.pageSize,
         offset,
         categoryId: filterCategoryId,
@@ -134,9 +142,7 @@ const ProductsListPage = () => {
                     ? categoryMap.get(props.row.original.categoryId)
                     : null
                 return categoryName ? (
-                    <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded text-xs font-medium">
-                        {categoryName}
-                    </span>
+                    <StatusBadge tone="info">{categoryName}</StatusBadge>
                 ) : (
                     <span className="text-gray-400">Sin categoría</span>
                 )
@@ -164,7 +170,7 @@ const ProductsListPage = () => {
             cell: (props) =>
                 props.row.original.salePrice != null ? (
                     <span className="font-mono text-sm">
-                        ${props.row.original.salePrice.toFixed(2)}
+                        {formatCurrency(props.row.original.salePrice)}
                     </span>
                 ) : (
                     <span className="text-gray-400">-</span>
@@ -173,16 +179,9 @@ const ProductsListPage = () => {
         {
             header: 'Estado',
             accessorKey: 'isActive',
-            cell: (props) =>
-                props.row.original.isActive ? (
-                    <span className="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 rounded text-xs font-medium">
-                        Activo
-                    </span>
-                ) : (
-                    <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 rounded text-xs font-medium">
-                        Inactivo
-                    </span>
-                ),
+            cell: (props) => (
+                <ActiveBadge active={props.row.original.isActive} />
+            ),
         },
         {
             header: 'Acciones',
@@ -210,72 +209,63 @@ const ProductsListPage = () => {
 
     return (
         <>
-            <Card>
-                <div className="p-4">
-                    <div className="flex justify-between items-center mb-4">
-                        <div>
-                            <h4 className="text-lg font-semibold">
-                                Listado de Productos
-                            </h4>
-                            <p className="text-sm text-gray-500 mt-1">
-                                Gestiona el catálogo de productos
-                            </p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <ListSearchInput
-                                placeholder="Buscar por nombre, SKU o código"
-                                value={search}
-                                onChange={(value) => {
-                                    setSearch(value)
-                                    crud.onPaginationChange(1, crud.pageSize)
-                                }}
-                            />
-                            <Select
-                                isClearable
-                                size="sm"
-                                className="min-w-[180px]"
-                                placeholder="Todas las categorías"
-                                options={categoryFilterOptions}
-                                value={
-                                    categoryFilterOptions.find(
-                                        (opt) => opt.value === filterCategoryId
-                                    ) || null
-                                }
-                                onChange={(option) => {
-                                    setFilterCategoryId(
-                                        option?.value || undefined
-                                    )
-                                    crud.onPaginationChange(1, crud.pageSize)
-                                }}
-                            />
-                            <Button
-                                variant="solid"
-                                size="sm"
-                                icon={<HiPlus />}
-                                onClick={crud.openCreate}
-                            >
-                                Nuevo Producto
-                            </Button>
-                        </div>
-                    </div>
-
-                    <DataTable
-                        columns={columns}
-                        data={items}
-                        loading={isLoading}
-                        pagingData={{
-                            total,
-                            pageIndex: crud.pageIndex,
-                            pageSize: crud.pageSize,
-                        }}
-                        onPaginationChange={(idx) =>
-                            crud.onPaginationChange(idx, crud.pageSize)
-                        }
-                        onSelectChange={(size) =>
-                            crud.onPaginationChange(1, size)
-                        }
-                    />
-                </div>
+            <PageHeader
+                title="Productos"
+                description="Gestiona el catálogo de productos"
+                actions={
+                    <>
+                        <ListSearchInput
+                            placeholder="Buscar por nombre, SKU o código"
+                            value={search}
+                            onChange={(value) => {
+                                setSearch(value)
+                                crud.onPaginationChange(1, crud.pageSize)
+                            }}
+                        />
+                        <Select
+                            isClearable
+                            size="sm"
+                            className="min-w-[180px]"
+                            placeholder="Todas las categorías"
+                            options={categoryFilterOptions}
+                            value={
+                                categoryFilterOptions.find(
+                                    (opt) => opt.value === filterCategoryId
+                                ) || null
+                            }
+                            onChange={(option) => {
+                                setFilterCategoryId(option?.value || undefined)
+                                crud.onPaginationChange(1, crud.pageSize)
+                            }}
+                        />
+                        <Button
+                            variant="solid"
+                            size="sm"
+                            icon={<HiPlus />}
+                            onClick={crud.openCreate}
+                        >
+                            Nuevo Producto
+                        </Button>
+                    </>
+                }
+            />
+            <Card bodyClass="p-0">
+                <DataTable
+                    columns={columns}
+                    data={items}
+                    loading={isLoading}
+                    error={listError}
+                    pagingData={{
+                        total,
+                        pageIndex: crud.pageIndex,
+                        pageSize: crud.pageSize,
+                    }}
+                    onRetry={refetch}
+                    onPaginationChange={(idx) =>
+                        crud.onPaginationChange(idx, crud.pageSize)
+                    }
+                    onSelectChange={(size) => crud.onPaginationChange(1, size)}
+                />
             </Card>
 
             <FormModal

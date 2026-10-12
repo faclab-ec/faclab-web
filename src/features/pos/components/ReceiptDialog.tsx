@@ -4,6 +4,7 @@ import Spinner from '@/components/ui/Spinner'
 import { useReceipt } from '../hooks/usePOS'
 import { HiOutlineCheckCircle } from 'react-icons/hi'
 import { InvoiceReceiptNote } from '@features/invoicing'
+import { formatCurrency } from '@shared/lib/format'
 
 interface ReceiptDialogProps {
     isOpen: boolean
@@ -21,13 +22,14 @@ const ReceiptDialog = ({ isOpen, saleId, onClose }: ReceiptDialogProps) => {
     return (
         <Dialog
             isOpen={isOpen}
+            contentLabel="Venta completada"
             width={400}
             overlayClassName="!z-[60]"
             onClose={onClose}
         >
             <div className="text-center mb-4">
                 <HiOutlineCheckCircle className="text-5xl text-emerald-500 mx-auto" />
-                <h4 className="text-lg font-bold mt-2">Venta Completada</h4>
+                <h4 className="mt-2">Venta completada</h4>
             </div>
 
             <div className="mb-4">
@@ -59,7 +61,7 @@ const ReceiptDialog = ({ isOpen, saleId, onClose }: ReceiptDialogProps) => {
                                 <span>
                                     {item.quantity}x {item.productName}
                                 </span>
-                                <span>${item.subtotal.toFixed(2)}</span>
+                                <span>{formatCurrency(item.subtotal)}</span>
                             </div>
                         ))}
                     </div>
@@ -69,7 +71,7 @@ const ReceiptDialog = ({ isOpen, saleId, onClose }: ReceiptDialogProps) => {
                             <span className="text-gray-500 dark:text-gray-400">
                                 Subtotal
                             </span>
-                            <span>${receipt.subtotal.toFixed(2)}</span>
+                            <span>{formatCurrency(receipt.subtotal)}</span>
                         </div>
                         {receipt.discount > 0 && (
                             <div className="flex justify-between">
@@ -77,7 +79,7 @@ const ReceiptDialog = ({ isOpen, saleId, onClose }: ReceiptDialogProps) => {
                                     Descuento
                                 </span>
                                 <span className="text-red-500">
-                                    -${receipt.discount.toFixed(2)}
+                                    -{formatCurrency(receipt.discount)}
                                 </span>
                             </div>
                         )}
@@ -85,11 +87,11 @@ const ReceiptDialog = ({ isOpen, saleId, onClose }: ReceiptDialogProps) => {
                             <span className="text-gray-500 dark:text-gray-400">
                                 Impuestos
                             </span>
-                            <span>${receipt.tax.toFixed(2)}</span>
+                            <span>{formatCurrency(receipt.tax)}</span>
                         </div>
                         <div className="flex justify-between font-bold text-lg">
                             <span>Total</span>
-                            <span>${receipt.total.toFixed(2)}</span>
+                            <span>{formatCurrency(receipt.total)}</span>
                         </div>
                     </div>
 
@@ -100,7 +102,7 @@ const ReceiptDialog = ({ isOpen, saleId, onClose }: ReceiptDialogProps) => {
                                 className="flex justify-between text-gray-500 dark:text-gray-400"
                             >
                                 <span>{p.method}</span>
-                                <span>${p.amount.toFixed(2)}</span>
+                                <span>{formatCurrency(p.amount)}</span>
                             </div>
                         ))}
                     </div>
@@ -108,7 +110,7 @@ const ReceiptDialog = ({ isOpen, saleId, onClose }: ReceiptDialogProps) => {
                     {receipt.change > 0 && (
                         <div className="bg-emerald-50 dark:bg-emerald-500/10 p-2 rounded text-center">
                             <span className="font-bold text-emerald-600">
-                                Cambio: ${receipt.change.toFixed(2)}
+                                Cambio: {formatCurrency(receipt.change)}
                             </span>
                         </div>
                     )}

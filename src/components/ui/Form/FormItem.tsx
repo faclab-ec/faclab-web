@@ -1,6 +1,7 @@
+import { useId } from 'react'
 import classNames from 'classnames'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useForm } from './context'
+import { useForm, FormItemContextProvider } from './context'
 import { useConfig } from '../ConfigProvider'
 import { CONTROL_SIZES, LAYOUT } from '../utils/constants'
 import type { CommonProps, TypeAttributes } from '../@types/common'
@@ -39,6 +40,9 @@ const FormItem = (props: FormItemProps) => {
     } = props
 
     const formContext = useForm()
+    const generatedId = useId()
+    const controlId = htmlFor ?? generatedId
+    const errorId = `${controlId}-error`
     const { controlSize } = useConfig()
 
     const formItemLabelHeight = size || formContext?.size || controlSize
@@ -73,6 +77,8 @@ const FormItem = (props: FormItemProps) => {
 
     const formLabelClass = classNames(
         'form-label',
+        // El asterisco se dibuja con CSS: no forma parte del texto del label
+        asterisk && 'form-label-required',
         label && getFormLabelLayoutClass(),
         labelClass
     )
@@ -92,16 +98,16 @@ const FormItem = (props: FormItemProps) => {
     return (
         <div ref={ref} className={formItemClass}>
             <label
-                htmlFor={htmlFor}
+                htmlFor={controlId}
                 className={formLabelClass}
                 style={formLabelStyle()}
             >
-                {asterisk && (
-                    <span className="text-red-500 ltr:mr-1 rtl:ml-1">*</span>
-                )}
                 {label}
                 {extra && <span>{extra}</span>}
-                {label && formItemLayout !== 'vertical' && ':'}
+                {label &&
+                    (formItemLayout === LAYOUT.HORIZONTAL ||
+                        formItemLayout === LAYOUT.INLINE) &&
+                    ':'}
             </label>
             <div
                 className={
@@ -110,10 +116,21 @@ const FormItem = (props: FormItemProps) => {
                         : ''
                 }
             >
-                {children}
+                <FormItemContextProvider
+                    value={{
+                        controlId,
+                        errorId,
+                        invalid: !!invalid,
+                        required: !!asterisk,
+                    }}
+                >
+                    {children}
+                </FormItemContextProvider>
                 <AnimatePresence mode="wait">
                     {invalid && (
                         <motion.div
+                            id={errorId}
+                            role="alert"
                             className="form-explain"
                             initial={initialStyle}
                             animate={enterStyle}

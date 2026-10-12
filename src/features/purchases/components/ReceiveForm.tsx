@@ -15,6 +15,8 @@ import {
     type ReceiveFormValues,
 } from '../model/receivePurchaseOrder.schema'
 import type { PurchaseOrderItem } from '../model/types'
+import LabeledField from '@/components/shared/LabeledField'
+import EmptyState from '@/components/shared/EmptyState'
 
 const { Tr, Th, Td, THead, TBody } = Table
 
@@ -143,9 +145,10 @@ const ReceiveForm = ({
                 <form className="flex-1" onSubmit={handleSubmit(onSubmit)}>
                     <div className="max-h-[60vh] overflow-y-auto pr-1">
                         {fields.length === 0 ? (
-                            <div className="text-center py-8 text-gray-500">
-                                No hay items pendientes de recepción
-                            </div>
+                            <EmptyState
+                                className="!py-8"
+                                title="No hay items pendientes de recepción"
+                            />
                         ) : (
                             <Table>
                                 <THead>
@@ -267,25 +270,19 @@ const ReceiveForm = ({
                         )}
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Fecha de Recepción
-                                </label>
+                            <LabeledField label="Fecha de Recepción">
                                 <Input
                                     type="date"
                                     {...register('receivedAt')}
                                 />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Notas
-                                </label>
+                            </LabeledField>
+                            <LabeledField label="Notas">
                                 <Input
                                     textArea
                                     placeholder="Observaciones de la recepción"
                                     {...register('notes')}
                                 />
-                            </div>
+                            </LabeledField>
                         </div>
                     </div>
 

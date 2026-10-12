@@ -7,6 +7,8 @@ export type Config = {
     mode: 'light' | 'dark'
     locale: string
     primaryColorLevel: ColorLevel
+    accentColor: string
+    accentColorLevel: ColorLevel
     cardBordered: boolean
     controlSize: TypeAttributes.ControlSize
     navMode: TypeAttributes.MenuVariant
@@ -14,11 +16,13 @@ export type Config = {
 }
 
 export const defaultConfig = {
-    themeColor: 'indigo',
+    themeColor: 'blue',
     direction: 'ltr',
     mode: 'light',
-    locale: 'en',
+    locale: 'es',
     primaryColorLevel: 600,
+    accentColor: 'emerald',
+    accentColorLevel: 600,
     cardBordered: false,
     controlSize: SIZES.MD,
     navMode: 'light',

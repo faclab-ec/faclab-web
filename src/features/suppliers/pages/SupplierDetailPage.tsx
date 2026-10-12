@@ -1,13 +1,15 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import Badge from '@/components/ui/Badge'
+import { ActiveBadge } from '@/components/shared/StatusBadge'
 import Tabs from '@/components/ui/Tabs'
 import { HiOutlineArrowLeft } from 'react-icons/hi'
 import { useSupplier } from '../hooks/useSuppliers'
 import SupplierInfoCard from '../components/SupplierInfoCard'
 import SupplierContactsTab from '../components/SupplierContactsTab'
 import SupplierProductsTab from '../components/SupplierProductsTab'
+import PageHeader from '@/components/shared/PageHeader'
+import EmptyState from '@/components/shared/EmptyState'
 
 const { TabList, TabNav, TabContent } = Tabs
 
@@ -28,39 +30,34 @@ const SupplierDetailPage = () => {
 
     if (!supplier) {
         return (
-            <div className="flex flex-col items-center justify-center h-96">
-                <h4 className="mb-4">Proveedor no encontrado</h4>
-                <Button
-                    variant="solid"
-                    icon={<HiOutlineArrowLeft />}
-                    onClick={() => navigate('/suppliers')}
-                >
-                    Volver a Proveedores
-                </Button>
-            </div>
+            <EmptyState
+                className="min-h-[24rem]"
+                title="Proveedor no encontrado"
+                action={
+                    <Button
+                        size="sm"
+                        icon={<HiOutlineArrowLeft />}
+                        onClick={() => navigate('/suppliers')}
+                    >
+                        Volver a Proveedores
+                    </Button>
+                }
+            />
         )
     }
 
     return (
         <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <Button
-                        variant="plain"
-                        icon={<HiOutlineArrowLeft />}
-                        onClick={() => navigate('/suppliers')}
-                    />
-                    <h3>{supplier.name}</h3>
-                    <Badge
-                        content={supplier.isActive ? 'Activo' : 'Inactivo'}
-                        className={
-                            supplier.isActive
-                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'
-                                : 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300'
-                        }
-                    />
-                </div>
-            </div>
+            <PageHeader
+                className="!mb-1"
+                title={supplier.name}
+                badge={
+                    <>
+                        <ActiveBadge active={supplier.isActive} />
+                    </>
+                }
+                onBack={() => navigate('/suppliers')}
+            />
 
             <SupplierInfoCard supplier={supplier} />
 

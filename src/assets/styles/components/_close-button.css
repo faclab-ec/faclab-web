@@ -3,5 +3,5 @@
 }
 
 .close-btn-default {
-  @apply text-xl rounded p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300;
+  @apply text-xl rounded-lg p-1 text-gray-400 transition-colors duration-150 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-gray-200;
 }

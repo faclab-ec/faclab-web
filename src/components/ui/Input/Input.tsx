@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import classNames from 'classnames'
 import { useConfig } from '../ConfigProvider'
-import { useForm } from '../Form/context'
+import { useForm, useFormItem } from '../Form/context'
 import { useInputGroup } from '../InputGroup/context'
 import { CONTROL_SIZES } from '../utils/constants'
 import isEmpty from 'lodash/isEmpty'
@@ -60,6 +60,7 @@ const Input = (props: InputProps) => {
     const { themeColor, controlSize, primaryColorLevel, direction } =
         useConfig()
     const formControlSize = useForm()?.size
+    const formItem = useFormItem()
     const inputGroupSize = useInputGroup()?.size
 
     const inputSize = size || inputGroupSize || formControlSize || controlSize
@@ -172,6 +173,11 @@ const Input = (props: InputProps) => {
         disabled,
         type,
         ref,
+        id: formItem?.controlId,
+        'aria-invalid': isInvalid ? true : undefined,
+        'aria-required': formItem?.required || undefined,
+        'aria-describedby':
+            isInvalid && formItem ? formItem.errorId : undefined,
         ...field,
         ...(valueOverride ? restWithoutDefault : rest),
         ...(valueOverride ?? {}),

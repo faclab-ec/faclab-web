@@ -1,22 +1,23 @@
 .table-default {
   @apply table-auto min-w-full divide-y divide-gray-200 dark:divide-gray-700;
+  font-variant-numeric: tabular-nums;
 
   thead {
-    @apply bg-gray-50 dark:bg-gray-700;
+    @apply bg-gray-50 dark:bg-gray-900/40;
 
     > tr {
       > th {
-        @apply px-6 py-3 text-left rtl:text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-100;
+        @apply px-4 py-3 text-left rtl:text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 whitespace-nowrap;
       }
     }
   }
 
   tbody {
-    @apply divide-y divide-gray-200 dark:divide-gray-700;
+    @apply divide-y divide-gray-100 dark:divide-gray-700;
 
     > tr {
       > td {
-        @apply px-6 py-4;
+        @apply px-4 py-3 whitespace-nowrap;
       }
     }
   }
@@ -24,7 +25,7 @@
   tfoot {
     > tr {
       > td {
-        @apply px-6 py-3 border-t border-gray-200 dark:border-gray-700;
+        @apply px-4 py-3 border-t border-gray-200 dark:border-gray-700;
       }
     }
   }
@@ -40,11 +41,11 @@
   @apply min-w-full divide-y divide-gray-200 dark:divide-gray-700;
 
   .thead {
-    @apply bg-gray-50 dark:bg-gray-700;
+    @apply bg-gray-50 dark:bg-gray-900/40;
 
     .tr {
       .th {
-        @apply px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-100;
+        @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400;
       }
     }
   }
@@ -54,7 +55,7 @@
 
     .tr {
       .td {
-        @apply px-6 py-4;
+        @apply px-4 py-3;
       }
     }
   }
@@ -62,7 +63,7 @@
   .tfoot {
     .tr {
       .td {
-        @apply px-6 py-3 border-t dark:border-gray-700;
+        @apply px-4 py-3 border-t dark:border-gray-700;
       }
     }
   }
@@ -112,7 +113,7 @@
   > tbody {
     > tr:hover {
       > * {
-        @apply bg-gray-100/50 dark:bg-gray-700/40;
+        @apply bg-gray-50 dark:bg-gray-700/40;
       }
     }
   }

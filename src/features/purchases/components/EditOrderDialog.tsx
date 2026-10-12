@@ -3,6 +3,7 @@ import Dialog from '@/components/ui/Dialog'
 import Input from '@/components/ui/Input'
 import { SupplierSelect } from '@features/suppliers'
 import type { PurchaseOrderUpdateInput } from '../model/types'
+import LabeledField from '@/components/shared/LabeledField'
 
 type EditData = PurchaseOrderUpdateInput & { supplierId: number }
 
@@ -43,10 +44,7 @@ export const EditOrderDialog = ({
                     }
                 />
             </div>
-            <div>
-                <label className="block text-sm font-medium mb-2">
-                    Fecha Esperada
-                </label>
+            <LabeledField label="Fecha Esperada">
                 <Input
                     type="date"
                     value={editData.expectedDate || ''}
@@ -54,9 +52,8 @@ export const EditOrderDialog = ({
                         onChange({ ...editData, expectedDate: e.target.value })
                     }
                 />
-            </div>
-            <div>
-                <label className="block text-sm font-medium mb-2">Notas</label>
+            </LabeledField>
+            <LabeledField label="Notas">
                 <Input
                     textArea
                     placeholder="Observaciones"
@@ -65,7 +62,7 @@ export const EditOrderDialog = ({
                         onChange({ ...editData, notes: e.target.value })
                     }
                 />
-            </div>
+            </LabeledField>
         </div>
         <div className="flex justify-end gap-2 mt-6">
             <Button variant="plain" onClick={onClose}>

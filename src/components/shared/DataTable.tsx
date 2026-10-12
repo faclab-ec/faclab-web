@@ -12,6 +12,8 @@ import Select from '@/components/ui/Select'
 import Checkbox from '@/components/ui/Checkbox'
 import TableRowSkeleton from './loaders/TableRowSkeleton'
 import Loading from './Loading'
+import EmptyState from './EmptyState'
+import ErrorState from './ErrorState'
 import {
     useReactTable,
     getCoreRowModel,
@@ -25,7 +27,7 @@ import {
     CellContext,
 } from '@tanstack/react-table'
 import type { SkeletonProps } from '@/components/ui/Skeleton'
-import type { ForwardedRef, ChangeEvent, Ref } from 'react'
+import type { ForwardedRef, ChangeEvent, ReactNode, Ref } from 'react'
 import type { CheckboxProps } from '@/components/ui/Checkbox'
 
 export type OnSortParam = { order: 'asc' | 'desc' | ''; key: string | number }
@@ -34,10 +36,16 @@ type DataTableProps<T> = {
     columns: ColumnDef<T>[]
     data?: unknown[]
     loading?: boolean
+    /** Error de la consulta: en lugar de una tabla vacía se avisa del fallo */
+    error?: unknown
+    onRetry?: () => void
+    /** Qué mostrar cuando no hay filas (por defecto, un aviso genérico) */
+    emptyState?: ReactNode
     onCheckBoxChange?: (checked: boolean, row: T) => void
     onIndeterminateCheckBoxChange?: (checked: boolean, rows: Row<T>[]) => void
     onPaginationChange?: (page: number) => void
     onSelectChange?: (num: number) => void
+    /** El orden lo resuelve el servidor: sin este callback no hay ordenamiento */
     onSort?: (sort: OnSortParam) => void
     pageSizes?: number[]
     selectable?: boolean
@@ -60,6 +68,8 @@ interface IndeterminateCheckboxProps extends Omit<CheckboxProps, 'onChange'> {
 }
 
 const { Tr, Th, Td, THead, TBody, Sorter } = Table
+
+const SKELETON_ROWS = 5
 
 const IndeterminateCheckbox = (props: IndeterminateCheckboxProps) => {
     const {
@@ -95,6 +105,11 @@ const IndeterminateCheckbox = (props: IndeterminateCheckboxProps) => {
     )
 }
 
+const ARIA_SORT = {
+    asc: 'ascending',
+    desc: 'descending',
+} as const
+
 export type DataTableResetHandle = {
     resetSorting: () => void
     resetSelected: () => void
@@ -108,6 +123,9 @@ function DataTable<T>(
         columns: columnsProp = [],
         data = [],
         loading = false,
+        error,
+        onRetry,
+        emptyState,
         onCheckBoxChange,
         onIndeterminateCheckBoxChange,
         onPaginationChange,
@@ -132,7 +150,7 @@ function DataTable<T>(
         () =>
             pageSizes.map((number) => ({
                 value: number,
-                label: `${number} / page`,
+                label: `${number} / página`,
             })),
         [pageSizes]
     )
@@ -227,6 +245,9 @@ function DataTable<T>(
         getSortedRowModel: getSortedRowModel(),
         manualPagination: true,
         manualSorting: true,
+        // Un encabezado ordenable que no ordena nada confunde: solo se
+        // ofrece cuando la página envía el orden al servidor.
+        enableSorting: !!onSort,
         onSortingChange: (sorter) => {
             setSorting(sorter as ColumnSort[])
         },
@@ -248,98 +269,138 @@ function DataTable<T>(
         resetSelected,
     }))
 
+    if (error && !loading) {
+        return <ErrorState error={error} onRetry={onRetry} />
+    }
+
+    const isFirstLoad = loading && data.length === 0
+    const isEmpty = !loading && data.length === 0
+    const columnCount = (finalColumns as Array<T>).length
+    const firstRow = total === 0 ? 0 : (pageIndex - 1) * pageSize + 1
+    const lastRow = Math.min(pageIndex * pageSize, total)
+
     return (
         <Loading loading={loading && data.length !== 0} type="cover">
-            <Table>
-                <THead>
-                    {table.getHeaderGroups().map((headerGroup) => (
-                        <Tr key={headerGroup.id}>
-                            {headerGroup.headers.map((header) => {
-                                return (
-                                    <Th
-                                        key={header.id}
-                                        colSpan={header.colSpan}
-                                    >
-                                        {header.isPlaceholder ? null : (
-                                            <div
-                                                className={classNames(
-                                                    header.column.getCanSort() &&
-                                                        'cursor-pointer select-none point',
-                                                    loading &&
-                                                        'pointer-events-none'
-                                                )}
-                                                onClick={header.column.getToggleSortingHandler()}
-                                            >
-                                                {flexRender(
-                                                    header.column.columnDef
-                                                        .header,
-                                                    header.getContext()
-                                                )}
-                                                {header.column.getCanSort() && (
-                                                    <Sorter
-                                                        sort={header.column.getIsSorted()}
-                                                    />
-                                                )}
-                                            </div>
-                                        )}
-                                    </Th>
-                                )
-                            })}
-                        </Tr>
-                    ))}
-                </THead>
-                {loading && data.length === 0 ? (
-                    <TableRowSkeleton
-                        columns={(finalColumns as Array<T>).length}
-                        rows={pagingData.pageSize}
-                        avatarInColumns={skeletonAvatarColumns}
-                        avatarProps={skeletonAvatarProps}
-                    />
-                ) : (
-                    <TBody>
-                        {table
-                            .getRowModel()
-                            .rows.slice(0, pageSize)
-                            .map((row) => {
-                                return (
-                                    <Tr key={row.id}>
-                                        {row.getVisibleCells().map((cell) => {
-                                            return (
-                                                <Td key={cell.id}>
-                                                    {flexRender(
-                                                        cell.column.columnDef
-                                                            .cell,
-                                                        cell.getContext()
+            <div className="overflow-hidden rounded-t-xl">
+                <Table aria-busy={loading}>
+                    <THead>
+                        {table.getHeaderGroups().map((headerGroup) => (
+                            <Tr key={headerGroup.id}>
+                                {headerGroup.headers.map((header) => {
+                                    const canSort = header.column.getCanSort()
+                                    const sorted = header.column.getIsSorted()
+                                    const label = header.isPlaceholder
+                                        ? null
+                                        : flexRender(
+                                              header.column.columnDef.header,
+                                              header.getContext()
+                                          )
+
+                                    return (
+                                        <Th
+                                            key={header.id}
+                                            colSpan={header.colSpan}
+                                            aria-sort={
+                                                sorted
+                                                    ? ARIA_SORT[sorted]
+                                                    : undefined
+                                            }
+                                        >
+                                            {canSort ? (
+                                                <button
+                                                    type="button"
+                                                    className={classNames(
+                                                        'inline-flex items-center gap-1 uppercase tracking-wider',
+                                                        loading &&
+                                                            'pointer-events-none'
                                                     )}
-                                                </Td>
-                                            )
-                                        })}
-                                    </Tr>
-                                )
-                            })}
-                    </TBody>
-                )}
-            </Table>
-            <div className="flex items-center justify-between mt-4">
-                <Pagination
-                    pageSize={pageSize}
-                    currentPage={pageIndex}
-                    total={total}
-                    onChange={handlePaginationChange}
-                />
-                <div style={{ minWidth: 130 }}>
-                    <Select
-                        size="sm"
-                        menuPlacement="top"
-                        isSearchable={false}
-                        value={pageSizeOption.filter(
-                            (option) => option.value === pageSize
-                        )}
-                        options={pageSizeOption}
-                        onChange={(option) => handleSelectChange(option?.value)}
-                    />
-                </div>
+                                                    onClick={header.column.getToggleSortingHandler()}
+                                                >
+                                                    {label}
+                                                    <Sorter sort={sorted} />
+                                                </button>
+                                            ) : (
+                                                label
+                                            )}
+                                        </Th>
+                                    )
+                                })}
+                            </Tr>
+                        ))}
+                    </THead>
+                    {isFirstLoad ? (
+                        <TableRowSkeleton
+                            columns={columnCount}
+                            rows={Math.min(pageSize, SKELETON_ROWS)}
+                            avatarInColumns={skeletonAvatarColumns}
+                            avatarProps={skeletonAvatarProps}
+                        />
+                    ) : (
+                        <TBody>
+                            {isEmpty && (
+                                <Tr>
+                                    <Td colSpan={columnCount} className="!p-0">
+                                        {emptyState ?? <EmptyState />}
+                                    </Td>
+                                </Tr>
+                            )}
+                            {table
+                                .getRowModel()
+                                .rows.slice(0, pageSize)
+                                .map((row) => {
+                                    return (
+                                        <Tr key={row.id}>
+                                            {row
+                                                .getVisibleCells()
+                                                .map((cell) => {
+                                                    return (
+                                                        <Td key={cell.id}>
+                                                            {flexRender(
+                                                                cell.column
+                                                                    .columnDef
+                                                                    .cell,
+                                                                cell.getContext()
+                                                            )}
+                                                        </Td>
+                                                    )
+                                                })}
+                                        </Tr>
+                                    )
+                                })}
+                        </TBody>
+                    )}
+                </Table>
             </div>
+            {total > 0 && (
+                <div className="flex flex-col gap-3 border-t border-gray-200 px-4 py-3 dark:border-gray-700 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-gray-500 dark:text-gray-400">
+                        Mostrando {firstRow}–{lastRow} de {total}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-3">
+                        <Pagination
+                            pageSize={pageSize}
+                            currentPage={pageIndex}
+                            total={total}
+                            onChange={handlePaginationChange}
+                        />
+                        <div style={{ minWidth: 132 }}>
+                            <Select
+                                aria-label="Filas por página"
+                                size="sm"
+                                menuPlacement="top"
+                                isSearchable={false}
+                                value={pageSizeOption.filter(
+                                    (option) => option.value === pageSize
+                                )}
+                                options={pageSizeOption}
+                                onChange={(option) =>
+                                    handleSelectChange(option?.value)
+                                }
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
         </Loading>
     )
 }

@@ -19,22 +19,25 @@ const NextMore = ({ className, onArrow }: MoreProps) => {
     const [quickNextArrowIcon, setQuickNextArrowIcon] = useState(false)
 
     return (
-        <li
-            className={className}
-            role="presentation"
-            onMouseEnter={() => {
-                setQuickNextArrowIcon(true)
-            }}
-            onMouseLeave={() => {
-                setQuickNextArrowIcon(false)
-            }}
-            onClick={() => onArrow('nextMore')}
-        >
-            {quickNextArrowIcon ? (
-                <HiChevronDoubleRight />
-            ) : (
-                <HiOutlineDotsHorizontal />
-            )}
+        <li>
+            <button
+                type="button"
+                className={className}
+                aria-label="Avanzar 5 páginas"
+                onMouseEnter={() => {
+                    setQuickNextArrowIcon(true)
+                }}
+                onMouseLeave={() => {
+                    setQuickNextArrowIcon(false)
+                }}
+                onClick={() => onArrow('nextMore')}
+            >
+                {quickNextArrowIcon ? (
+                    <HiChevronDoubleRight />
+                ) : (
+                    <HiOutlineDotsHorizontal />
+                )}
+            </button>
         </li>
     )
 }
@@ -43,22 +46,25 @@ const PrevMore = ({ className, onArrow }: MoreProps) => {
     const [quickPrevArrowIcon, setQuickPrevArrowIcon] = useState(false)
 
     return (
-        <li
-            className={className}
-            role="presentation"
-            onMouseEnter={() => {
-                setQuickPrevArrowIcon(true)
-            }}
-            onMouseLeave={() => {
-                setQuickPrevArrowIcon(false)
-            }}
-            onClick={() => onArrow('prevMore')}
-        >
-            {quickPrevArrowIcon ? (
-                <HiOutlineChevronDoubleLeft />
-            ) : (
-                <HiOutlineDotsHorizontal />
-            )}
+        <li>
+            <button
+                type="button"
+                className={className}
+                aria-label="Retroceder 5 páginas"
+                onMouseEnter={() => {
+                    setQuickPrevArrowIcon(true)
+                }}
+                onMouseLeave={() => {
+                    setQuickPrevArrowIcon(false)
+                }}
+                onClick={() => onArrow('prevMore')}
+            >
+                {quickPrevArrowIcon ? (
+                    <HiOutlineChevronDoubleLeft />
+                ) : (
+                    <HiOutlineDotsHorizontal />
+                )}
+            </button>
         </li>
     )
 }
@@ -88,11 +94,7 @@ const Pagers = (props: PagersProps) => {
         if (currentPage >= 1 && currentPage <= 4) showPrevMore = false
     }
 
-    const onPagerClick = (
-        value: number,
-        e: React.MouseEvent<HTMLLIElement, MouseEvent>
-    ) => {
-        e.preventDefault()
+    const onPagerClick = (value: number) => {
         let newPage = value
 
         if (newPage < 1) {
@@ -162,17 +164,23 @@ const Pagers = (props: PagersProps) => {
         )
     }
 
+    const renderPager = (page: number) => (
+        <li key={page}>
+            <button
+                type="button"
+                className={getPagerClass(page)}
+                aria-label={`Página ${page}`}
+                aria-current={currentPage === page ? 'page' : undefined}
+                onClick={() => onPagerClick(page)}
+            >
+                {page}
+            </button>
+        </li>
+    )
+
     return (
-        <ul>
-            {pageCount > 0 && (
-                <li
-                    className={getPagerClass(1)}
-                    role="presentation"
-                    onClick={(e) => onPagerClick(1, e)}
-                >
-                    1
-                </li>
-            )}
+        <ul className="flex items-center">
+            {pageCount > 0 && renderPager(1)}
             {showPrevMore && (
                 <PrevMore
                     className={classNames(
@@ -182,18 +190,7 @@ const Pagers = (props: PagersProps) => {
                     onArrow={(arrow) => onArrowClick(arrow)}
                 />
             )}
-            {getPages.map((pager, index) => {
-                return (
-                    <li
-                        key={index}
-                        className={getPagerClass(pager)}
-                        role="presentation"
-                        onClick={(e) => onPagerClick(pager, e)}
-                    >
-                        {pager}
-                    </li>
-                )
-            })}
+            {getPages.map((pager) => renderPager(pager))}
             {showNextMore && (
                 <NextMore
                     className={classNames(
@@ -203,15 +200,7 @@ const Pagers = (props: PagersProps) => {
                     onArrow={(arrow) => onArrowClick(arrow)}
                 />
             )}
-            {pageCount > 1 && (
-                <li
-                    className={getPagerClass(pageCount)}
-                    role="presentation"
-                    onClick={(e) => onPagerClick(pageCount, e)}
-                >
-                    {pageCount}
-                </li>
-            )}
+            {pageCount > 1 && renderPager(pageCount)}
         </ul>
     )
 }

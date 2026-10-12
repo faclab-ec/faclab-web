@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import { type StockAlert } from '../model/types'
+import EmptyState from '@/components/shared/EmptyState'
 
 interface StockAlertTabProps {
     data: StockAlert[]
@@ -65,9 +66,7 @@ const StockAlertTab = ({
     ]
 
     if (data.length === 0 && !loading) {
-        return (
-            <div className="text-center py-8 text-gray-500">{emptyMessage}</div>
-        )
+        return <EmptyState className="!py-8" title={emptyMessage} />
     }
 
     return (

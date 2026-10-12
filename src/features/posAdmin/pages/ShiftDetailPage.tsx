@@ -1,12 +1,16 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import Badge from '@/components/ui/Badge'
+import StatusBadge from '@/components/shared/StatusBadge'
 import Spinner from '@/components/ui/Spinner'
-import { HiOutlineArrowLeft } from 'react-icons/hi'
+import {
+    HiOutlineArrowLeft,
+    HiOutlineCurrencyDollar,
+    HiOutlineReceiptRefund,
+} from 'react-icons/hi'
 import { formatCurrency, formatDatetime } from '@shared/lib/format'
 import {
-    SHIFT_STATUS_CLASSES,
+    SHIFT_STATUS_TONES,
     SHIFT_STATUS_LABELS,
     useShift,
     useXReport,
@@ -15,8 +19,10 @@ import {
 import {
     PaymentsByMethodTable,
     ProductsSoldTable,
-    StatCard,
 } from '../components/ReportBlocks'
+import StatCard from '@/components/shared/StatCard'
+import EmptyState from '@/components/shared/EmptyState'
+import PageHeader from '@/components/shared/PageHeader'
 
 const Row = ({ label, value }: { label: string; value: string }) => (
     <div className="flex justify-between py-1">
@@ -40,14 +46,6 @@ const ShiftDetailPage = () => {
     const { data: zReport } = useZReport(isClosed ? shiftId : 0)
     const report = zReport ?? xReport
 
-    const back = (
-        <Button
-            variant="plain"
-            icon={<HiOutlineArrowLeft />}
-            onClick={() => navigate('/shifts')}
-        />
-    )
-
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-96">
@@ -58,23 +56,34 @@ const ShiftDetailPage = () => {
 
     if (!shift) {
         return (
-            <div className="flex flex-col items-center justify-center h-96 gap-4">
-                <h4>Turno no encontrado</h4>
-                {back}
-            </div>
+            <EmptyState
+                className="min-h-[24rem]"
+                title="Turno no encontrado"
+                action={
+                    <Button
+                        size="sm"
+                        icon={<HiOutlineArrowLeft />}
+                        onClick={() => navigate('/shifts')}
+                    >
+                        Volver a Turnos
+                    </Button>
+                }
+            />
         )
     }
 
     return (
         <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-4">
-                {back}
-                <h3>Turno #{shift.id}</h3>
-                <Badge
-                    content={SHIFT_STATUS_LABELS[shift.status]}
-                    className={SHIFT_STATUS_CLASSES[shift.status]}
-                />
-            </div>
+            <PageHeader
+                className="!mb-1"
+                title={`Turno #${shift.id}`}
+                badge={
+                    <StatusBadge tone={SHIFT_STATUS_TONES[shift.status]}>
+                        {SHIFT_STATUS_LABELS[shift.status]}
+                    </StatusBadge>
+                }
+                onBack={() => navigate('/shifts')}
+            />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <Card>
@@ -166,7 +175,8 @@ const ShiftDetailPage = () => {
                         <StatCard
                             label="Total vendido"
                             value={formatCurrency(report.salesSummary.total)}
-                            tone="text-emerald-600 dark:text-emerald-400"
+                            icon={<HiOutlineCurrencyDollar />}
+                            tone="success"
                         />
                         {zReport && (
                             <StatCard
@@ -176,7 +186,8 @@ const ShiftDetailPage = () => {
                                 } · ${formatCurrency(
                                     zReport.refundSummary.total
                                 )}`}
-                                tone="text-red-600 dark:text-red-400"
+                                icon={<HiOutlineReceiptRefund />}
+                                tone="danger"
                             />
                         )}
                     </div>

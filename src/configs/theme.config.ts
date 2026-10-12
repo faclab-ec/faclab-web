@@ -1,43 +1,41 @@
 import { THEME_ENUM } from '@/constants/theme.constant'
-import {
+import type {
     Direction,
     Mode,
     ColorLevel,
     NavMode,
     ControlSize,
-    LayoutType,
 } from '@/@types/theme'
 
 export type ThemeConfig = {
+    /** Color de interacción: foco, selección, enlaces, navegación activa */
     themeColor: string
+    primaryColorLevel: ColorLevel
+    /** Color de la acción principal (botón sólido) y de los interruptores */
+    accentColor: string
+    accentColorLevel: ColorLevel
     direction: Direction
     mode: Mode
-    primaryColorLevel: ColorLevel
-    panelExpand: boolean
     navMode: NavMode
     controlSize: ControlSize
     cardBordered: boolean
-    layout: {
-        type: LayoutType
-        sideNavCollapse: boolean
-    }
+    sideNavCollapse: boolean
 }
 
 /**
- * Since some configurations need to be match with specific themes,
- * we recommend to use the configuration that generated from demo.
+ * Tema de la aplicación. La marca es fija: el usuario solo puede cambiar el
+ * modo claro/oscuro y colapsar la navegación (ver `useThemeStore`).
  */
 export const themeConfig: ThemeConfig = {
-    themeColor: 'indigo',
+    themeColor: 'blue',
+    primaryColorLevel: 600,
+    accentColor: 'emerald',
+    // 600 y no 500: texto blanco sobre emerald-500 queda en 2.5:1
+    accentColorLevel: 600,
     direction: THEME_ENUM.DIR_LTR,
     mode: THEME_ENUM.MODE_LIGHT,
-    primaryColorLevel: 600,
-    cardBordered: true,
-    panelExpand: false,
+    navMode: THEME_ENUM.NAV_MODE_DARK,
     controlSize: 'md',
-    navMode: THEME_ENUM.NAV_MODE_LIGHT,
-    layout: {
-        type: THEME_ENUM.LAYOUT_TYPE_MODERN,
-        sideNavCollapse: false,
-    },
+    cardBordered: true,
+    sideNavCollapse: false,
 }

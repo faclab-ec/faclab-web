@@ -7,7 +7,7 @@ import {
 } from 'react-icons/hi'
 import type { CommonProps } from '../@types/common'
 import type { DropdownPlacement } from '../@types/placement'
-import type { ReactNode, Ref } from 'react'
+import type { HTMLAttributes, ReactNode, Ref } from 'react'
 
 export interface DropdownToggleSharedProps {
     renderTitle?: ReactNode
@@ -15,7 +15,20 @@ export interface DropdownToggleSharedProps {
     toggleClassName?: string
 }
 
-interface DropdownToggleProps extends CommonProps, DropdownToggleSharedProps {
+type ToggleAriaProps = Pick<
+    HTMLAttributes<HTMLDivElement>,
+    | 'role'
+    | 'tabIndex'
+    | 'onKeyDown'
+    | 'aria-haspopup'
+    | 'aria-expanded'
+    | 'aria-label'
+>
+
+interface DropdownToggleProps
+    extends CommonProps,
+        DropdownToggleSharedProps,
+        ToggleAriaProps {
     disabled?: boolean
     id?: string
     ref?: Ref<HTMLDivElement>

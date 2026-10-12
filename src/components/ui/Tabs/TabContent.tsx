@@ -25,7 +25,7 @@ const TabContent = (props: TabContentProps) => {
         <div
             ref={ref}
             role="tabpanel"
-            tabIndex={0}
+            hidden={!isSelected}
             className={tabContentClass}
             {...rest}
         >

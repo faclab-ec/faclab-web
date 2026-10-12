@@ -2,21 +2,23 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
+import PageHeader from '@/components/shared/PageHeader'
 import Button from '@/components/ui/Button'
-import Badge from '@/components/ui/Badge'
+import StatusBadge from '@/components/shared/StatusBadge'
 import Select from '@/components/ui/Select'
 import { usePurchaseOrders } from '../hooks/usePurchaseOrders'
 import { SupplierSelect } from '@features/suppliers'
 import { formatCurrency } from '@shared/lib/format'
 import {
     PURCHASE_ORDER_STATUS_LABELS,
-    PURCHASE_ORDER_STATUS_CLASSES,
+    PURCHASE_ORDER_STATUS_TONES,
     type PurchaseOrder,
     type PurchaseOrderQueryParams,
     type PurchaseOrderStatus,
 } from '../model/types'
 import PurchaseOrderForm from '../components/PurchaseOrderForm'
 import { HiPlus, HiOutlineEye } from 'react-icons/hi'
+import LabeledField from '@/components/shared/LabeledField'
 
 const statusOptions = [
     { value: '', label: 'Todos' },
@@ -45,7 +47,12 @@ const PurchaseOrdersListPage = () => {
         offset,
     }
 
-    const { data, isLoading } = usePurchaseOrders(queryParams)
+    const {
+        data,
+        isLoading,
+        error: listError,
+        refetch,
+    } = usePurchaseOrders(queryParams)
     const orders = data?.items ?? []
     const total = data?.pagination?.total ?? 0
 
@@ -82,10 +89,9 @@ const PurchaseOrdersListPage = () => {
             cell: (props) => {
                 const status = props.row.original.status
                 return (
-                    <Badge
-                        content={PURCHASE_ORDER_STATUS_LABELS[status]}
-                        className={PURCHASE_ORDER_STATUS_CLASSES[status]}
-                    />
+                    <StatusBadge tone={PURCHASE_ORDER_STATUS_TONES[status]}>
+                        {PURCHASE_ORDER_STATUS_LABELS[status]}
+                    </StatusBadge>
                 )
             },
         },
@@ -133,6 +139,7 @@ const PurchaseOrdersListPage = () => {
                 <Button
                     size="sm"
                     variant="plain"
+                    aria-label="Ver detalle"
                     icon={<HiOutlineEye />}
                     onClick={() =>
                         navigate(`/purchase-orders/${props.row.original.id}`)
@@ -145,80 +152,67 @@ const PurchaseOrdersListPage = () => {
     return (
         <>
             <Card className="mb-4">
-                <div className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Estado
-                            </label>
-                            <Select
-                                placeholder="Filtrar por estado"
-                                options={statusOptions}
-                                value={statusOptions.find(
-                                    (o) => o.value === statusFilter
-                                )}
-                                onChange={(option) => {
-                                    setStatusFilter(option?.value || '')
-                                    setPageIndex(1)
-                                }}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Proveedor
-                            </label>
-                            <SupplierSelect
-                                isClearable
-                                placeholder="Todos"
-                                value={supplierFilter}
-                                onChange={(id) => {
-                                    setSupplierFilter(id)
-                                    setPageIndex(1)
-                                }}
-                            />
-                        </div>
-                        <div className="flex items-end">
-                            <Button variant="plain" onClick={handleReset}>
-                                Limpiar Filtros
-                            </Button>
-                        </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <LabeledField label="Estado">
+                        <Select
+                            placeholder="Filtrar por estado"
+                            options={statusOptions}
+                            value={statusOptions.find(
+                                (o) => o.value === statusFilter
+                            )}
+                            onChange={(option) => {
+                                setStatusFilter(option?.value || '')
+                                setPageIndex(1)
+                            }}
+                        />
+                    </LabeledField>
+                    <LabeledField label="Proveedor">
+                        <SupplierSelect
+                            isClearable
+                            placeholder="Todos"
+                            value={supplierFilter}
+                            onChange={(id) => {
+                                setSupplierFilter(id)
+                                setPageIndex(1)
+                            }}
+                        />
+                    </LabeledField>
+                    <div className="flex items-end">
+                        <Button variant="plain" onClick={handleReset}>
+                            Limpiar Filtros
+                        </Button>
                     </div>
                 </div>
             </Card>
 
-            <Card>
-                <div className="p-4">
-                    <div className="flex justify-between items-center mb-4">
-                        <div>
-                            <h4 className="text-lg font-semibold">
-                                Órdenes de Compra
-                            </h4>
-                            <p className="text-sm text-gray-500 mt-1">
-                                Gestiona las órdenes de compra a proveedores
-                            </p>
-                        </div>
-                        <Button
-                            variant="solid"
-                            size="sm"
-                            icon={<HiPlus />}
-                            onClick={() => setIsFormOpen(true)}
-                        >
-                            Nueva Orden de Compra
-                        </Button>
-                    </div>
-
-                    <DataTable
-                        columns={columns}
-                        data={orders}
-                        loading={isLoading}
-                        pagingData={{ total, pageIndex, pageSize }}
-                        onPaginationChange={setPageIndex}
-                        onSelectChange={(size) => {
-                            setPageSize(size)
-                            setPageIndex(1)
-                        }}
-                    />
-                </div>
+            <PageHeader
+                title="Órdenes de Compra"
+                description="Gestiona las órdenes de compra a proveedores"
+                actions={
+                    <Button
+                        variant="solid"
+                        size="sm"
+                        icon={<HiPlus />}
+                        onClick={() => setIsFormOpen(true)}
+                    >
+                        Nueva Orden de Compra
+                    </Button>
+                }
+            />
+            <Card bodyClass="p-0">
+                <DataTable
+                    columns={columns}
+                    data={orders}
+                    loading={isLoading}
+                    error={listError}
+                    pagingData={{ total, pageIndex, pageSize }}
+                    onRetry={refetch}
+                    onPaginationChange={setPageIndex}
+                    onSelectChange={(size) => {
+                        setPageSize(size)
+                        setPageIndex(1)
+                    }}
+                />
             </Card>
 
             <PurchaseOrderForm

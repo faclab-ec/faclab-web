@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import Badge from '@/components/ui/Badge'
+import { ActiveBadge } from '@/components/shared/StatusBadge'
 import Table from '@/components/ui/Table'
 import Dialog from '@/components/ui/Dialog'
 import { notifySuccess, notifyError } from '@shared/ui/notify'
@@ -20,6 +20,9 @@ import {
 import { ContactForm } from '../components/ContactForm'
 import type { CustomerContact } from '../model/types'
 import { TAX_TYPE_LABELS } from '../model/types'
+import EmptyState from '@/components/shared/EmptyState'
+import { formatCurrency } from '@shared/lib/format'
+import PageHeader from '@/components/shared/PageHeader'
 
 const { Tr, Th, Td, THead, TBody } = Table
 
@@ -87,49 +90,46 @@ const CustomerDetailPage = () => {
 
     if (!customer) {
         return (
-            <div className="flex flex-col items-center justify-center h-96">
-                <h4 className="mb-4">Cliente no encontrado</h4>
-                <Button
-                    variant="solid"
-                    icon={<HiOutlineArrowLeft />}
-                    onClick={() => navigate('/customers')}
-                >
-                    Volver a Clientes
-                </Button>
-            </div>
+            <EmptyState
+                className="min-h-[24rem]"
+                title="Cliente no encontrado"
+                action={
+                    <Button
+                        size="sm"
+                        icon={<HiOutlineArrowLeft />}
+                        onClick={() => navigate('/customers')}
+                    >
+                        Volver a Clientes
+                    </Button>
+                }
+            />
         )
     }
 
     return (
         <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <Button
-                        variant="plain"
-                        icon={<HiOutlineArrowLeft />}
-                        onClick={() => navigate('/customers')}
-                    />
-                    <h3>{customer.name}</h3>
-                    <Badge
-                        content={customer.isActive ? 'Activo' : 'Inactivo'}
-                        className={
-                            customer.isActive
-                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'
-                                : 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300'
-                        }
-                    />
-                </div>
-            </div>
+            <PageHeader
+                className="!mb-1"
+                title={customer.name}
+                badge={
+                    <>
+                        <ActiveBadge active={customer.isActive} />
+                    </>
+                }
+                onBack={() => navigate('/customers')}
+            />
 
             <Card>
                 <h5 className="mb-4">Información del Cliente</h5>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
-                        <p className="text-sm text-gray-500">Tax ID</p>
+                        <p className="text-sm text-gray-500">Identificación</p>
                         <p className="font-medium">{customer.taxId}</p>
                     </div>
                     <div>
-                        <p className="text-sm text-gray-500">Tipo de ID</p>
+                        <p className="text-sm text-gray-500">
+                            Tipo de identificación
+                        </p>
                         <p className="font-medium">
                             {TAX_TYPE_LABELS[customer.taxType]}
                         </p>
@@ -162,7 +162,7 @@ const CustomerDetailPage = () => {
                         </p>
                         <p className="font-medium">
                             {customer.creditLimit
-                                ? `$${customer.creditLimit.toFixed(2)}`
+                                ? formatCurrency(customer.creditLimit)
                                 : '-'}
                         </p>
                     </div>
@@ -203,9 +203,10 @@ const CustomerDetailPage = () => {
                         <div>Cargando contactos...</div>
                     </div>
                 ) : contacts.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                        No hay contactos registrados para este cliente
-                    </div>
+                    <EmptyState
+                        className="!py-8"
+                        title="No hay contactos registrados para este cliente"
+                    />
                 ) : (
                     <Table>
                         <THead>
@@ -229,6 +230,7 @@ const CustomerDetailPage = () => {
                                             <Button
                                                 size="sm"
                                                 variant="plain"
+                                                aria-label="Editar"
                                                 icon={<HiOutlinePencil />}
                                                 onClick={() =>
                                                     handleEditContact(contact)
@@ -237,6 +239,7 @@ const CustomerDetailPage = () => {
                                             <Button
                                                 size="sm"
                                                 variant="plain"
+                                                aria-label="Eliminar"
                                                 icon={<HiOutlineTrash />}
                                                 onClick={() =>
                                                     handleDeleteClick(contact)

@@ -21,19 +21,19 @@ const ICONS: Record<
     }
 > = {
     success: {
-        color: 'text-emerald-400',
+        color: 'text-emerald-500',
         icon: <HiCheckCircle />,
     },
     info: {
-        color: 'text-blue-400',
+        color: 'text-blue-500',
         icon: <HiInformationCircle />,
     },
     warning: {
-        color: 'text-yellow-400',
+        color: 'text-amber-500',
         icon: <HiExclamation />,
     },
     danger: {
-        color: 'text-red-400',
+        color: 'text-red-500',
         icon: <HiXCircle />,
     },
 }

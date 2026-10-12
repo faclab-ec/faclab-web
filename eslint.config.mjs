@@ -14,6 +14,8 @@ export default tseslint.config(
         ignores: [
             'node_modules/**',
             'build/**',
+            'playwright-report/**',
+            'test-results/**',
             'dist/**',
             'public/**',
             'src/assets/styles/**',
@@ -27,7 +29,7 @@ export default tseslint.config(
     ...tseslint.configs.recommended,
 
     {
-        files: ['**/*.{ts,tsx,js,jsx,mjs,cjs}'],
+        files: ['**/*.{ts,tsx,mts,js,jsx,mjs,cjs}'],
         languageOptions: {
             ecmaVersion: 2022,
             sourceType: 'module',
@@ -122,6 +124,16 @@ export default tseslint.config(
             'react-hooks/globals': 'warn',
             'react-hooks/unsupported-syntax': 'warn',
             'react-hooks/config': 'warn',
+        },
+    },
+
+    {
+        // Pruebas E2E: código de Node/Playwright, no de React. El `use` de
+        // los fixtures de Playwright no es el hook `use` de React.
+        files: ['tests/e2e/**/*.ts', 'playwright.config.ts'],
+        rules: {
+            'react-hooks/rules-of-hooks': 'off',
+            'react-refresh/only-export-components': 'off',
         },
     },
 

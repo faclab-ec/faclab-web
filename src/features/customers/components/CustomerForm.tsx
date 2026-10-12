@@ -114,7 +114,7 @@ export const CustomerForm = ({
                     <FormItem
                         asterisk
                         htmlFor="taxId"
-                        label="Tax ID"
+                        label="Identificación"
                         invalid={!!errors.taxId}
                         errorMessage={errors.taxId?.message}
                     >
@@ -130,7 +130,7 @@ export const CustomerForm = ({
                     <FormItem
                         asterisk
                         htmlFor="taxType"
-                        label="Tipo de ID"
+                        label="Tipo de identificación"
                         invalid={!!errors.taxType}
                         errorMessage={errors.taxType?.message}
                     >

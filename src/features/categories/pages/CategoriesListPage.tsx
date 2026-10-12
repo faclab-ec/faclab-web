@@ -1,5 +1,6 @@
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
+import PageHeader from '@/components/shared/PageHeader'
 import Button from '@/components/ui/Button'
 import { useCategoriesList, useCategoryMutations } from '../hooks/useCategories'
 import { notifySuccess, notifyError } from '@shared/ui/notify'
@@ -14,7 +15,12 @@ const CategoriesListPage = () => {
     const crud = useCrudOperations<Category>()
     const offset = (crud.pageIndex - 1) * crud.pageSize
 
-    const { data, isLoading } = useCategoriesList({
+    const {
+        data,
+        isLoading,
+        error: listError,
+        refetch,
+    } = useCategoriesList({
         limit: crud.pageSize,
         offset,
     })
@@ -112,44 +118,37 @@ const CategoriesListPage = () => {
 
     return (
         <>
-            <Card>
-                <div className="p-4">
-                    <div className="flex justify-between items-center mb-4">
-                        <div>
-                            <h4 className="text-lg font-semibold">
-                                Listado de Categorías
-                            </h4>
-                            <p className="text-sm text-gray-500 mt-1">
-                                Gestiona las categorías de productos
-                            </p>
-                        </div>
-                        <Button
-                            variant="solid"
-                            size="sm"
-                            icon={<HiPlus />}
-                            onClick={crud.openCreate}
-                        >
-                            Nueva Categoría
-                        </Button>
-                    </div>
-
-                    <DataTable
-                        columns={columns}
-                        data={categories}
-                        loading={isLoading}
-                        pagingData={{
-                            total,
-                            pageIndex: crud.pageIndex,
-                            pageSize: crud.pageSize,
-                        }}
-                        onPaginationChange={(idx) =>
-                            crud.onPaginationChange(idx, crud.pageSize)
-                        }
-                        onSelectChange={(size) =>
-                            crud.onPaginationChange(1, size)
-                        }
-                    />
-                </div>
+            <PageHeader
+                title="Categorías"
+                description="Gestiona las categorías de productos"
+                actions={
+                    <Button
+                        variant="solid"
+                        size="sm"
+                        icon={<HiPlus />}
+                        onClick={crud.openCreate}
+                    >
+                        Nueva Categoría
+                    </Button>
+                }
+            />
+            <Card bodyClass="p-0">
+                <DataTable
+                    columns={columns}
+                    data={categories}
+                    loading={isLoading}
+                    error={listError}
+                    pagingData={{
+                        total,
+                        pageIndex: crud.pageIndex,
+                        pageSize: crud.pageSize,
+                    }}
+                    onRetry={refetch}
+                    onPaginationChange={(idx) =>
+                        crud.onPaginationChange(idx, crud.pageSize)
+                    }
+                    onSelectChange={(size) => crud.onPaginationChange(1, size)}
+                />
             </Card>
 
             <FormModal

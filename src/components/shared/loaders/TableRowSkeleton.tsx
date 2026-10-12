@@ -15,7 +15,7 @@ const TableRowSkeleton = (props: TableRowSkeletonProps) => {
     const { columns = 1, rows = 10, avatarInColumns = [], avatarProps } = props
 
     return (
-        <TBody>
+        <TBody aria-label="Cargando">
             {Array.from(new Array(rows), (_, i) => i + 0).map((row) => (
                 <Tr key={`row-${row}`}>
                     {Array.from(new Array(columns), (_, i) => i + 0).map(

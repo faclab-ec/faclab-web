@@ -8,8 +8,8 @@ export enum SIZES {
 export const CONTROL_SIZES = {
     [SIZES.XS]: 7,
     [SIZES.SM]: 9,
-    [SIZES.MD]: 11,
-    [SIZES.LG]: 14,
+    [SIZES.MD]: 10,
+    [SIZES.LG]: 12,
 }
 
 export const LAYOUT = {

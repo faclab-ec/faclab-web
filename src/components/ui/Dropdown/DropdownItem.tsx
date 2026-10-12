@@ -23,6 +23,7 @@ import MenuItem from '../MenuItem'
 import { DROPDOWN_ITEM_TYPE } from '../utils/constants'
 import type { CommonProps } from '../@types/common'
 import type {
+    KeyboardEvent,
     SyntheticEvent,
     RefObject,
     ElementType,
@@ -127,10 +128,18 @@ const DropdownItem = (props: DropdownItemProps) => {
     const menuitemEventHandlers: {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onClick: any
+        onKeyDown: (e: KeyboardEvent<HTMLElement>) => void
         onMouseOver?: () => void
         onMouseOut?: () => void
     } = {
         onClick: chainedFunction(handleClick, onClick),
+        // Mismo efecto que el clic: los ítems no son botones nativos
+        onKeyDown: (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                e.currentTarget.click()
+            }
+        },
     }
 
     const { registerItem, unregisterItem } = menuControl ?? {}
@@ -162,6 +171,7 @@ const DropdownItem = (props: DropdownItemProps) => {
                 ref={menuitemRef}
                 id={menuitemId}
                 style={style}
+                role={variant === DIVIDER ? 'separator' : 'presentation'}
                 className={classNames(`menu-item-${variant}`, className)}
                 {...(variant === CUSTOM ? menuitemEventHandlers : {})}
                 {...rest}
@@ -226,6 +236,9 @@ const DropdownItem = (props: DropdownItemProps) => {
         <MenuItem
             ref={menuitemRef}
             asElement="li"
+            role="menuitem"
+            tabIndex={disabled ? -1 : 0}
+            aria-disabled={disabled || undefined}
             style={style}
             isActive={active}
             disabled={disabled}

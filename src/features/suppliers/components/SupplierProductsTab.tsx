@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import Button from '@/components/ui/Button'
-import Badge from '@/components/ui/Badge'
+import StatusBadge from '@/components/shared/StatusBadge'
 import Table from '@/components/ui/Table'
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi'
 import { notifySuccess, notifyError } from '@shared/ui/notify'
-import { formatProductLabel } from '@shared/lib/format'
+import { formatProductLabel, formatCurrency } from '@shared/lib/format'
 import {
     useSupplierProducts,
     useSupplierProductMutations,
@@ -12,6 +12,7 @@ import {
 import SupplierProductForm from './SupplierProductForm'
 import DeleteConfirmDialog from './DeleteConfirmDialog'
 import type { SupplierProduct } from '../model/types'
+import EmptyState from '@/components/shared/EmptyState'
 
 const { Tr, Th, Td, THead, TBody } = Table
 
@@ -82,9 +83,10 @@ const SupplierProductsTab = ({ supplierId }: SupplierProductsTabProps) => {
             </div>
 
             {supplierProducts.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                    No hay productos registrados para este proveedor
-                </div>
+                <EmptyState
+                    className="!py-8"
+                    title="No hay productos registrados para este proveedor"
+                />
             ) : (
                 <Table>
                     <THead>
@@ -103,7 +105,9 @@ const SupplierProductsTab = ({ supplierId }: SupplierProductsTabProps) => {
                             <Tr key={sp.id}>
                                 <Td>{formatProductLabel(sp)}</Td>
                                 <Td>{sp.supplierSku || '-'}</Td>
-                                <Td>${Number(sp.purchasePrice).toFixed(2)}</Td>
+                                <Td>
+                                    {formatCurrency(Number(sp.purchasePrice))}
+                                </Td>
                                 <Td>{sp.minOrderQuantity || '-'}</Td>
                                 <Td>
                                     {sp.leadTimeDays
@@ -111,26 +115,29 @@ const SupplierProductsTab = ({ supplierId }: SupplierProductsTabProps) => {
                                         : '-'}
                                 </Td>
                                 <Td>
-                                    <Badge
-                                        content={sp.isPreferred ? 'Sí' : 'No'}
-                                        className={
+                                    <StatusBadge
+                                        tone={
                                             sp.isPreferred
-                                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'
-                                                : 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300'
+                                                ? 'success'
+                                                : 'neutral'
                                         }
-                                    />
+                                    >
+                                        {sp.isPreferred ? 'Sí' : 'No'}
+                                    </StatusBadge>
                                 </Td>
                                 <Td>
                                     <div className="flex gap-2">
                                         <Button
                                             size="sm"
                                             variant="plain"
+                                            aria-label="Editar"
                                             icon={<HiOutlinePencil />}
                                             onClick={() => handleEdit(sp)}
                                         />
                                         <Button
                                             size="sm"
                                             variant="plain"
+                                            aria-label="Eliminar"
                                             icon={<HiOutlineTrash />}
                                             onClick={() => {
                                                 setToDelete(sp)

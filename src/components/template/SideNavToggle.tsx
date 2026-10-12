@@ -1,34 +1,30 @@
-import withHeaderItem from '@/utils/hoc/withHeaderItem'
+import { HiOutlineMenuAlt2, HiOutlineMenu } from 'react-icons/hi'
 import { useThemeStore } from '@/stores'
 import useResponsive from '@/utils/hooks/useResponsive'
-import NavToggle from '@/components/shared/NavToggle'
-import type { CommonProps } from '@/@types/common'
 
-const SideNavToggle = ({ className }: CommonProps) => {
-    const sideNavCollapse = useThemeStore(
-        (state) => state.layout.sideNavCollapse
-    )
+const SideNavToggle = () => {
+    const sideNavCollapse = useThemeStore((state) => state.sideNavCollapse)
     const setSideNavCollapse = useThemeStore(
         (state) => state.setSideNavCollapse
     )
 
     const { larger } = useResponsive()
 
-    const onCollapse = () => {
-        setSideNavCollapse(!sideNavCollapse)
+    if (!larger.md) {
+        return null
     }
 
     return (
-        <>
-            {larger.md && (
-                <div className={className} onClick={onCollapse}>
-                    <NavToggle className="text-2xl" toggled={sideNavCollapse} />
-                </div>
-            )}
-        </>
+        <button
+            type="button"
+            className="header-action-item"
+            aria-label={sideNavCollapse ? 'Expandir menú' : 'Contraer menú'}
+            aria-expanded={!sideNavCollapse}
+            onClick={() => setSideNavCollapse(!sideNavCollapse)}
+        >
+            {sideNavCollapse ? <HiOutlineMenu /> : <HiOutlineMenuAlt2 />}
+        </button>
     )
 }
 
-const SideNavToggleHeader = withHeaderItem(SideNavToggle)
-
-export default SideNavToggleHeader
+export default SideNavToggle

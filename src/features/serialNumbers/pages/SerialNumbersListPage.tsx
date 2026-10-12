@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
+import PageHeader from '@/components/shared/PageHeader'
 import Button from '@/components/ui/Button'
-import Badge from '@/components/ui/Badge'
+import StatusBadge from '@/components/shared/StatusBadge'
 import Input from '@/components/ui/Input'
 import Select from '@/components/ui/Select'
 import {
@@ -14,6 +15,7 @@ import { FormModal } from '@/components/shared'
 import { notifySuccess, notifyError } from '@shared/ui/notify'
 import {
     SERIAL_STATUS_LABELS,
+    SERIAL_STATUS_TONES,
     type SerialNumber,
     type SerialStatus,
     type SerialNumberListParams,
@@ -22,17 +24,7 @@ import {
 import { SerialNumberForm } from '../components/SerialNumberForm'
 import { StatusChangeDialog } from '../components/StatusChangeDialog'
 import { HiOutlineRefresh, HiPlus } from 'react-icons/hi'
-
-const STATUS_BADGE_CLASSES: Record<SerialStatus, string> = {
-    available:
-        'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
-    reserved:
-        'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300',
-    sold: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
-    returned:
-        'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300',
-    scrapped: 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300',
-}
+import LabeledField from '@/components/shared/LabeledField'
 
 const statusFilterOptions = [
     { value: '', label: 'Todos los estados' },
@@ -59,7 +51,12 @@ const SerialNumbersListPage = () => {
         offset,
     }
 
-    const { data, isLoading } = useSerialNumbersList(queryParams)
+    const {
+        data,
+        isLoading,
+        error: listError,
+        refetch,
+    } = useSerialNumbersList(queryParams)
     const serials = data?.items ?? []
     const total = data?.pagination?.total ?? 0
 
@@ -121,10 +118,9 @@ const SerialNumbersListPage = () => {
             cell: (props) => {
                 const status = props.row.original.status
                 return (
-                    <Badge
-                        content={SERIAL_STATUS_LABELS[status]}
-                        className={STATUS_BADGE_CLASSES[status]}
-                    />
+                    <StatusBadge tone={SERIAL_STATUS_TONES[status]}>
+                        {SERIAL_STATUS_LABELS[status]}
+                    </StatusBadge>
                 )
             },
         },
@@ -155,83 +151,67 @@ const SerialNumbersListPage = () => {
     return (
         <>
             <Card className="mb-4">
-                <div className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                ID Producto
-                            </label>
-                            <Input
-                                type="number"
-                                placeholder="Filtrar por producto"
-                                value={productId}
-                                onChange={(e) => setProductId(e.target.value)}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Estado
-                            </label>
-                            <Select
-                                options={statusFilterOptions}
-                                value={statusFilterOptions.find(
-                                    (o) => o.value === statusFilter
-                                )}
-                                onChange={(option) =>
-                                    setStatusFilter(
-                                        (option as { value: string })?.value ||
-                                            ''
-                                    )
-                                }
-                            />
-                        </div>
-                        <div className="flex items-end">
-                            <Button variant="plain" onClick={handleReset}>
-                                Limpiar Filtros
-                            </Button>
-                        </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <LabeledField label="ID Producto">
+                        <Input
+                            type="number"
+                            placeholder="Filtrar por producto"
+                            value={productId}
+                            onChange={(e) => setProductId(e.target.value)}
+                        />
+                    </LabeledField>
+                    <LabeledField label="Estado">
+                        <Select
+                            options={statusFilterOptions}
+                            value={statusFilterOptions.find(
+                                (o) => o.value === statusFilter
+                            )}
+                            onChange={(option) =>
+                                setStatusFilter(
+                                    (option as { value: string })?.value || ''
+                                )
+                            }
+                        />
+                    </LabeledField>
+                    <div className="flex items-end">
+                        <Button variant="plain" onClick={handleReset}>
+                            Limpiar Filtros
+                        </Button>
                     </div>
                 </div>
             </Card>
 
-            <Card>
-                <div className="p-4">
-                    <div className="flex justify-between items-center mb-4">
-                        <div>
-                            <h4 className="text-lg font-semibold">
-                                Números de Serie
-                            </h4>
-                            <p className="text-sm text-gray-500 mt-1">
-                                Gestiona los números de serie de productos
-                            </p>
-                        </div>
-                        <Button
-                            variant="solid"
-                            size="sm"
-                            icon={<HiPlus />}
-                            onClick={crud.openCreate}
-                        >
-                            Nuevo Serial
-                        </Button>
-                    </div>
-
-                    <DataTable
-                        columns={columns}
-                        data={serials}
-                        loading={isLoading}
-                        pagingData={{
-                            total,
-                            pageIndex: crud.pageIndex,
-                            pageSize: crud.pageSize,
-                        }}
-                        onPaginationChange={(idx) =>
-                            crud.onPaginationChange(idx, crud.pageSize)
-                        }
-                        onSelectChange={(size) =>
-                            crud.onPaginationChange(1, size)
-                        }
-                    />
-                </div>
+            <PageHeader
+                title="Números de Serie"
+                description="Gestiona los números de serie de productos"
+                actions={
+                    <Button
+                        variant="solid"
+                        size="sm"
+                        icon={<HiPlus />}
+                        onClick={crud.openCreate}
+                    >
+                        Nuevo Serial
+                    </Button>
+                }
+            />
+            <Card bodyClass="p-0">
+                <DataTable
+                    columns={columns}
+                    data={serials}
+                    loading={isLoading}
+                    error={listError}
+                    pagingData={{
+                        total,
+                        pageIndex: crud.pageIndex,
+                        pageSize: crud.pageSize,
+                    }}
+                    onRetry={refetch}
+                    onPaginationChange={(idx) =>
+                        crud.onPaginationChange(idx, crud.pageSize)
+                    }
+                    onSelectChange={(size) => crud.onPaginationChange(1, size)}
+                />
             </Card>
 
             <FormModal

@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
+import PageHeader from '@/components/shared/PageHeader'
 import Button from '@/components/ui/Button'
-import Badge from '@/components/ui/Badge'
+import { ActiveBadge } from '@/components/shared/StatusBadge'
 import { FormModal, DeleteConfirmDialog } from '@/components/shared'
 import { notifySuccess, notifyInfo, notifyError } from '@shared/ui/notify'
 import useCrudOperations from '@shared/hooks/useCrudOperations'
@@ -30,7 +31,12 @@ const SuppliersListPage = () => {
     const searchTerm = useDebouncedValue(search.trim())
     const offset = (crud.pageIndex - 1) * crud.pageSize
 
-    const { data, isLoading } = useSuppliersList({
+    const {
+        data,
+        isLoading,
+        error: listError,
+        refetch,
+    } = useSuppliersList({
         limit: crud.pageSize,
         offset,
         search: searchTerm || undefined,
@@ -125,7 +131,7 @@ const SuppliersListPage = () => {
             },
         },
         {
-            header: 'Tax ID',
+            header: 'Identificación',
             accessorKey: 'taxId',
         },
         {
@@ -151,16 +157,7 @@ const SuppliersListPage = () => {
         {
             header: 'Estado',
             accessorKey: 'isActive',
-            cell: ({ row }) => (
-                <Badge
-                    content={row.original.isActive ? 'Activo' : 'Inactivo'}
-                    className={
-                        row.original.isActive
-                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'
-                            : 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300'
-                    }
-                />
-            ),
+            cell: ({ row }) => <ActiveBadge active={row.original.isActive} />,
         },
         {
             header: 'Acciones',
@@ -212,54 +209,47 @@ const SuppliersListPage = () => {
 
     return (
         <>
-            <Card>
-                <div className="p-4">
-                    <div className="flex justify-between items-center mb-4">
-                        <div>
-                            <h4 className="text-lg font-semibold">
-                                Proveedores
-                            </h4>
-                            <p className="text-sm text-gray-500 mt-1">
-                                Gestiona los proveedores registrados
-                            </p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <ListSearchInput
-                                placeholder="Buscar por nombre o identificación"
-                                value={search}
-                                onChange={(value) => {
-                                    setSearch(value)
-                                    crud.onPaginationChange(1, crud.pageSize)
-                                }}
-                            />
-                            <Button
-                                variant="solid"
-                                size="sm"
-                                icon={<HiOutlinePlus />}
-                                onClick={crud.openCreate}
-                            >
-                                Nuevo Proveedor
-                            </Button>
-                        </div>
-                    </div>
-
-                    <DataTable
-                        columns={columns}
-                        data={suppliers}
-                        loading={isLoading}
-                        pagingData={{
-                            total,
-                            pageIndex: crud.pageIndex,
-                            pageSize: crud.pageSize,
-                        }}
-                        onPaginationChange={(idx) =>
-                            crud.onPaginationChange(idx, crud.pageSize)
-                        }
-                        onSelectChange={(size) =>
-                            crud.onPaginationChange(1, size)
-                        }
-                    />
-                </div>
+            <PageHeader
+                title="Proveedores"
+                description="Gestiona los proveedores registrados"
+                actions={
+                    <>
+                        <ListSearchInput
+                            placeholder="Buscar por nombre o identificación"
+                            value={search}
+                            onChange={(value) => {
+                                setSearch(value)
+                                crud.onPaginationChange(1, crud.pageSize)
+                            }}
+                        />
+                        <Button
+                            variant="solid"
+                            size="sm"
+                            icon={<HiOutlinePlus />}
+                            onClick={crud.openCreate}
+                        >
+                            Nuevo Proveedor
+                        </Button>
+                    </>
+                }
+            />
+            <Card bodyClass="p-0">
+                <DataTable
+                    columns={columns}
+                    data={suppliers}
+                    loading={isLoading}
+                    error={listError}
+                    pagingData={{
+                        total,
+                        pageIndex: crud.pageIndex,
+                        pageSize: crud.pageSize,
+                    }}
+                    onRetry={refetch}
+                    onPaginationChange={(idx) =>
+                        crud.onPaginationChange(idx, crud.pageSize)
+                    }
+                    onSelectChange={(size) => crud.onPaginationChange(1, size)}
+                />
             </Card>
 
             <FormModal

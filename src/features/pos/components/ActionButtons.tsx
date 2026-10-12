@@ -24,9 +24,20 @@ const ActionButtons = ({
         (customerId !== null || (isFinalConsumer && !requiresCustomer))
 
     return (
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2 border-t border-gray-200 p-4 dark:border-gray-700">
             <Button
                 block
+                className="col-span-3"
+                size="lg"
+                variant="solid"
+                disabled={!canPay}
+                onClick={onPayment}
+            >
+                Cobrar
+            </Button>
+            <Button
+                block
+                size="sm"
                 variant="default"
                 disabled={cartEmpty}
                 onClick={onHold}
@@ -35,22 +46,15 @@ const ActionButtons = ({
             </Button>
             <Button
                 block
-                variant="twoTone"
+                size="sm"
+                variant="default"
                 disabled={cartEmpty}
                 onClick={onDiscount}
             >
                 Descuento
             </Button>
-            <Button
-                block
-                variant="solid"
-                disabled={!canPay}
-                onClick={onPayment}
-            >
-                Cobrar
-            </Button>
-            <Button block variant="plain" onClick={onViewOrders}>
-                Ordenes
+            <Button block size="sm" variant="default" onClick={onViewOrders}>
+                Órdenes
             </Button>
         </div>
     )

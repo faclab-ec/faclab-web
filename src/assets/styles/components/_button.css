@@ -1,8 +1,8 @@
 .button {
-  @apply font-semibold focus:outline-none whitespace-nowrap;
+  @apply font-semibold whitespace-nowrap transition-colors duration-150 ease-out;
 
   &.radius-round {
-    @apply rounded-md;
+    @apply rounded-lg;
   }
 
   &.radius-circle {

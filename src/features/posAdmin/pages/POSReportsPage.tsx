@@ -8,9 +8,16 @@ import { useByPaymentMethodReport, useDailyReport } from '@features/pos'
 import {
     PaymentsByMethodTable,
     ProductsSoldTable,
-    StatCard,
 } from '../components/ReportBlocks'
 import { paymentMethodLabel } from '../lib/labels'
+import Input from '@/components/ui/Input'
+import { PageHeader, StatCard } from '@/components/shared'
+import LabeledField from '@/components/shared/LabeledField'
+import {
+    HiOutlineCurrencyDollar,
+    HiOutlineReceiptRefund,
+    HiOutlineShoppingCart,
+} from 'react-icons/hi'
 
 const { TabList, TabNav, TabContent } = Tabs
 const { Tr, Th, Td, THead, TBody } = Table
@@ -32,15 +39,13 @@ const DateInput = ({
     value: string
     onChange: (value: string) => void
 }) => (
-    <div>
-        <label className="block text-sm font-medium mb-2">{label}</label>
-        <input
+    <LabeledField label={label}>
+        <Input
             type="date"
-            className="w-full border rounded-lg px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
             value={value}
             onChange={(e) => onChange(e.target.value)}
         />
-    </div>
+    </LabeledField>
 )
 
 const DailyTab = () => {
@@ -59,18 +64,25 @@ const DailyTab = () => {
             ) : (
                 <>
                     <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                        <StatCard label="Ventas" value={report.totalSales} />
+                        <StatCard
+                            label="Ventas"
+                            value={report.totalSales}
+                            icon={<HiOutlineShoppingCart />}
+                            tone="info"
+                        />
                         <StatCard
                             label="Total vendido"
                             value={formatCurrency(report.totalAmount)}
-                            tone="text-emerald-600 dark:text-emerald-400"
+                            icon={<HiOutlineCurrencyDollar />}
+                            tone="success"
                         />
                         <StatCard
                             label="Devoluciones"
                             value={`${
                                 report.refundSummary.count
                             } · ${formatCurrency(report.refundSummary.total)}`}
-                            tone="text-red-600 dark:text-red-400"
+                            icon={<HiOutlineReceiptRefund />}
+                            tone="danger"
                         />
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -106,49 +118,43 @@ const ByPaymentMethodTab = () => {
                 <DateInput label="Hasta" value={toDate} onChange={setToDate} />
             </div>
             <Card>
-                <div className="p-4">
-                    {isLoading ? (
-                        <div className="flex justify-center py-8">
-                            <Spinner size={30} />
-                        </div>
-                    ) : rows.length === 0 ? (
-                        <p className="text-sm text-gray-500">
-                            Sin ventas en el período
-                        </p>
-                    ) : (
-                        <Table>
-                            <THead>
-                                <Tr>
-                                    <Th>Forma de pago</Th>
-                                    <Th>Ventas</Th>
-                                    <Th>Total</Th>
-                                </Tr>
-                            </THead>
-                            <TBody>
-                                {rows.map((row) => (
-                                    <Tr key={row.paymentMethod}>
-                                        <Td>
-                                            {paymentMethodLabel(
-                                                row.paymentMethod
-                                            )}
-                                        </Td>
-                                        <Td>{row.salesCount}</Td>
-                                        <Td>
-                                            {formatCurrency(row.totalAmount)}
-                                        </Td>
-                                    </Tr>
-                                ))}
-                                <Tr>
-                                    <Td className="font-semibold">Total</Td>
-                                    <Td />
-                                    <Td className="font-semibold">
-                                        {formatCurrency(total)}
+                {isLoading ? (
+                    <div className="flex justify-center py-8">
+                        <Spinner size={30} />
+                    </div>
+                ) : rows.length === 0 ? (
+                    <p className="text-sm text-gray-500">
+                        Sin ventas en el período
+                    </p>
+                ) : (
+                    <Table>
+                        <THead>
+                            <Tr>
+                                <Th>Forma de pago</Th>
+                                <Th>Ventas</Th>
+                                <Th>Total</Th>
+                            </Tr>
+                        </THead>
+                        <TBody>
+                            {rows.map((row) => (
+                                <Tr key={row.paymentMethod}>
+                                    <Td>
+                                        {paymentMethodLabel(row.paymentMethod)}
                                     </Td>
+                                    <Td>{row.salesCount}</Td>
+                                    <Td>{formatCurrency(row.totalAmount)}</Td>
                                 </Tr>
-                            </TBody>
-                        </Table>
-                    )}
-                </div>
+                            ))}
+                            <Tr>
+                                <Td className="font-semibold">Total</Td>
+                                <Td />
+                                <Td className="font-semibold">
+                                    {formatCurrency(total)}
+                                </Td>
+                            </Tr>
+                        </TBody>
+                    </Table>
+                )}
             </Card>
         </div>
     )
@@ -158,15 +164,12 @@ const POSReportsPage = () => {
     const [activeTab, setActiveTab] = useState('daily')
 
     return (
-        <Card>
-            <div className="p-4">
-                <div className="mb-4">
-                    <h4 className="text-lg font-semibold">Reportes POS</h4>
-                    <p className="text-sm text-gray-500 mt-1">
-                        Los reportes X y Z de cada turno están en el detalle del
-                        turno
-                    </p>
-                </div>
+        <>
+            <PageHeader
+                title="Reportes POS"
+                description="Los reportes X y Z de cada turno están en el detalle del turno"
+            />
+            <Card>
                 <Tabs value={activeTab} onChange={setActiveTab}>
                     <TabList>
                         <TabNav value="daily">Diario</TabNav>
@@ -183,8 +186,8 @@ const POSReportsPage = () => {
                         </TabContent>
                     </div>
                 </Tabs>
-            </div>
-        </Card>
+            </Card>
+        </>
     )
 }
 

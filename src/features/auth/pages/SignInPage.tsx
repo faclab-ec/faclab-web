@@ -15,6 +15,7 @@ import useQuery from '@/utils/hooks/useQuery'
 import { isApiError } from '@/utils/errors/ApiError'
 import { signInSchema, type SignInFormValues } from '../model/schemas'
 import { useLogin } from '../hooks/useAuth'
+import { safeRedirectPath } from '../lib/safeRedirect'
 
 const SignInForm = () => {
     const navigate = useNavigate()
@@ -40,8 +41,12 @@ const SignInForm = () => {
             } else if (session?.role === ROLE.CASHIER) {
                 navigate('/pos', { replace: true })
             } else {
-                const redirect = query.get(REDIRECT_URL_KEY)
-                navigate(redirect ?? appConfig.authenticatedEntryPath)
+                navigate(
+                    safeRedirectPath(
+                        query.get(REDIRECT_URL_KEY),
+                        appConfig.authenticatedEntryPath
+                    )
+                )
             }
         } catch (err) {
             setMessage(

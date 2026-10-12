@@ -13,6 +13,7 @@ import { EditAdjustmentDialog } from '../components/EditAdjustmentDialog'
 import { ConfirmAdjustmentDialog } from '../components/ConfirmAdjustmentDialog'
 import AdjustmentItemForm from '../components/AdjustmentItemForm'
 import { formatProductLabel } from '@shared/lib/format'
+import EmptyState from '@/components/shared/EmptyState'
 
 const AdjustmentDetailPage = () => {
     const { id } = useParams<{ id: string }>()
@@ -63,16 +64,19 @@ const AdjustmentDetailPage = () => {
 
     if (!adjustment) {
         return (
-            <div className="flex flex-col items-center justify-center h-96">
-                <h4 className="mb-4">Ajuste no encontrado</h4>
-                <Button
-                    variant="solid"
-                    icon={<HiOutlineArrowLeft />}
-                    onClick={() => navigate('/adjustments')}
-                >
-                    Volver a Ajustes
-                </Button>
-            </div>
+            <EmptyState
+                className="min-h-[24rem]"
+                title="Ajuste no encontrado"
+                action={
+                    <Button
+                        size="sm"
+                        icon={<HiOutlineArrowLeft />}
+                        onClick={() => navigate('/adjustments')}
+                    >
+                        Volver a Ajustes
+                    </Button>
+                }
+            />
         )
     }
 

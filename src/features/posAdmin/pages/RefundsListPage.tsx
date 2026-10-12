@@ -3,19 +3,21 @@ import { useNavigate } from 'react-router-dom'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import Badge from '@/components/ui/Badge'
+import StatusBadge from '@/components/shared/StatusBadge'
 import Select from '@/components/ui/Select'
 import { useCan } from '@/stores/useAuthStore'
 import { formatCurrency, formatDatetime } from '@shared/lib/format'
 import { notifyError, notifySuccess } from '@shared/ui/notify'
 import {
-    REFUND_STATUS_CLASSES,
+    REFUND_STATUS_TONES,
     REFUND_STATUS_LABELS,
     useCancelRefund,
     useRefunds,
     type Refund,
     type RefundStatus,
 } from '@features/pos'
+import LabeledField from '@/components/shared/LabeledField'
+import PageHeader from '@/components/shared/PageHeader'
 
 const statusOptions = [
     { value: '', label: 'Todas' },
@@ -33,7 +35,12 @@ const RefundsListPage = () => {
     const [pageIndex, setPageIndex] = useState(1)
     const [pageSize, setPageSize] = useState(10)
 
-    const { data, isLoading } = useRefunds({
+    const {
+        data,
+        isLoading,
+        error: listError,
+        refetch,
+    } = useRefunds({
         status: (statusFilter as RefundStatus) || undefined,
         limit: pageSize,
         offset: (pageIndex - 1) * pageSize,
@@ -106,10 +113,9 @@ const RefundsListPage = () => {
             cell: (props) => {
                 const status = props.row.original.status
                 return (
-                    <Badge
-                        content={REFUND_STATUS_LABELS[status]}
-                        className={REFUND_STATUS_CLASSES[status]}
-                    />
+                    <StatusBadge tone={REFUND_STATUS_TONES[status]}>
+                        {REFUND_STATUS_LABELS[status]}
+                    </StatusBadge>
                 )
             },
         },
@@ -133,12 +139,13 @@ const RefundsListPage = () => {
 
     return (
         <>
+            <PageHeader
+                title="Devoluciones"
+                description="Devoluciones del punto de venta, de la más reciente a la más antigua"
+            />
             <Card className="mb-4">
                 <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Estado
-                        </label>
+                    <LabeledField label="Estado">
                         <Select
                             options={statusOptions}
                             value={statusOptions.find(
@@ -149,31 +156,24 @@ const RefundsListPage = () => {
                                 setPageIndex(1)
                             }}
                         />
-                    </div>
+                    </LabeledField>
                 </div>
             </Card>
 
-            <Card>
-                <div className="p-4">
-                    <div className="mb-4">
-                        <h4 className="text-lg font-semibold">Devoluciones</h4>
-                        <p className="text-sm text-gray-500 mt-1">
-                            Devoluciones del punto de venta, de la más reciente
-                            a la más antigua
-                        </p>
-                    </div>
-                    <DataTable
-                        columns={columns}
-                        data={refunds}
-                        loading={isLoading}
-                        pagingData={{ total, pageIndex, pageSize }}
-                        onPaginationChange={setPageIndex}
-                        onSelectChange={(size) => {
-                            setPageSize(size)
-                            setPageIndex(1)
-                        }}
-                    />
-                </div>
+            <Card bodyClass="p-0">
+                <DataTable
+                    columns={columns}
+                    data={refunds}
+                    loading={isLoading}
+                    error={listError}
+                    pagingData={{ total, pageIndex, pageSize }}
+                    onRetry={refetch}
+                    onPaginationChange={setPageIndex}
+                    onSelectChange={(size) => {
+                        setPageSize(size)
+                        setPageIndex(1)
+                    }}
+                />
             </Card>
         </>
     )

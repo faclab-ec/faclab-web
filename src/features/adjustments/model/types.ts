@@ -1,4 +1,5 @@
 import type { PaginationParams } from '@/@types/api'
+import type { StatusTone } from '@shared/lib/statusTone'
 
 export type AdjustmentStatus = 'draft' | 'confirmed' | 'cancelled'
 
@@ -17,11 +18,10 @@ export const ADJUSTMENT_STATUS_LABELS: Record<AdjustmentStatus, string> = {
     cancelled: 'Cancelado',
 }
 
-export const ADJUSTMENT_STATUS_CLASSES: Record<AdjustmentStatus, string> = {
-    draft: 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300',
-    confirmed:
-        'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
-    cancelled: 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300',
+export const ADJUSTMENT_STATUS_TONES: Record<AdjustmentStatus, StatusTone> = {
+    draft: 'neutral',
+    confirmed: 'success',
+    cancelled: 'danger',
 }
 
 export const ADJUSTMENT_REASON_LABELS: Record<AdjustmentReason, string> = {

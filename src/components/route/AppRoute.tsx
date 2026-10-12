@@ -1,55 +1,21 @@
-import { useEffect, useCallback } from 'react'
-import { useThemeStore, useBaseStore } from '@/stores'
-import { useLocation } from 'react-router-dom'
-import type { LayoutType } from '@/@types/theme'
+import { useEffect } from 'react'
+import { useBaseStore } from '@/stores'
 import type { ComponentType } from 'react'
 
-export type AppRouteProps<T> = {
-    component: ComponentType<T>
+export type AppRouteProps = {
+    component: ComponentType
     routeKey: string
-    layout?: LayoutType
 }
 
-const AppRoute = <T extends Record<string, unknown>>({
-    component: Component,
-    routeKey,
-    ...props
-}: AppRouteProps<T>) => {
-    const location = useLocation()
-
-    const layoutType = useThemeStore((state) => state.layout.type)
-    const previousLayout = useThemeStore((state) => state.layout.previousType)
-    const setLayout = useThemeStore((state) => state.setLayout)
-    const setPreviousLayout = useThemeStore((state) => state.setPreviousLayout)
+/** Renderiza la página de una ruta y publica su clave (la usa el menú). */
+const AppRoute = ({ component: Component, routeKey }: AppRouteProps) => {
     const setCurrentRouteKey = useBaseStore((state) => state.setCurrentRouteKey)
 
-    const handleLayoutChange = useCallback(() => {
-        setCurrentRouteKey(routeKey)
-
-        if (props.layout && props.layout !== layoutType) {
-            setPreviousLayout(layoutType)
-            setLayout(props.layout)
-        }
-
-        if (!props.layout && previousLayout && layoutType !== previousLayout) {
-            setLayout(previousLayout)
-            setPreviousLayout(undefined)
-        }
-    }, [
-        layoutType,
-        previousLayout,
-        props.layout,
-        routeKey,
-        setCurrentRouteKey,
-        setLayout,
-        setPreviousLayout,
-    ])
-
     useEffect(() => {
-        handleLayoutChange()
-    }, [location, handleLayoutChange])
+        setCurrentRouteKey(routeKey)
+    }, [routeKey, setCurrentRouteKey])
 
-    return <Component {...(props as T)} />
+    return <Component />
 }
 
 export default AppRoute

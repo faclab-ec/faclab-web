@@ -7,7 +7,7 @@ import tw, { theme } from 'twin.macro'
 import isEmpty from 'lodash/isEmpty'
 import get from 'lodash/get'
 import { useConfig } from '../ConfigProvider'
-import { useForm } from '../Form/context'
+import { useForm, useFormItem } from '../Form/context'
 import { useInputGroup } from '../InputGroup/context'
 import { HiCheck, HiChevronDown, HiX } from 'react-icons/hi'
 import Spinner from '../Spinner/Spinner'
@@ -50,10 +50,10 @@ const DefaultOption = ({
             )}
             {...innerProps}
         >
-            <span className="ml-2">{label}</span>
+            <span className="ml-1">{label}</span>
             {isSelected && (
                 <HiCheck
-                    className={`text-${themeColor} dark:text-white text-xl`}
+                    className={`text-${themeColor} dark:text-white text-lg`}
                 />
             )}
         </div>
@@ -137,6 +137,7 @@ function Select<
 
     const { themeColor, controlSize, primaryColorLevel, mode } = useConfig()
     const formControlSize = useForm()?.size
+    const formItem = useFormItem()
     const inputGroupSize = useInputGroup()?.size
 
     const selectSize = size || inputGroupSize || formControlSize || controlSize
@@ -156,14 +157,15 @@ function Select<
     }
 
     const getBoxShadow = (state: ControlProps<Option, IsMulti, Group>) => {
-        const shadaowBase = '0 0 0 1px '
+        // Anillo de 2 px al 25 % (sufijo hexadecimal `40`), como en Input
+        const shadaowBase = '0 0 0 2px '
 
         if (isInvalid) {
-            return shadaowBase + twColor.red['500']
+            return shadaowBase + twColor.red['500'] + '40'
         }
 
         if (state.isFocused) {
-            return shadaowBase + twColor[themeColor][primaryColorLevel]
+            return shadaowBase + twColor[themeColor][primaryColorLevel] + '40'
         }
 
         return 'none'
@@ -174,6 +176,7 @@ function Select<
     return (
         <Component<Option, IsMulti, Group>
             ref={ref}
+            inputId={formItem?.controlId}
             className={selectClass}
             classNamePrefix={'select'}
             styles={{
@@ -187,7 +190,7 @@ function Select<
                             cursor: 'pointer',
                         },
                         boxShadow: getBoxShadow(state),
-                        borderRadius: tw`rounded-md`.borderRadius,
+                        borderRadius: tw`rounded-lg`.borderRadius,
                         ...(isInvalid
                             ? { borderColor: twColor.red['500'] }
                             : {}),

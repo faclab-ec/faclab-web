@@ -1,9 +1,9 @@
 import Dialog from '@/components/ui/Dialog'
-import Badge from '@/components/ui/Badge'
+import StatusBadge from '@/components/shared/StatusBadge'
 import { formatDatetime } from '@shared/lib/format'
 import {
     INVOICE_STATUS_LABELS,
-    INVOICE_STATUS_CLASSES,
+    INVOICE_STATUS_TONES,
     InvoiceReason,
     type Invoice,
     type InvoiceStatus,
@@ -35,12 +35,11 @@ const InvoicePreviewDialog = ({
                     <div className="grid grid-cols-2 gap-3">
                         <div>
                             <p className="text-sm text-gray-500">Estado</p>
-                            <Badge
-                                content={INVOICE_STATUS_LABELS[invoice.status]}
-                                className={
-                                    INVOICE_STATUS_CLASSES[invoice.status]
-                                }
-                            />
+                            <StatusBadge
+                                tone={INVOICE_STATUS_TONES[invoice.status]}
+                            >
+                                {INVOICE_STATUS_LABELS[invoice.status]}
+                            </StatusBadge>
                         </div>
                         <div>
                             <p className="text-sm text-gray-500">
@@ -77,18 +76,17 @@ const InvoicePreviewDialog = ({
                                 key={index}
                                 className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700"
                             >
-                                <Badge
-                                    content={
-                                        INVOICE_STATUS_LABELS[
+                                <StatusBadge
+                                    tone={
+                                        INVOICE_STATUS_TONES[
                                             entry.name as InvoiceStatus
-                                        ] ?? entry.name
+                                        ] ?? 'neutral'
                                     }
-                                    className={
-                                        INVOICE_STATUS_CLASSES[
-                                            entry.name as InvoiceStatus
-                                        ] ?? 'bg-gray-100 text-gray-600'
-                                    }
-                                />
+                                >
+                                    {INVOICE_STATUS_LABELS[
+                                        entry.name as InvoiceStatus
+                                    ] ?? entry.name}
+                                </StatusBadge>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-xs text-gray-500">
                                         {formatDatetime(entry.statusDate)}

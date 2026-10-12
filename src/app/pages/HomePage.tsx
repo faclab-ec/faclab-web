@@ -1,30 +1,52 @@
 import { useNavigate } from 'react-router-dom'
+import {
+    HiOutlineBan,
+    HiOutlineBell,
+    HiOutlineClock,
+    HiOutlineCurrencyDollar,
+    HiOutlineOfficeBuilding,
+    HiOutlineRefresh,
+    HiOutlineTrendingDown,
+} from 'react-icons/hi'
 import Card from '@/components/ui/Card'
 import Table from '@/components/ui/Table'
-import Spinner from '@/components/ui/Spinner'
+import Skeleton from '@/components/ui/Skeleton'
+import {
+    BarList,
+    EmptyState,
+    ErrorState,
+    PageHeader,
+    StatCard,
+} from '@/components/shared'
+import { formatCurrency, formatPercent } from '@shared/lib/format'
 import { useDashboard } from '@features/reports'
 import { InvoicingSummaryCard } from '@features/invoicing'
+import type { ReactNode } from 'react'
+import type { StatusTone } from '@shared/lib/statusTone'
 
 const { THead, TBody, Th, Tr, Td } = Table
 
-const formatCurrency = (value: number) =>
-    new Intl.NumberFormat('es-EC', {
-        style: 'currency',
-        currency: 'USD',
-    }).format(value)
+interface AlertTile {
+    tab: string
+    label: string
+    count: number
+    tone: StatusTone
+    icon: ReactNode
+}
 
 const HomePage = () => {
     const navigate = useNavigate()
 
     // One call: inventory value, warehouse summary and alert counts
-    const { data: dashboard, isLoading } = useDashboard(30)
-    const warehouseSummary = dashboard?.warehouses ?? []
+    const { data: dashboard, isLoading, error, refetch } = useDashboard(30)
+    const warehouses = dashboard?.warehouses ?? []
     const alerts = dashboard?.alerts ?? {
         lowStock: 0,
         outOfStock: 0,
         reorderPoint: 0,
         expiringSoon: 0,
     }
+    const inventoryValue = dashboard?.inventoryValue ?? 0
 
     const totalAlerts =
         alerts.lowStock +
@@ -32,224 +54,217 @@ const HomePage = () => {
         alerts.reorderPoint +
         alerts.expiringSoon
 
-    const alertSummary = [
+    const alertTiles: AlertTile[] = [
         {
             tab: 'low_stock',
-            label: 'Stock Bajo',
+            label: 'Stock bajo',
             count: alerts.lowStock,
-            colorClass:
-                'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20',
-            textClass: 'text-amber-700 dark:text-amber-300',
-            countClass: 'text-amber-600 dark:text-amber-400',
+            tone: 'warning',
+            icon: <HiOutlineTrendingDown />,
         },
         {
             tab: 'out_of_stock',
-            label: 'Sin Stock',
+            label: 'Sin stock',
             count: alerts.outOfStock,
-            colorClass:
-                'bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20',
-            textClass: 'text-red-700 dark:text-red-300',
-            countClass: 'text-red-600 dark:text-red-400',
+            tone: 'danger',
+            icon: <HiOutlineBan />,
         },
         {
             tab: 'reorder_point',
-            label: 'Punto de Reorden',
+            label: 'Punto de reorden',
             count: alerts.reorderPoint,
-            colorClass:
-                'bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/20',
-            textClass: 'text-blue-700 dark:text-blue-300',
-            countClass: 'text-blue-600 dark:text-blue-400',
+            tone: 'info',
+            icon: <HiOutlineRefresh />,
         },
         {
             tab: 'expiring_soon',
-            label: 'Por Vencer',
+            label: 'Por vencer',
             count: alerts.expiringSoon,
-            colorClass:
-                'bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20',
-            textClass: 'text-orange-700 dark:text-orange-300',
-            countClass: 'text-orange-600 dark:text-orange-400',
+            tone: 'warning',
+            icon: <HiOutlineClock />,
         },
     ]
 
-    return (
-        <div className="flex flex-col gap-6">
-            <h3>Dashboard</h3>
+    const openAlerts = (tab?: string) =>
+        navigate('/alerts', tab ? { state: { tab } } : undefined)
 
-            <InvoicingSummaryCard
-                uninvoicedSales={dashboard?.uninvoicedSales}
+    if (error) {
+        return (
+            <>
+                <PageHeader title="Resumen" />
+                <Card bodyClass="p-0">
+                    <ErrorState error={error} onRetry={refetch} />
+                </Card>
+            </>
+        )
+    }
+
+    return (
+        <>
+            <PageHeader
+                title="Resumen"
+                description="Estado del inventario y de la facturación"
             />
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card>
-                    <div className="p-4">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Valor del Inventario
-                        </p>
-                        {isLoading ? (
-                            <Spinner size={20} className="mt-2" />
-                        ) : (
-                            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
-                                {formatCurrency(dashboard?.inventoryValue ?? 0)}
-                            </p>
-                        )}
-                    </div>
-                </Card>
-                <Card>
-                    <div className="p-4">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Almacenes
-                        </p>
-                        {isLoading ? (
-                            <Spinner size={20} className="mt-2" />
-                        ) : (
-                            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">
-                                {warehouseSummary.length}
-                            </p>
-                        )}
-                    </div>
-                </Card>
-                <button
-                    className="text-left"
-                    onClick={() => navigate('/alerts')}
-                >
-                    <Card>
-                        <div className="p-4">
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                                Alertas Activas
-                            </p>
-                            <p
-                                className={`text-2xl font-bold mt-1 ${
-                                    totalAlerts > 0
-                                        ? 'text-red-600 dark:text-red-400'
-                                        : 'text-gray-600 dark:text-gray-400'
-                                }`}
-                            >
-                                {totalAlerts}
-                            </p>
-                        </div>
-                    </Card>
-                </button>
-                <button
-                    className="text-left"
-                    onClick={() =>
-                        navigate('/alerts', {
-                            state: { tab: 'expiring_soon' },
-                        })
-                    }
-                >
-                    <Card>
-                        <div className="p-4">
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                                Lotes por Vencer
-                            </p>
-                            <p
-                                className={`text-2xl font-bold mt-1 ${
-                                    alerts.expiringSoon > 0
-                                        ? 'text-orange-600 dark:text-orange-400'
-                                        : 'text-gray-600 dark:text-gray-400'
-                                }`}
-                            >
-                                {alerts.expiringSoon}
-                            </p>
-                        </div>
-                    </Card>
-                </button>
-            </div>
+            <div className="flex flex-col gap-5">
+                <InvoicingSummaryCard
+                    uninvoicedSales={dashboard?.uninvoicedSales}
+                />
 
-            <Card>
-                <div className="p-4">
-                    <div className="flex items-center justify-between mb-4">
-                        <h5>Alertas de Inventario</h5>
+                <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+                    <StatCard
+                        label="Valor del inventario"
+                        value={formatCurrency(inventoryValue)}
+                        icon={<HiOutlineCurrencyDollar />}
+                        tone="success"
+                        loading={isLoading}
+                    />
+                    <StatCard
+                        label="Almacenes"
+                        value={warehouses.length}
+                        icon={<HiOutlineOfficeBuilding />}
+                        tone="info"
+                        loading={isLoading}
+                    />
+                    <StatCard
+                        label="Alertas activas"
+                        value={totalAlerts}
+                        icon={<HiOutlineBell />}
+                        tone={totalAlerts > 0 ? 'danger' : 'neutral'}
+                        loading={isLoading}
+                        onClick={() => openAlerts()}
+                    />
+                    <StatCard
+                        label="Lotes por vencer"
+                        value={alerts.expiringSoon}
+                        hint="Próximos 30 días"
+                        icon={<HiOutlineClock />}
+                        tone={alerts.expiringSoon > 0 ? 'warning' : 'neutral'}
+                        loading={isLoading}
+                        onClick={() => openAlerts('expiring_soon')}
+                    />
+                </div>
+
+                <Card
+                    header="Alertas de inventario"
+                    headerExtra={
                         <button
-                            className="text-sm text-primary hover:underline"
-                            onClick={() => navigate('/alerts')}
+                            type="button"
+                            className="link text-sm"
+                            onClick={() => openAlerts()}
                         >
                             Ver todo
                         </button>
-                    </div>
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                        {alertSummary.map((item) => (
-                            <button
-                                key={item.tab}
-                                className={`border rounded-lg p-3 text-left cursor-pointer transition-all hover:shadow-md ${item.colorClass}`}
-                                onClick={() =>
-                                    navigate('/alerts', {
-                                        state: { tab: item.tab },
-                                    })
-                                }
-                            >
-                                <p
-                                    className={`text-xs font-medium ${item.textClass}`}
-                                >
-                                    {item.label}
-                                </p>
-                                <p
-                                    className={`text-2xl font-bold mt-1 ${item.countClass}`}
-                                >
-                                    {item.count}
-                                </p>
-                            </button>
+                    }
+                >
+                    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                        {alertTiles.map((tile) => (
+                            <StatCard
+                                key={tile.tab}
+                                label={tile.label}
+                                value={tile.count}
+                                icon={tile.icon}
+                                tone={tile.count > 0 ? tile.tone : 'neutral'}
+                                loading={isLoading}
+                                onClick={() => openAlerts(tile.tab)}
+                            />
                         ))}
                     </div>
-                </div>
-            </Card>
+                </Card>
 
-            <Card>
-                <div className="p-4">
-                    <h5 className="mb-4">Resumen por Almacen</h5>
-                    {isLoading ? (
-                        <div className="flex justify-center py-8">
-                            <Spinner size={30} />
-                        </div>
-                    ) : warehouseSummary.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
-                            No hay datos de almacenes
-                        </div>
-                    ) : (
-                        <Table>
-                            <THead>
-                                <Tr>
-                                    <Th>Almacen</Th>
-                                    <Th>Codigo</Th>
-                                    <Th>Productos</Th>
-                                    <Th>Cantidad Total</Th>
-                                    <Th>Disponible</Th>
-                                    <Th>Valor Total</Th>
-                                </Tr>
-                            </THead>
-                            <TBody>
-                                {warehouseSummary.map((ws) => (
-                                    <Tr key={ws.warehouseId}>
-                                        <Td>
-                                            <span className="font-medium">
-                                                {ws.warehouseName}
-                                            </span>
-                                        </Td>
-                                        <Td>
-                                            <span className="font-mono text-sm text-gray-600 dark:text-gray-400">
-                                                {ws.warehouseCode}
-                                            </span>
-                                        </Td>
-                                        <Td>{ws.totalProducts}</Td>
-                                        <Td>{ws.totalQuantity}</Td>
-                                        <Td>
-                                            <span className="text-emerald-600 dark:text-emerald-400">
-                                                {ws.availableQuantity}
-                                            </span>
-                                        </Td>
-                                        <Td>
-                                            <span className="font-medium">
-                                                {formatCurrency(ws.totalValue)}
-                                            </span>
-                                        </Td>
+                <div className="grid gap-5 lg:grid-cols-3">
+                    <Card header="Valor por almacén">
+                        {isLoading ? (
+                            <div className="flex flex-col gap-5">
+                                <Skeleton height={28} />
+                                <Skeleton height={28} />
+                            </div>
+                        ) : warehouses.length === 0 ? (
+                            <EmptyState
+                                className="!py-6"
+                                title="Sin almacenes"
+                                description="Aún no hay inventario valorizado."
+                            />
+                        ) : (
+                            <BarList
+                                aria-label="Valor del inventario por almacén"
+                                formatValue={formatCurrency}
+                                items={[...warehouses]
+                                    .sort((a, b) => b.totalValue - a.totalValue)
+                                    .map((warehouse) => ({
+                                        key: warehouse.warehouseId,
+                                        label: warehouse.warehouseName,
+                                        value: warehouse.totalValue,
+                                        caption:
+                                            inventoryValue > 0
+                                                ? `${formatPercent(
+                                                      (warehouse.totalValue /
+                                                          inventoryValue) *
+                                                          100
+                                                  )} del total`
+                                                : undefined,
+                                    }))}
+                            />
+                        )}
+                    </Card>
+
+                    <Card
+                        className="lg:col-span-2"
+                        header="Resumen por almacén"
+                        bodyClass="p-0"
+                    >
+                        {isLoading ? (
+                            <div className="flex flex-col gap-4 p-5">
+                                <Skeleton />
+                                <Skeleton />
+                                <Skeleton />
+                            </div>
+                        ) : warehouses.length === 0 ? (
+                            <EmptyState title="No hay datos de almacenes" />
+                        ) : (
+                            <Table>
+                                <THead>
+                                    <Tr>
+                                        <Th>Almacén</Th>
+                                        <Th>Código</Th>
+                                        <Th>Productos</Th>
+                                        <Th>Cantidad total</Th>
+                                        <Th>Disponible</Th>
+                                        <Th>Valor total</Th>
                                     </Tr>
-                                ))}
-                            </TBody>
-                        </Table>
-                    )}
+                                </THead>
+                                <TBody>
+                                    {warehouses.map((ws) => (
+                                        <Tr key={ws.warehouseId}>
+                                            <Td>
+                                                <span className="font-medium text-gray-900 dark:text-gray-50">
+                                                    {ws.warehouseName}
+                                                </span>
+                                            </Td>
+                                            <Td>
+                                                <span className="font-mono text-gray-500 dark:text-gray-400">
+                                                    {ws.warehouseCode}
+                                                </span>
+                                            </Td>
+                                            <Td>{ws.totalProducts}</Td>
+                                            <Td>{ws.totalQuantity}</Td>
+                                            <Td>{ws.availableQuantity}</Td>
+                                            <Td>
+                                                <span className="font-medium">
+                                                    {formatCurrency(
+                                                        ws.totalValue
+                                                    )}
+                                                </span>
+                                            </Td>
+                                        </Tr>
+                                    ))}
+                                </TBody>
+                            </Table>
+                        )}
+                    </Card>
                 </div>
-            </Card>
-        </div>
+            </div>
+        </>
     )
 }
 

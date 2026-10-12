@@ -4,6 +4,8 @@ import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import { formatCurrency, formatDate } from '@shared/lib/format'
 import { useValuation } from '../hooks/useReports'
 import type { ValuationItem } from '../model/types'
+import LabeledField from '@/components/shared/LabeledField'
+import Input from '@/components/ui/Input'
 
 type Option = { value: string; label: string }
 
@@ -69,10 +71,7 @@ const ValuationTab = ({ warehouseOptions }: Props) => {
     return (
         <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div>
-                    <label className="block text-sm font-medium mb-2">
-                        Almacén
-                    </label>
+                <LabeledField label="Almacén">
                     <Select
                         placeholder="Todos los almacenes"
                         options={warehouseOptions}
@@ -83,18 +82,14 @@ const ValuationTab = ({ warehouseOptions }: Props) => {
                             setValuationWarehouse(option?.value || '')
                         }
                     />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium mb-2">
-                        Fecha histórica
-                    </label>
-                    <input
+                </LabeledField>
+                <LabeledField label="Fecha histórica">
+                    <Input
                         type="date"
-                        className="w-full border rounded-lg px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
                         value={valuationDate}
                         onChange={(e) => setValuationDate(e.target.value)}
                     />
-                </div>
+                </LabeledField>
             </div>
 
             {valuation && (

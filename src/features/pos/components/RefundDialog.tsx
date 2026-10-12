@@ -17,6 +17,7 @@ import {
     type POSPaymentMethod,
 } from '../model/types'
 import { HiOutlineSearch, HiMinus, HiPlus } from 'react-icons/hi'
+import { formatCurrency } from '@shared/lib/format'
 
 interface RefundDialogProps {
     isOpen: boolean
@@ -55,7 +56,9 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
             const saleData = saleResponse.data
 
             if (!REFUNDABLE_SALE_STATUSES.includes(saleData.status)) {
-                notifyWarning('Solo se pueden devolver ventas confirmadas o facturadas')
+                notifyWarning(
+                    'Solo se pueden devolver ventas confirmadas o facturadas'
+                )
                 setLoading(false)
                 return
             }
@@ -214,7 +217,7 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
                     <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
                         <p className="text-sm font-medium">Venta #{sale.id}</p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
-                            Total: ${sale.total.toFixed(2)}
+                            Total: {formatCurrency(sale.total)}
                         </p>
                     </div>
 
@@ -233,14 +236,17 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
                                         {item.productName}
                                     </p>
                                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                                        ${item.saleItem.unitPrice.toFixed(2)} x{' '}
-                                        {item.maxQuantity} (máx)
+                                        {formatCurrency(
+                                            item.saleItem.unitPrice
+                                        )}{' '}
+                                        x {item.maxQuantity} (máx)
                                     </p>
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <Button
                                         size="xs"
                                         variant="plain"
+                                        aria-label="Disminuir cantidad"
                                         icon={<HiMinus />}
                                         onClick={() =>
                                             updateQuantity(
@@ -255,6 +261,7 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
                                     <Button
                                         size="xs"
                                         variant="plain"
+                                        aria-label="Aumentar cantidad"
                                         icon={<HiPlus />}
                                         onClick={() =>
                                             updateQuantity(
@@ -280,7 +287,7 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
                                 Total a devolver
                             </p>
                             <p className="text-xl font-bold text-red-500">
-                                ${previewTotal.toFixed(2)}
+                                {formatCurrency(previewTotal)}
                             </p>
                         </div>
                     )}
@@ -315,7 +322,7 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
                             Total a devolver
                         </p>
                         <p className="text-3xl font-bold text-red-500">
-                            ${refundTotal.toFixed(2)}
+                            {formatCurrency(refundTotal)}
                         </p>
                     </div>
 

@@ -6,6 +6,7 @@ import { useParkedSales, useResumeSale, useCancelSale } from '../hooks/usePOS'
 import { usePOSStore } from '../store/usePOSStore'
 import { getSale, getSaleItems, getProduct, getCustomer } from '../api/client'
 import { useCan } from '@/stores'
+import { formatCurrency } from '@shared/lib/format'
 
 interface ParkedSalesDrawerProps {
     isOpen: boolean
@@ -138,7 +139,7 @@ const ParkedSalesDrawer = ({ isOpen, onClose }: ParkedSalesDrawerProps) => {
                                     </div>
                                     <div className="text-right">
                                         <p className="font-bold">
-                                            ${sale.total.toFixed(2)}
+                                            {formatCurrency(sale.total)}
                                         </p>
                                         <div className="flex gap-1 mt-1">
                                             {canCancelSale && (

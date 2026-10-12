@@ -1,5 +1,5 @@
 .form-item {
-  @apply mb-7 relative;
+  @apply mb-6 relative;
 
   &.horizontal {
     @apply flex flex-auto;
@@ -19,15 +19,20 @@
 }
 
 .form-label {
-  @apply flex items-center font-semibold;
+  @apply flex items-center text-sm font-medium text-gray-700 dark:text-gray-300;
 
   &.invalid {
     @apply text-red-500;
   }
 }
 
+.form-label-required::after {
+  content: "*";
+  @apply ml-0.5 text-red-500;
+}
+
 .form-explain {
-  @apply text-red-500 absolute;
+  @apply text-xs text-red-600 dark:text-red-400 absolute;
 }
 
 .form-container {

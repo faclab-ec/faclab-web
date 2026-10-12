@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
-import Badge from '@/components/ui/Badge'
+import StatusBadge from '@/components/shared/StatusBadge'
 import Button from '@/components/ui/Button'
 import Select from '@/components/ui/Select'
 import { HiOutlineEye, HiOutlineRefresh } from 'react-icons/hi'
@@ -10,7 +10,7 @@ import { formatDatetime } from '@shared/lib/format'
 import { notifyError, notifySuccess } from '@shared/ui/notify'
 import { useCan } from '@/stores'
 import {
-    INVOICE_STATUS_CLASSES,
+    INVOICE_STATUS_TONES,
     INVOICE_STATUS_LABELS,
     invoiceIssuedAt,
     invoiceNumber,
@@ -23,6 +23,8 @@ import {
     type InvoiceStatus,
 } from '@features/invoicing'
 import InvoicePreviewDialog from '../components/InvoicePreviewDialog'
+import LabeledField from '@/components/shared/LabeledField'
+import PageHeader from '@/components/shared/PageHeader'
 
 const statusOptions = [
     { value: '', label: 'Todos' },
@@ -52,6 +54,7 @@ const InvoicesListPage = () => {
         data: invoices = [],
         isLoading,
         isError,
+        refetch,
     } = useInvoices({
         attention,
     })
@@ -114,10 +117,9 @@ const InvoicesListPage = () => {
             cell: (props) => {
                 const status = props.row.original.status
                 return (
-                    <Badge
-                        content={INVOICE_STATUS_LABELS[status]}
-                        className={INVOICE_STATUS_CLASSES[status]}
-                    />
+                    <StatusBadge tone={INVOICE_STATUS_TONES[status]}>
+                        {INVOICE_STATUS_LABELS[status]}
+                    </StatusBadge>
                 )
             },
         },
@@ -176,12 +178,31 @@ const InvoicesListPage = () => {
 
     return (
         <>
+            <PageHeader
+                title="Facturas"
+                description={
+                    attention
+                        ? 'Facturas pendientes o cuyo último intento falló. Las que esperan la configuración fiscal se emiten solas cuando se completa.'
+                        : 'Facturas electrónicas emitidas al SRI'
+                }
+                actions={
+                    attention &&
+                    canRetry &&
+                    invoices.length > 0 && (
+                        <Button
+                            size="sm"
+                            icon={<HiOutlineRefresh />}
+                            loading={retryAll.isPending}
+                            onClick={handleRetryAll}
+                        >
+                            Reintentar todas
+                        </Button>
+                    )
+                }
+            />
             <Card className="mb-4">
                 <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Mostrar
-                        </label>
+                    <LabeledField label="Mostrar">
                         <Select
                             options={viewOptions}
                             value={viewOptions.find(
@@ -198,11 +219,8 @@ const InvoicesListPage = () => {
                                 setPageIndex(1)
                             }}
                         />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Estado
-                        </label>
+                    </LabeledField>
+                    <LabeledField label="Estado">
                         <Select
                             options={statusOptions}
                             value={statusOptions.find(
@@ -215,55 +233,34 @@ const InvoicesListPage = () => {
                                 setPageIndex(1)
                             }}
                         />
-                    </div>
+                    </LabeledField>
                 </div>
             </Card>
 
-            <Card>
-                <div className="p-4">
-                    <div className="flex justify-between items-start mb-4 gap-4">
-                        <div>
-                            <h4 className="text-lg font-semibold">Facturas</h4>
-                            <p className="text-sm text-gray-500 mt-1">
-                                {attention
-                                    ? 'Facturas pendientes o cuyo último intento falló. Las que esperan la configuración fiscal se emiten solas cuando se completa.'
-                                    : 'Facturas electrónicas emitidas al SRI'}
-                            </p>
-                        </div>
-                        {attention && canRetry && invoices.length > 0 && (
-                            <Button
-                                size="sm"
-                                icon={<HiOutlineRefresh />}
-                                loading={retryAll.isPending}
-                                onClick={handleRetryAll}
-                            >
-                                Reintentar todas
-                            </Button>
-                        )}
-                    </div>
-                    {isError ? (
-                        <p className="text-center py-8 text-red-500">
-                            No se pudieron cargar las facturas: el servicio de
-                            facturación no responde
-                        </p>
-                    ) : (
-                        <DataTable
-                            columns={columns}
-                            data={page}
-                            loading={isLoading}
-                            pagingData={{
-                                total: filtered.length,
-                                pageIndex,
-                                pageSize,
-                            }}
-                            onPaginationChange={setPageIndex}
-                            onSelectChange={(size) => {
-                                setPageSize(size)
-                                setPageIndex(1)
-                            }}
-                        />
-                    )}
-                </div>
+            <Card bodyClass="p-0">
+                <DataTable
+                    columns={columns}
+                    data={page}
+                    loading={isLoading}
+                    error={
+                        isError
+                            ? new Error(
+                                  'El servicio de facturación no responde'
+                              )
+                            : undefined
+                    }
+                    pagingData={{
+                        total: filtered.length,
+                        pageIndex,
+                        pageSize,
+                    }}
+                    onRetry={refetch}
+                    onPaginationChange={setPageIndex}
+                    onSelectChange={(size) => {
+                        setPageSize(size)
+                        setPageIndex(1)
+                    }}
+                />
             </Card>
 
             <InvoicePreviewDialog

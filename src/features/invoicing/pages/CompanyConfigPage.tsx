@@ -20,6 +20,7 @@ import CompanyInfoSection from '../components/CompanyInfoSection'
 import AddressSection from '../components/AddressSection'
 import SriSection from '../components/SriSection'
 import CertificateSection from '../components/CertificateSection'
+import PageHeader from '@/components/shared/PageHeader'
 
 const emptyValues: CompanyConfigFormValues = {
     taxId: '',
@@ -114,18 +115,12 @@ const CompanyConfigPage = () => {
     }
 
     return (
-        <Card>
-            <div className="p-4">
-                <div className="mb-6">
-                    <h4 className="text-lg font-semibold">
-                        Configuración Fiscal
-                    </h4>
-                    <p className="text-sm text-gray-500 mt-1">
-                        Datos fiscales de la empresa para la generación de
-                        facturas electrónicas
-                    </p>
-                </div>
-
+        <>
+            <PageHeader
+                title="Configuración Fiscal"
+                description="Datos fiscales de la empresa para la generación de facturas electrónicas"
+            />
+            <Card>
                 {status && (
                     <div className="mb-6 p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                         <p className="text-sm font-semibold mb-3">
@@ -173,8 +168,8 @@ const CompanyConfigPage = () => {
                         </Button>
                     </div>
                 </form>
-            </div>
-        </Card>
+            </Card>
+        </>
     )
 }
 

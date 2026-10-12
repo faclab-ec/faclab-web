@@ -1,4 +1,5 @@
 import { Server, Response } from 'miragejs'
+import { singleQueryParams } from './queryParams'
 
 const uuid = () => Math.random().toString(36).slice(2)
 const meta = () => ({ requestId: uuid(), timestamp: new Date().toISOString() })
@@ -22,7 +23,7 @@ export default function adminUsersFakeApi(server: Server) {
             role,
             limit = '100',
             offset = '0',
-        } = request.queryParams
+        } = singleQueryParams(request)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let users: Record<string, unknown>[] = (schema.db as any).usersData.map(
             (u: Record<string, unknown>) => u

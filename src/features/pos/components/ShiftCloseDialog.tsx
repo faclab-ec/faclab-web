@@ -8,6 +8,8 @@ import Spinner from '@/components/ui/Spinner'
 import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { useCloseShift, useCashSummary } from '../hooks/usePOS'
 import { useShift } from './useShift'
+import LabeledField from '@/components/shared/LabeledField'
+import { formatCurrency } from '@shared/lib/format'
 
 interface ShiftCloseDialogProps {
     isOpen: boolean
@@ -34,7 +36,7 @@ const SummaryRow = ({
                 positive ? 'text-emerald-600' : negative ? 'text-red-500' : ''
             }
         >
-            ${value.toFixed(2)}
+            {formatCurrency(value)}
         </span>
     </div>
 )
@@ -129,10 +131,7 @@ const ShiftCloseDialog = ({ isOpen, onClose }: ShiftCloseDialogProps) => {
                 </div>
             )}
 
-            <div>
-                <label className="block text-sm font-medium mb-1">
-                    Saldo real en caja
-                </label>
+            <LabeledField label="Saldo real en caja">
                 <Input
                     type="number"
                     step="any"
@@ -141,7 +140,7 @@ const ShiftCloseDialog = ({ isOpen, onClose }: ShiftCloseDialogProps) => {
                     placeholder="0.00"
                     onChange={(e) => setClosingBalance(e.target.value)}
                 />
-            </div>
+            </LabeledField>
 
             {closingBalance !== '' && cashSummary && (
                 <div
@@ -151,20 +150,17 @@ const ShiftCloseDialog = ({ isOpen, onClose }: ShiftCloseDialogProps) => {
                             : 'bg-red-50 dark:bg-red-500/10 text-red-600'
                     }`}
                 >
-                    Discrepancia: ${discrepancy.toFixed(2)}
+                    Discrepancia: {formatCurrency(discrepancy)}
                 </div>
             )}
 
-            <div className="mt-4">
-                <label className="block text-sm font-medium mb-1">
-                    Notas (opcional)
-                </label>
+            <LabeledField label="Notas (opcional)" className="mt-4">
                 <Input
                     value={notes}
                     placeholder="Notas opcionales"
                     onChange={(e) => setNotes(e.target.value)}
                 />
-            </div>
+            </LabeledField>
 
             <div className="flex gap-2 mt-6">
                 <Button block variant="default" onClick={onClose}>

@@ -1,3 +1,5 @@
+import type { StatusTone } from '@shared/lib/statusTone'
+
 export interface Certificate {
     id: string
     serialNumber: string
@@ -64,14 +66,13 @@ export const INVOICE_STATUS_LABELS: Record<InvoiceStatus, string> = {
     rejected: 'Rechazada',
 }
 
-export const INVOICE_STATUS_CLASSES: Record<InvoiceStatus, string> = {
-    pending:
-        'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300',
-    created: 'bg-gray-100 text-gray-600',
-    signed: 'bg-blue-100 text-blue-600',
-    sent: 'bg-yellow-100 text-yellow-600',
-    authorized: 'bg-emerald-100 text-emerald-600',
-    rejected: 'bg-red-100 text-red-600',
+export const INVOICE_STATUS_TONES: Record<InvoiceStatus, StatusTone> = {
+    pending: 'warning',
+    created: 'neutral',
+    signed: 'info',
+    sent: 'warning',
+    authorized: 'success',
+    rejected: 'danger',
 }
 
 // Issuer problems: invoices wait until the config or the certificate is fixed

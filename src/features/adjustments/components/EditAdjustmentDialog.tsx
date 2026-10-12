@@ -2,6 +2,7 @@ import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
 import Input from '@/components/ui/Input'
 import type { AdjustmentUpdateInput } from '../model/types'
+import LabeledField from '@/components/shared/LabeledField'
 
 type Props = {
     open: boolean
@@ -28,10 +29,7 @@ export const EditAdjustmentDialog = ({
     >
         <h5 className="mb-4">Editar Ajuste</h5>
         <div className="space-y-4">
-            <div>
-                <label className="block text-sm font-medium mb-2">
-                    Responsable
-                </label>
+            <LabeledField label="Responsable">
                 <Input
                     type="text"
                     placeholder="Nombre del responsable"
@@ -40,9 +38,8 @@ export const EditAdjustmentDialog = ({
                         onChange({ ...editData, adjustedBy: e.target.value })
                     }
                 />
-            </div>
-            <div>
-                <label className="block text-sm font-medium mb-2">Notas</label>
+            </LabeledField>
+            <LabeledField label="Notas">
                 <Input
                     textArea
                     placeholder="Observaciones"
@@ -51,7 +48,7 @@ export const EditAdjustmentDialog = ({
                         onChange({ ...editData, notes: e.target.value })
                     }
                 />
-            </div>
+            </LabeledField>
         </div>
         <div className="flex justify-end gap-2 mt-6">
             <Button variant="plain" onClick={onClose}>

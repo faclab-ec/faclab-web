@@ -3,6 +3,7 @@ import OrderItemRow from './OrderItemRow'
 import CustomerSelector from './CustomerSelector'
 import PaymentSummary from './PaymentSummary'
 import ActionButtons from './ActionButtons'
+import EmptyState from '@/components/shared/EmptyState'
 import { HiOutlineShoppingCart } from 'react-icons/hi'
 
 interface OrderPanelProps {
@@ -21,28 +22,29 @@ const OrderPanel = ({
     const { cartItems } = usePOSStore()
 
     return (
-        <div className="flex flex-col h-full">
-            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="font-semibold text-lg">Lista de Orden</h3>
+        <div className="flex h-full flex-col">
+            <div className="hidden border-b border-gray-200 px-4 py-3 dark:border-gray-700 lg:block">
+                <h2 className="text-base">Orden</h2>
             </div>
 
             <CustomerSelector />
 
             <div className="flex-1 overflow-y-auto p-4">
                 {cartItems.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                        <HiOutlineShoppingCart className="text-4xl mb-2" />
-                        <p className="text-sm">Carrito vacio</p>
-                        <p className="text-xs">
-                            Seleccione productos para agregar
-                        </p>
-                    </div>
+                    <EmptyState
+                        className="h-full !py-6"
+                        icon={<HiOutlineShoppingCart />}
+                        title="Carrito vacío"
+                        description="Selecciona productos para agregarlos."
+                    />
                 ) : (
-                    <div className="space-y-3">
+                    <ul className="space-y-3">
                         {cartItems.map((item) => (
-                            <OrderItemRow key={item.productId} item={item} />
+                            <li key={item.productId}>
+                                <OrderItemRow item={item} />
+                            </li>
                         ))}
-                    </div>
+                    </ul>
                 )}
             </div>
 

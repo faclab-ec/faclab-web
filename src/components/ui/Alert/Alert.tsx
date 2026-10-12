@@ -31,31 +31,35 @@ const DEFAULT_TYPE = 'warning'
 
 const TYPE_MAP = {
     success: {
-        backgroundColor: 'bg-emerald-50 dark:bg-emerald-500',
-        titleColor: 'text-emerald-700 dark:text-emerald-50',
-        textColor: 'text-emerald-500 dark:text-emerald-50',
-        iconColor: 'text-emerald-400 dark:text-emerald-50',
+        backgroundColor:
+            'bg-emerald-50 border border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/30',
+        titleColor: 'text-emerald-900 dark:text-emerald-100',
+        textColor: 'text-emerald-800 dark:text-emerald-200',
+        iconColor: 'text-emerald-500 dark:text-emerald-400',
         icon: <HiCheckCircle />,
     },
     info: {
-        backgroundColor: 'bg-blue-50 dark:bg-blue-500',
-        titleColor: 'text-blue-700 dark:text-blue-100',
-        textColor: 'text-blue-500 dark:text-blue-100',
-        iconColor: 'text-blue-400 dark:text-blue-100',
+        backgroundColor:
+            'bg-blue-50 border border-blue-200 dark:bg-blue-500/10 dark:border-blue-500/30',
+        titleColor: 'text-blue-900 dark:text-blue-100',
+        textColor: 'text-blue-800 dark:text-blue-200',
+        iconColor: 'text-blue-500 dark:text-blue-400',
         icon: <HiInformationCircle />,
     },
     warning: {
-        backgroundColor: 'bg-yellow-50 dark:bg-yellow-500',
-        titleColor: 'text-yellow-700 dark:text-yellow-50',
-        textColor: 'text-yellow-500 dark:text-yellow-50',
-        iconColor: 'text-yellow-400 dark:text-yellow-50',
+        backgroundColor:
+            'bg-amber-50 border border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/30',
+        titleColor: 'text-amber-900 dark:text-amber-100',
+        textColor: 'text-amber-800 dark:text-amber-200',
+        iconColor: 'text-amber-500 dark:text-amber-400',
         icon: <HiExclamation />,
     },
     danger: {
-        backgroundColor: 'bg-red-50 dark:bg-red-500',
-        titleColor: 'text-red-700 dark:text-red-100',
-        textColor: 'text-red-500 dark:text-red-100',
-        iconColor: 'text-red-400 dark:text-red-100',
+        backgroundColor:
+            'bg-red-50 border border-red-200 dark:bg-red-500/10 dark:border-red-500/30',
+        titleColor: 'text-red-900 dark:text-red-100',
+        textColor: 'text-red-800 dark:text-red-200',
+        iconColor: 'text-red-500 dark:text-red-400',
         icon: <HiXCircle />,
     },
 }
@@ -133,7 +137,7 @@ const Alert = (props: AlertProps) => {
         alertDefaultClass,
         typeMap.backgroundColor,
         typeMap.textColor,
-        !title ? 'font-semibold' : '',
+        !title ? 'font-medium' : '',
         closable ? 'justify-between' : '',
         closable && !title ? 'items-center' : '',
         rounded && 'rounded-lg',
@@ -147,6 +151,8 @@ const Alert = (props: AlertProps) => {
     return (
         <motion.div
             ref={ref}
+            // Errores y avisos interrumpen; el resto se anuncia sin urgencia
+            role={type === 'danger' || type === 'warning' ? 'alert' : 'status'}
             className={alertClass}
             initial={{ opacity: 1 }}
             animate={display === 'hiding' ? 'exit' : 'animate'}

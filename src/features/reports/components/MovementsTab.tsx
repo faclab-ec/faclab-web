@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import Badge from '@/components/ui/Badge'
+import StatusBadge from '@/components/shared/StatusBadge'
 import Select from '@/components/ui/Select'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import { formatDatetime } from '@shared/lib/format'
 import { ProductSelect } from '@features/products'
 import { useMovementHistory } from '../hooks/useReports'
 import type { MovementHistoryItem, MovementHistoryParams } from '../model/types'
+import LabeledField from '@/components/shared/LabeledField'
+import Input from '@/components/ui/Input'
 
 const movementTypeOptions = [
     { value: '', label: 'Todos' },
@@ -75,14 +77,9 @@ const MovementsTab = ({ warehouseOptions }: Props) => {
             cell: (props) => {
                 const type = props.row.original.type
                 return (
-                    <Badge
-                        content={type === 'IN' ? 'Entrada' : 'Salida'}
-                        className={
-                            type === 'IN'
-                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'
-                                : 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300'
-                        }
-                    />
+                    <StatusBadge tone={type === 'IN' ? 'success' : 'danger'}>
+                        {type === 'IN' ? 'Entrada' : 'Salida'}
+                    </StatusBadge>
                 )
             },
         },
@@ -146,10 +143,7 @@ const MovementsTab = ({ warehouseOptions }: Props) => {
     return (
         <>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-                <div>
-                    <label className="block text-sm font-medium mb-2">
-                        Almacén
-                    </label>
+                <LabeledField label="Almacén">
                     <Select
                         placeholder="Todos"
                         options={warehouseOptions}
@@ -161,11 +155,8 @@ const MovementsTab = ({ warehouseOptions }: Props) => {
                             setMovPageIndex(1)
                         }}
                     />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium mb-2">
-                        Producto
-                    </label>
+                </LabeledField>
+                <LabeledField label="Producto">
                     <ProductSelect
                         isClearable
                         placeholder="Todos"
@@ -175,11 +166,8 @@ const MovementsTab = ({ warehouseOptions }: Props) => {
                             setMovPageIndex(1)
                         }}
                     />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium mb-2">
-                        Tipo
-                    </label>
+                </LabeledField>
+                <LabeledField label="Tipo">
                     <Select
                         placeholder="Todos"
                         options={movementTypeOptions}
@@ -191,35 +179,27 @@ const MovementsTab = ({ warehouseOptions }: Props) => {
                             setMovPageIndex(1)
                         }}
                     />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium mb-2">
-                        Desde
-                    </label>
-                    <input
+                </LabeledField>
+                <LabeledField label="Desde">
+                    <Input
                         type="date"
-                        className="w-full border rounded-lg px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
                         value={movFromDate}
                         onChange={(e) => {
                             setMovFromDate(e.target.value)
                             setMovPageIndex(1)
                         }}
                     />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium mb-2">
-                        Hasta
-                    </label>
-                    <input
+                </LabeledField>
+                <LabeledField label="Hasta">
+                    <Input
                         type="date"
-                        className="w-full border rounded-lg px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
                         value={movToDate}
                         onChange={(e) => {
                             setMovToDate(e.target.value)
                             setMovPageIndex(1)
                         }}
                     />
-                </div>
+                </LabeledField>
             </div>
 
             <DataTable

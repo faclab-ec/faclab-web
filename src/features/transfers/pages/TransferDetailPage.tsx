@@ -13,6 +13,7 @@ import { ConfirmTransferDialog } from '../components/ConfirmTransferDialog'
 import { ReceiveTransferDialog } from '../components/ReceiveTransferDialog'
 import TransferItemForm from '../components/TransferItemForm'
 import { formatProductLabel } from '@shared/lib/format'
+import EmptyState from '@/components/shared/EmptyState'
 
 const TransferDetailPage = () => {
     const { id } = useParams<{ id: string }>()
@@ -53,16 +54,19 @@ const TransferDetailPage = () => {
 
     if (!transfer) {
         return (
-            <div className="flex flex-col items-center justify-center h-96">
-                <h4 className="mb-4">Transferencia no encontrada</h4>
-                <Button
-                    variant="solid"
-                    icon={<HiOutlineArrowLeft />}
-                    onClick={() => navigate('/transfers')}
-                >
-                    Volver a Transferencias
-                </Button>
-            </div>
+            <EmptyState
+                className="min-h-[24rem]"
+                title="Transferencia no encontrada"
+                action={
+                    <Button
+                        size="sm"
+                        icon={<HiOutlineArrowLeft />}
+                        onClick={() => navigate('/transfers')}
+                    >
+                        Volver a Transferencias
+                    </Button>
+                }
+            />
         )
     }
 

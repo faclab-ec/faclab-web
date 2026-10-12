@@ -81,8 +81,8 @@ const ConfirmDialog = (props: ConfirmDialogProps) => {
         children,
         onCancel,
         onConfirm,
-        cancelText = 'Cancel',
-        confirmText = 'Confirm',
+        cancelText = 'Cancelar',
+        confirmText = 'Confirmar',
         confirmButtonColor,
         ...rest
     } = props
@@ -96,17 +96,21 @@ const ConfirmDialog = (props: ConfirmDialogProps) => {
     }
 
     return (
-        <Dialog contentClassName="pb-0 px-0" {...rest}>
+        <Dialog
+            contentClassName="pb-0 px-0"
+            contentLabel={typeof title === 'string' ? title : undefined}
+            {...rest}
+        >
             <div className="px-6 pb-6 pt-2 flex">
                 <div>
                     <StatusIcon status={type} />
                 </div>
                 <div className="ml-4 rtl:mr-4">
-                    <h5 className="mb-2">{title}</h5>
+                    <h4 className="mb-2">{title}</h4>
                     {children}
                 </div>
             </div>
-            <div className="text-right px-6 py-3 bg-gray-100 dark:bg-gray-700 rounded-bl-lg rounded-br-lg">
+            <div className="rounded-b-2xl border-t border-gray-200 bg-gray-50 px-6 py-3 text-right dark:border-gray-700 dark:bg-gray-900/40">
                 <Button
                     size="sm"
                     className="ltr:mr-2 rtl:ml-2"

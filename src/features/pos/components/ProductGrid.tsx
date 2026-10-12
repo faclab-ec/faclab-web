@@ -2,6 +2,8 @@ import { usePOSProducts, usePOSSearchProducts } from '../hooks/usePOS'
 import { usePOSStore } from '../store/usePOSStore'
 import ProductCard from './ProductCard'
 import Skeleton from '@/components/ui/Skeleton'
+import EmptyState from '@/components/shared/EmptyState'
+import { HiOutlineSearch } from 'react-icons/hi'
 
 const ProductGrid = () => {
     const searchTerm = usePOSStore((s) => s.searchTerm)
@@ -24,10 +26,16 @@ const ProductGrid = () => {
 
     if (isLoading) {
         return (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div
+                aria-label="Cargando"
+                className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+            >
                 {Array.from({ length: 10 }).map((_, i) => (
-                    <div key={i} className="rounded-lg overflow-hidden">
-                        <Skeleton height={160} />
+                    <div
+                        key={i}
+                        className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+                    >
+                        <Skeleton height={120} className="!rounded-none" />
                         <div className="p-3 space-y-2">
                             <Skeleton height={16} />
                             <Skeleton height={20} width="60%" />
@@ -40,14 +48,16 @@ const ProductGrid = () => {
 
     if (products.length === 0) {
         return (
-            <div className="flex items-center justify-center h-64 text-gray-400">
-                No se encontraron productos
-            </div>
+            <EmptyState
+                icon={<HiOutlineSearch />}
+                title="No se encontraron productos"
+                description="Prueba con otro nombre, SKU o categoría."
+            />
         )
     }
 
     return (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
             {products.map((product) => (
                 <ProductCard key={product.id} product={product} />
             ))}

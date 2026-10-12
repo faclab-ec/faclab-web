@@ -7,7 +7,7 @@ export interface CloseButtonProps extends CommonProps {
     absolute?: boolean
     defaultStyle?: boolean
     onClick?: (e: MouseEvent<HTMLSpanElement>) => void
-    ref?: Ref<HTMLElement>
+    ref?: Ref<HTMLButtonElement>
 }
 
 const CloseButton = (props: CloseButtonProps) => {
@@ -22,9 +22,15 @@ const CloseButton = (props: CloseButtonProps) => {
     )
 
     return (
-        <span className={closeButtonClass} role="button" {...rest} ref={ref}>
+        <button
+            type="button"
+            className={closeButtonClass}
+            aria-label="Cerrar"
+            {...rest}
+            ref={ref}
+        >
             <HiX />
-        </span>
+        </button>
     )
 }
 

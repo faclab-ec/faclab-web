@@ -1,3 +1,5 @@
+import type { StatusTone } from '@shared/lib/statusTone'
+
 export type AlertType =
     | 'low_stock'
     | 'out_of_stock'
@@ -11,15 +13,11 @@ export const ALERT_TYPE_LABELS: Record<AlertType, string> = {
     expiring_soon: 'Por Vencer',
 }
 
-export const ALERT_TYPE_CLASSES: Record<AlertType, string> = {
-    low_stock:
-        'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300',
-    out_of_stock:
-        'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300',
-    reorder_point:
-        'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
-    expiring_soon:
-        'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300',
+export const ALERT_TYPE_TONES: Record<AlertType, StatusTone> = {
+    low_stock: 'warning',
+    out_of_stock: 'danger',
+    reorder_point: 'info',
+    expiring_soon: 'warning',
 }
 
 export interface StockAlert {

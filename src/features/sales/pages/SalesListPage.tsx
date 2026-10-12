@@ -3,21 +3,23 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import Badge from '@/components/ui/Badge'
+import StatusBadge from '@/components/shared/StatusBadge'
 import Select from '@/components/ui/Select'
 import { CustomerSelect } from '@features/customers'
 import { formatCurrency } from '@shared/lib/format'
 import { useSalesList } from '../hooks/useSales'
 import {
     SALE_STATUS_LABELS,
-    SALE_STATUS_CLASSES,
+    SALE_STATUS_TONES,
     PAYMENT_STATUS_LABELS,
-    PAYMENT_STATUS_CLASSES,
+    PAYMENT_STATUS_TONES,
     type Sale,
     type SaleQueryParams,
     type SaleStatus,
 } from '../model/types'
 import { HiOutlineEye } from 'react-icons/hi'
+import LabeledField from '@/components/shared/LabeledField'
+import PageHeader from '@/components/shared/PageHeader'
 
 const statusOptions = [
     { value: '', label: 'Todos' },
@@ -47,7 +49,12 @@ const SalesListPage = () => {
         offset,
     }
 
-    const { data, isLoading } = useSalesList(queryParams)
+    const {
+        data,
+        isLoading,
+        error: listError,
+        refetch,
+    } = useSalesList(queryParams)
     const sales = data?.items ?? []
     const total = data?.pagination?.total ?? 0
 
@@ -77,10 +84,9 @@ const SalesListPage = () => {
             cell: (props) => {
                 const status = props.row.original.status
                 return (
-                    <Badge
-                        content={SALE_STATUS_LABELS[status]}
-                        className={SALE_STATUS_CLASSES[status]}
-                    />
+                    <StatusBadge tone={SALE_STATUS_TONES[status]}>
+                        {SALE_STATUS_LABELS[status]}
+                    </StatusBadge>
                 )
             },
         },
@@ -90,10 +96,9 @@ const SalesListPage = () => {
             cell: (props) => {
                 const ps = props.row.original.paymentStatus
                 return (
-                    <Badge
-                        content={PAYMENT_STATUS_LABELS[ps]}
-                        className={PAYMENT_STATUS_CLASSES[ps]}
-                    />
+                    <StatusBadge tone={PAYMENT_STATUS_TONES[ps]}>
+                        {PAYMENT_STATUS_LABELS[ps]}
+                    </StatusBadge>
                 )
             },
         },
@@ -136,6 +141,7 @@ const SalesListPage = () => {
                 <Button
                     size="sm"
                     variant="plain"
+                    aria-label="Ver detalle"
                     icon={<HiOutlineEye />}
                     onClick={() => navigate(`/sales/${props.row.original.id}`)}
                 />
@@ -145,69 +151,58 @@ const SalesListPage = () => {
 
     return (
         <>
+            <PageHeader
+                title="Ventas"
+                description="Consulta el historial de ventas"
+            />
             <Card className="mb-4">
-                <div className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Estado
-                            </label>
-                            <Select
-                                placeholder="Filtrar por estado"
-                                options={statusOptions}
-                                value={statusOptions.find(
-                                    (o) => o.value === statusFilter
-                                )}
-                                onChange={(option) => {
-                                    setStatusFilter(option?.value || '')
-                                    setPageIndex(1)
-                                }}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Cliente
-                            </label>
-                            <CustomerSelect
-                                isClearable
-                                placeholder="Todos"
-                                value={customerFilter}
-                                onChange={(id) => {
-                                    setCustomerFilter(id)
-                                    setPageIndex(1)
-                                }}
-                            />
-                        </div>
-                        <div className="flex items-end">
-                            <Button variant="plain" onClick={handleReset}>
-                                Limpiar Filtros
-                            </Button>
-                        </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <LabeledField label="Estado">
+                        <Select
+                            placeholder="Filtrar por estado"
+                            options={statusOptions}
+                            value={statusOptions.find(
+                                (o) => o.value === statusFilter
+                            )}
+                            onChange={(option) => {
+                                setStatusFilter(option?.value || '')
+                                setPageIndex(1)
+                            }}
+                        />
+                    </LabeledField>
+                    <LabeledField label="Cliente">
+                        <CustomerSelect
+                            isClearable
+                            placeholder="Todos"
+                            value={customerFilter}
+                            onChange={(id) => {
+                                setCustomerFilter(id)
+                                setPageIndex(1)
+                            }}
+                        />
+                    </LabeledField>
+                    <div className="flex items-end">
+                        <Button variant="plain" onClick={handleReset}>
+                            Limpiar Filtros
+                        </Button>
                     </div>
                 </div>
             </Card>
 
-            <Card>
-                <div className="p-4">
-                    <div className="mb-4">
-                        <h4 className="text-lg font-semibold">Ventas</h4>
-                        <p className="text-sm text-gray-500 mt-1">
-                            Consulta el historial de ventas
-                        </p>
-                    </div>
-
-                    <DataTable
-                        columns={columns}
-                        data={sales}
-                        loading={isLoading}
-                        pagingData={{ total, pageIndex, pageSize }}
-                        onPaginationChange={setPageIndex}
-                        onSelectChange={(size) => {
-                            setPageSize(size)
-                            setPageIndex(1)
-                        }}
-                    />
-                </div>
+            <Card bodyClass="p-0">
+                <DataTable
+                    columns={columns}
+                    data={sales}
+                    loading={isLoading}
+                    error={listError}
+                    pagingData={{ total, pageIndex, pageSize }}
+                    onRetry={refetch}
+                    onPaginationChange={setPageIndex}
+                    onSelectChange={(size) => {
+                        setPageSize(size)
+                        setPageIndex(1)
+                    }}
+                />
             </Card>
         </>
     )

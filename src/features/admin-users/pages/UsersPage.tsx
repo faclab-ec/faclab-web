@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Card from '@/components/ui/Card'
+import PageHeader from '@/components/shared/PageHeader'
 import Button from '@/components/ui/Button'
 import Select from '@/components/ui/Select'
 import { ConfirmDialog } from '@/components/shared'
@@ -48,77 +49,70 @@ const UsersPage = () => {
 
     return (
         <>
+            <PageHeader
+                title="Usuarios"
+                description="Gestiona los usuarios del sistema"
+                actions={
+                    <>
+                        <Select
+                            isClearable
+                            size="sm"
+                            className="min-w-[160px]"
+                            placeholder="Todos los roles"
+                            options={roleFilterOptions}
+                            value={
+                                roleFilterOptions.find(
+                                    (o) => o.value === filterRole
+                                ) ?? null
+                            }
+                            onChange={(opt) => {
+                                setFilterRole(opt?.value)
+                                crud.onPaginationChange(1, crud.pageSize)
+                            }}
+                        />
+                        <Select
+                            size="sm"
+                            className="min-w-[130px]"
+                            options={isActiveOptions}
+                            value={
+                                isActiveOptions.find(
+                                    (o) => o.value === filterIsActive
+                                ) ?? isActiveOptions[0]
+                            }
+                            onChange={(opt) => {
+                                setFilterIsActive(opt?.value)
+                                crud.onPaginationChange(1, crud.pageSize)
+                            }}
+                        />
+                        <Button
+                            variant="solid"
+                            size="sm"
+                            icon={<HiPlus />}
+                            onClick={crud.openCreate}
+                        >
+                            Nuevo usuario
+                        </Button>
+                    </>
+                }
+            />
             <Card>
-                <div className="p-4">
-                    <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
-                        <div>
-                            <h4 className="text-lg font-semibold">Usuarios</h4>
-                            <p className="text-sm text-gray-500 mt-1">
-                                Gestiona los usuarios del sistema
-                            </p>
-                        </div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <Select
-                                isClearable
-                                size="sm"
-                                className="min-w-[160px]"
-                                placeholder="Todos los roles"
-                                options={roleFilterOptions}
-                                value={
-                                    roleFilterOptions.find(
-                                        (o) => o.value === filterRole
-                                    ) ?? null
-                                }
-                                onChange={(opt) => {
-                                    setFilterRole(opt?.value)
-                                    crud.onPaginationChange(1, crud.pageSize)
-                                }}
-                            />
-                            <Select
-                                size="sm"
-                                className="min-w-[130px]"
-                                options={isActiveOptions}
-                                value={
-                                    isActiveOptions.find(
-                                        (o) => o.value === filterIsActive
-                                    ) ?? isActiveOptions[0]
-                                }
-                                onChange={(opt) => {
-                                    setFilterIsActive(opt?.value)
-                                    crud.onPaginationChange(1, crud.pageSize)
-                                }}
-                            />
-                            <Button
-                                variant="solid"
-                                size="sm"
-                                icon={<HiPlus />}
-                                onClick={crud.openCreate}
-                            >
-                                Nuevo usuario
-                            </Button>
-                        </div>
-                    </div>
-
-                    <UsersTable
-                        items={items}
-                        isLoading={isLoading}
-                        pageIndex={crud.pageIndex}
-                        pageSize={crud.pageSize}
-                        total={total}
-                        updatingRoleId={actions.updatingRoleId}
-                        togglingId={actions.togglingId}
-                        onPaginationChange={(idx) =>
-                            crud.onPaginationChange(idx, crud.pageSize)
-                        }
-                        onSelectChange={(size) =>
-                            crud.onPaginationChange(1, size)
-                        }
-                        onRoleChange={actions.handleRoleChange}
-                        onReset={actions.openReset}
-                        onDeactivate={actions.openDeactivate}
-                        onActivate={actions.handleActivate}
-                    />
-                </div>
+                <UsersTable
+                    items={items}
+                    isLoading={isLoading}
+                    pageIndex={crud.pageIndex}
+                    pageSize={crud.pageSize}
+                    total={total}
+                    updatingRoleId={actions.updatingRoleId}
+                    togglingId={actions.togglingId}
+                    onPaginationChange={(idx) =>
+                        crud.onPaginationChange(idx, crud.pageSize)
+                    }
+                    onSelectChange={(size) => crud.onPaginationChange(1, size)}
+                    onRoleChange={actions.handleRoleChange}
+                    onReset={actions.openReset}
+                    onDeactivate={actions.openDeactivate}
+                    onActivate={actions.handleActivate}
+                />
             </Card>
 
             <CreateUserModal open={crud.isCreateOpen} onClose={crud.closeAll} />

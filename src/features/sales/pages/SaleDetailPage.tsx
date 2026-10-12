@@ -1,20 +1,22 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import Badge from '@/components/ui/Badge'
+import StatusBadge from '@/components/shared/StatusBadge'
 import Tabs from '@/components/ui/Tabs'
 import { HiOutlineArrowLeft } from 'react-icons/hi'
 import { useSale } from '../hooks/useSales'
 import {
     SALE_STATUS_LABELS,
-    SALE_STATUS_CLASSES,
+    SALE_STATUS_TONES,
     PAYMENT_STATUS_LABELS,
-    PAYMENT_STATUS_CLASSES,
+    PAYMENT_STATUS_TONES,
 } from '../model/types'
 import SaleInfoCard from '../components/SaleInfoCard'
 import SaleItemsTab from '../components/SaleItemsTab'
 import SalePaymentsTab from '../components/SalePaymentsTab'
 import SaleInvoicesTab from '../components/SaleInvoicesTab'
+import PageHeader from '@/components/shared/PageHeader'
+import EmptyState from '@/components/shared/EmptyState'
 
 const { TabList, TabNav, TabContent } = Tabs
 
@@ -35,37 +37,41 @@ const SaleDetailPage = () => {
 
     if (!sale) {
         return (
-            <div className="flex flex-col items-center justify-center h-96">
-                <h4 className="mb-4">Venta no encontrada</h4>
-                <Button
-                    variant="solid"
-                    icon={<HiOutlineArrowLeft />}
-                    onClick={() => navigate('/sales')}
-                >
-                    Volver a Ventas
-                </Button>
-            </div>
+            <EmptyState
+                className="min-h-[24rem]"
+                title="Venta no encontrada"
+                action={
+                    <Button
+                        size="sm"
+                        icon={<HiOutlineArrowLeft />}
+                        onClick={() => navigate('/sales')}
+                    >
+                        Volver a Ventas
+                    </Button>
+                }
+            />
         )
     }
 
     return (
         <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-4">
-                <Button
-                    variant="plain"
-                    icon={<HiOutlineArrowLeft />}
-                    onClick={() => navigate('/sales')}
-                />
-                <h3>Venta #{sale.id}</h3>
-                <Badge
-                    content={SALE_STATUS_LABELS[sale.status]}
-                    className={SALE_STATUS_CLASSES[sale.status]}
-                />
-                <Badge
-                    content={PAYMENT_STATUS_LABELS[sale.paymentStatus]}
-                    className={PAYMENT_STATUS_CLASSES[sale.paymentStatus]}
-                />
-            </div>
+            <PageHeader
+                className="!mb-1"
+                title={`Venta #${sale.id}`}
+                badge={
+                    <>
+                        <StatusBadge tone={SALE_STATUS_TONES[sale.status]}>
+                            {SALE_STATUS_LABELS[sale.status]}
+                        </StatusBadge>
+                        <StatusBadge
+                            tone={PAYMENT_STATUS_TONES[sale.paymentStatus]}
+                        >
+                            {PAYMENT_STATUS_LABELS[sale.paymentStatus]}
+                        </StatusBadge>
+                    </>
+                }
+                onBack={() => navigate('/sales')}
+            />
 
             <SaleInfoCard sale={sale} />
 

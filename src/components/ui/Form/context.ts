@@ -17,4 +17,23 @@ export function useForm() {
     return useContext(FormContext)
 }
 
+export type FormItemContextProps = {
+    /** `id` que debe llevar el control para que el `<label>` lo nombre */
+    controlId: string
+    /** `id` del mensaje de error, para `aria-describedby` */
+    errorId: string
+    invalid: boolean
+    /** El `FormItem` está marcado como obligatorio (`asterisk`) */
+    required: boolean
+}
+
+const FormItemContext = createContext<FormItemContextProps | null>(null)
+
+export const FormItemContextProvider = FormItemContext.Provider
+
+/** Datos del `FormItem` que envuelve al control, o `null` fuera de uno. */
+export function useFormItem() {
+    return useContext(FormItemContext)
+}
+
 export default FormContext

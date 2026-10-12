@@ -46,7 +46,7 @@ const Button = (props: ButtonProps) => {
         variant = 'default',
         ...rest
     } = props
-    const { themeColor, controlSize, primaryColorLevel } = useConfig()
+    const { accentColor, accentColorLevel, controlSize } = useConfig()
     const formControlSize = useForm()?.size
     const inputGroupSize = useInputGroup()?.size
     const defaultClass = 'button'
@@ -55,12 +55,10 @@ const Button = (props: ButtonProps) => {
     const splitedColor = color?.split('-') || []
 
     const buttonSize = size || inputGroupSize || formControlSize || controlSize
-    const buttonColor = splitedColor[0] || themeColor
-    const buttonColorLevel = splitedColor[1] || primaryColorLevel
+    const buttonColor = splitedColor[0] || accentColor
+    const buttonColorLevel = splitedColor[1] || accentColorLevel
 
-    const [increaseLevel, decreaseLevel] = useColorLevel(
-        buttonColorLevel as ColorLevel
-    )
+    const [increaseLevel] = useColorLevel(buttonColorLevel as ColorLevel)
 
     const getButtonSize = () => {
         let sizeClass = ''
@@ -70,7 +68,7 @@ const Button = (props: ButtonProps) => {
                     `h-${CONTROL_SIZES.lg}`,
                     icon && !children
                         ? `w-${CONTROL_SIZES.lg} ${sizeIconClass} text-2xl`
-                        : 'px-8 py-2 text-base'
+                        : 'px-6 py-2 text-base'
                 )
                 break
             case SIZES.SM:
@@ -94,7 +92,7 @@ const Button = (props: ButtonProps) => {
                     `h-${CONTROL_SIZES.md}`,
                     icon && !children
                         ? `w-${CONTROL_SIZES.md} ${sizeIconClass} text-xl`
-                        : 'px-8 py-2'
+                        : 'px-5 py-2'
                 )
                 break
         }
@@ -109,9 +107,10 @@ const Button = (props: ButtonProps) => {
                 ? `bg-${buttonColor}-${increaseLevel}`
                 : `bg-${buttonColor}-${buttonColorLevel}`,
             textColor: 'text-white',
+            // Más oscuro al pasar el cursor: mantiene el contraste del texto
             hoverColor: active
                 ? ''
-                : `hover:bg-${buttonColor}-${decreaseLevel}`,
+                : `hover:bg-${buttonColor}-${increaseLevel}`,
             activeColor: `active:bg-${buttonColor}-${increaseLevel}`,
         }
         return getBtnColor(btn)
@@ -134,11 +133,13 @@ const Button = (props: ButtonProps) => {
     const defaultColor = () => {
         const btn = {
             bgColor: active
-                ? `bg-gray-100 border border-gray-300 dark:bg-gray-500 dark:border-gray-500`
-                : `bg-white border border-gray-300 dark:bg-gray-700 dark:border-gray-700`,
-            textColor: `text-gray-600 dark:text-gray-100`,
-            hoverColor: active ? '' : `hover:bg-gray-50 dark:hover:bg-gray-600`,
-            activeColor: `active:bg-gray-100 dark:active:bg-gray-500 dark:active:border-gray-500`,
+                ? `bg-gray-100 border border-gray-300 dark:bg-gray-600 dark:border-gray-500`
+                : `bg-white border border-gray-300 dark:bg-gray-800 dark:border-gray-600`,
+            textColor: `text-gray-700 dark:text-gray-100`,
+            hoverColor: active
+                ? ''
+                : `hover:bg-gray-50 hover:border-gray-400 dark:hover:bg-gray-700`,
+            activeColor: `active:bg-gray-100 dark:active:bg-gray-600`,
         }
         return getBtnColor(btn)
     }
@@ -146,11 +147,13 @@ const Button = (props: ButtonProps) => {
     const plainColor = () => {
         const btn = {
             bgColor: active
-                ? `bg-gray-100 dark:bg-gray-500`
+                ? `bg-gray-100 dark:bg-gray-600`
                 : 'bg-transparent border border-transparent',
-            textColor: `text-gray-600 dark:text-gray-100`,
-            hoverColor: active ? '' : `hover:bg-gray-50 dark:hover:bg-gray-600`,
-            activeColor: `active:bg-gray-100 dark:active:bg-gray-500 dark:active:border-gray-500`,
+            textColor: `text-gray-600 dark:text-gray-200`,
+            hoverColor: active
+                ? ''
+                : `hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-white`,
+            activeColor: `active:bg-gray-200 dark:active:bg-gray-600`,
         }
         return getBtnColor(btn)
     }
@@ -230,7 +233,14 @@ const Button = (props: ButtonProps) => {
     }
 
     return (
-        <button ref={ref} className={classes} {...rest} onClick={handleClick}>
+        <button
+            ref={ref}
+            className={classes}
+            disabled={disabled}
+            aria-busy={loading || undefined}
+            {...rest}
+            onClick={handleClick}
+        >
             {renderChildren()}
         </button>
     )

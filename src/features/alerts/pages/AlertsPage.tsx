@@ -13,6 +13,9 @@ import { useWarehousesList } from '@features/warehouses'
 import AlertSummaryCards from '../components/AlertSummaryCards'
 import StockAlertTab from '../components/StockAlertTab'
 import ExpiringLotsTab from '../components/ExpiringLotsTab'
+import LabeledField from '@/components/shared/LabeledField'
+import Input from '@/components/ui/Input'
+import PageHeader from '@/components/shared/PageHeader'
 
 const { TabList, TabNav, TabContent } = Tabs
 
@@ -56,6 +59,11 @@ const AlertsPage = () => {
 
     return (
         <div className="flex flex-col gap-4">
+            <PageHeader
+                className="!mb-1"
+                title="Alertas de Inventario"
+                description="Productos con stock bajo, agotados, en punto de reorden o con lotes por vencer"
+            />
             <AlertSummaryCards
                 counts={{
                     lowStock: lowStock.length,
@@ -68,41 +76,32 @@ const AlertsPage = () => {
             />
 
             <Card>
-                <div className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {activeTab !== 'expiring_soon' ? (
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Almacén
-                                </label>
-                                <Select
-                                    placeholder="Filtrar por almacén"
-                                    options={warehouseOptions}
-                                    value={warehouseOptions.find(
-                                        (o) => o.value === warehouseFilter
-                                    )}
-                                    onChange={(option) =>
-                                        setWarehouseFilter(option?.value || '')
-                                    }
-                                />
-                            </div>
-                        ) : (
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Días para vencer
-                                </label>
-                                <input
-                                    type="number"
-                                    min={1}
-                                    className="w-full border rounded-lg px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                                    value={expiringDays}
-                                    onChange={(e) =>
-                                        setExpiringDays(e.target.value)
-                                    }
-                                />
-                            </div>
-                        )}
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {activeTab !== 'expiring_soon' ? (
+                        <LabeledField label="Almacén">
+                            <Select
+                                placeholder="Filtrar por almacén"
+                                options={warehouseOptions}
+                                value={warehouseOptions.find(
+                                    (o) => o.value === warehouseFilter
+                                )}
+                                onChange={(option) =>
+                                    setWarehouseFilter(option?.value || '')
+                                }
+                            />
+                        </LabeledField>
+                    ) : (
+                        <LabeledField label="Días para vencer">
+                            <Input
+                                type="number"
+                                min={1}
+                                value={expiringDays}
+                                onChange={(e) =>
+                                    setExpiringDays(e.target.value)
+                                }
+                            />
+                        </LabeledField>
+                    )}
                 </div>
             </Card>
 

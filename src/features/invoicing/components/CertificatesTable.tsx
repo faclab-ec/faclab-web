@@ -1,6 +1,6 @@
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Button from '@/components/ui/Button'
-import Badge from '@/components/ui/Badge'
+import StatusBadge from '@/components/shared/StatusBadge'
 import { HiOutlineTrash } from 'react-icons/hi'
 import type { Certificate } from '../model/types'
 
@@ -35,10 +35,7 @@ const CertificatesTable = ({
                 <span className="inline-flex items-center gap-2 font-medium">
                     {props.row.original.fileName}
                     {props.row.original.id === activeCertificateId && (
-                        <Badge
-                            content="En uso"
-                            className="bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
-                        />
+                        <StatusBadge tone="success">En uso</StatusBadge>
                     )}
                 </span>
             ),
