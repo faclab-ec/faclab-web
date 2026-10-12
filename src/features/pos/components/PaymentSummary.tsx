@@ -1,3 +1,4 @@
+import { formatCurrency } from '@shared/lib/format'
 import { usePOSStore } from '../store/usePOSStore'
 import { useCartTotals } from '../hooks/useCartTotals'
 
@@ -6,34 +7,36 @@ const PaymentSummary = () => {
     const { subtotal, discountAmount, tax, total } = useCartTotals()
 
     return (
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
-            <div className="flex justify-between text-sm">
-                <span className="text-gray-500 dark:text-gray-400">
-                    Subtotal
-                </span>
-                <span>${subtotal.toFixed(2)}</span>
+        <dl className="space-y-1.5 border-t border-gray-200 px-4 py-3 tabular-nums dark:border-gray-700">
+            <div className="flex justify-between">
+                <dt className="text-gray-500 dark:text-gray-400">Subtotal</dt>
+                <dd>{formatCurrency(subtotal)}</dd>
             </div>
             {discountAmount > 0 && (
-                <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400">
+                <div className="flex justify-between">
+                    <dt className="text-gray-500 dark:text-gray-400">
                         Descuento
                         {discountType === 'PERCENTAGE' &&
                             ` (${discountValue}%)`}
-                    </span>
-                    <span className="text-red-500">
-                        -${discountAmount.toFixed(2)}
-                    </span>
+                    </dt>
+                    <dd className="text-red-600 dark:text-red-400">
+                        -{formatCurrency(discountAmount)}
+                    </dd>
                 </div>
             )}
-            <div className="flex justify-between text-sm">
-                <span className="text-gray-500 dark:text-gray-400">IVA</span>
-                <span>${tax.toFixed(2)}</span>
+            <div className="flex justify-between">
+                <dt className="text-gray-500 dark:text-gray-400">IVA</dt>
+                <dd>{formatCurrency(tax)}</dd>
             </div>
-            <div className="flex justify-between font-bold text-lg pt-2 border-t border-gray-200 dark:border-gray-700">
-                <span>Total</span>
-                <span className="text-primary-600">${total.toFixed(2)}</span>
+            <div className="flex items-baseline justify-between border-t border-gray-200 pt-2 dark:border-gray-700">
+                <dt className="font-semibold text-gray-900 dark:text-gray-50">
+                    Total
+                </dt>
+                <dd className="text-xl font-semibold text-gray-900 dark:text-gray-50">
+                    {formatCurrency(total)}
+                </dd>
             </div>
-        </div>
+        </dl>
     )
 }
 

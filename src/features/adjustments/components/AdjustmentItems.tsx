@@ -4,6 +4,7 @@ import Table from '@/components/ui/Table'
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi'
 import { getDifferenceColor, getDifferenceLabel } from './utils'
 import type { AdjustmentItem } from '../model/types'
+import EmptyState from '@/components/shared/EmptyState'
 
 const { Tr, Th, Td, THead, TBody } = Table
 
@@ -48,9 +49,7 @@ export const AdjustmentItems = ({
                 <div>Cargando items...</div>
             </div>
         ) : items.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-                No hay items en este ajuste
-            </div>
+            <EmptyState className="!py-8" title="No hay items en este ajuste" />
         ) : (
             <Table>
                 <THead>
@@ -93,12 +92,14 @@ export const AdjustmentItems = ({
                                         <Button
                                             size="sm"
                                             variant="plain"
+                                            aria-label="Editar"
                                             icon={<HiOutlinePencil />}
                                             onClick={() => onEdit(item)}
                                         />
                                         <Button
                                             size="sm"
                                             variant="plain"
+                                            aria-label="Eliminar"
                                             icon={<HiOutlineTrash />}
                                             onClick={() => onDeleteItem(item)}
                                         />

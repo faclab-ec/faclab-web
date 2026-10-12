@@ -1,8 +1,13 @@
 import classNames from 'classnames'
 import type { CommonProps, TypeAttributes } from '../@types/common'
-import type { ElementType, Ref } from 'react'
+import type { ElementType, HTMLAttributes, Ref } from 'react'
 
-export interface MenuItemProps extends CommonProps {
+type MenuItemAriaProps = Pick<
+    HTMLAttributes<HTMLElement>,
+    'role' | 'tabIndex' | 'onKeyDown' | 'aria-disabled' | 'aria-current'
+>
+
+export interface MenuItemProps extends CommonProps, MenuItemAriaProps {
     asElement?: ElementType
     id?: string
     disabled?: boolean

@@ -29,7 +29,7 @@ const appConfig: AppConfig = {
     authenticatedEntryPath: '/home',
     unAuthenticatedEntryPath: '/sign-in',
     tourPath: '/',
-    locale: 'en',
+    locale: 'es',
     enableMock: false,
     inventoryApiHost: `${apiBaseUrl}/api/admin`,
     posApiHost: `${apiBaseUrl}/api/pos`,

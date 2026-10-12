@@ -1,7 +1,6 @@
 import Button from '@/components/ui/Button'
-import Badge from '@/components/ui/Badge'
+import StatusBadge from '@/components/shared/StatusBadge'
 import {
-    HiOutlineArrowLeft,
     HiOutlinePencil,
     HiOutlineTrash,
     HiOutlineCheck,
@@ -9,9 +8,10 @@ import {
 } from 'react-icons/hi'
 import {
     ADJUSTMENT_STATUS_LABELS,
-    ADJUSTMENT_STATUS_CLASSES,
+    ADJUSTMENT_STATUS_TONES,
     type Adjustment,
 } from '../model/types'
+import PageHeader from '@/components/shared/PageHeader'
 
 type Props = {
     adjustment: Adjustment
@@ -32,55 +32,57 @@ export const AdjustmentHeader = ({
     onCancel,
     onDelete,
 }: Props) => (
-    <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-            <Button
-                variant="plain"
-                icon={<HiOutlineArrowLeft />}
-                onClick={onBack}
-            />
-            <h3>Ajuste #{adjustment.id}</h3>
-            <Badge
-                content={ADJUSTMENT_STATUS_LABELS[adjustment.status]}
-                className={ADJUSTMENT_STATUS_CLASSES[adjustment.status]}
-            />
-        </div>
-        {isDraft && (
-            <div className="flex gap-2">
-                <Button
-                    size="sm"
-                    variant="plain"
-                    icon={<HiOutlinePencil />}
-                    onClick={onEdit}
-                >
-                    Editar
-                </Button>
-                <Button
-                    size="sm"
-                    variant="solid"
-                    color="emerald-600"
-                    icon={<HiOutlineCheck />}
-                    onClick={onConfirm}
-                >
-                    Confirmar
-                </Button>
-                <Button
-                    size="sm"
-                    variant="plain"
-                    icon={<HiOutlineX />}
-                    onClick={onCancel}
-                >
-                    Cancelar
-                </Button>
-                <Button
-                    size="sm"
-                    variant="plain"
-                    icon={<HiOutlineTrash />}
-                    onClick={onDelete}
-                >
-                    Eliminar
-                </Button>
-            </div>
-        )}
-    </div>
+    <PageHeader
+        className="!mb-1"
+        title={`Ajuste #${adjustment.id}`}
+        badge={
+            <>
+                <StatusBadge tone={ADJUSTMENT_STATUS_TONES[adjustment.status]}>
+                    {ADJUSTMENT_STATUS_LABELS[adjustment.status]}
+                </StatusBadge>
+            </>
+        }
+        actions={
+            <>
+                {isDraft && (
+                    <div className="flex gap-2">
+                        <Button
+                            size="sm"
+                            variant="plain"
+                            icon={<HiOutlinePencil />}
+                            onClick={onEdit}
+                        >
+                            Editar
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="solid"
+                            color="emerald-600"
+                            icon={<HiOutlineCheck />}
+                            onClick={onConfirm}
+                        >
+                            Confirmar
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="plain"
+                            icon={<HiOutlineX />}
+                            onClick={onCancel}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="plain"
+                            icon={<HiOutlineTrash />}
+                            onClick={onDelete}
+                        >
+                            Eliminar
+                        </Button>
+                    </div>
+                )}
+            </>
+        }
+        onBack={onBack}
+    />
 )

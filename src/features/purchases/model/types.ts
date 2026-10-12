@@ -1,4 +1,5 @@
 import type { PaginationParams } from '@/@types/api'
+import type { StatusTone } from '@shared/lib/statusTone'
 
 export type PurchaseOrderStatus =
     | 'draft'
@@ -16,17 +17,15 @@ export const PURCHASE_ORDER_STATUS_LABELS: Record<PurchaseOrderStatus, string> =
         cancelled: 'Cancelada',
     }
 
-export const PURCHASE_ORDER_STATUS_CLASSES: Record<
+export const PURCHASE_ORDER_STATUS_TONES: Record<
     PurchaseOrderStatus,
-    string
+    StatusTone
 > = {
-    draft: 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300',
-    sent: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
-    partial:
-        'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300',
-    received:
-        'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
-    cancelled: 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300',
+    draft: 'neutral',
+    sent: 'info',
+    partial: 'warning',
+    received: 'success',
+    cancelled: 'danger',
 }
 
 export interface PurchaseOrder {

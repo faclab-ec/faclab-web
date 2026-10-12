@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
+import PageHeader from '@/components/shared/PageHeader'
 import Button from '@/components/ui/Button'
-import Badge from '@/components/ui/Badge'
+import StatusBadge from '@/components/shared/StatusBadge'
 import Input from '@/components/ui/Input'
 import { useLotsList, useLotMutations } from '../hooks/useLots'
 import useCrudOperations from '@shared/hooks/useCrudOperations'
@@ -16,6 +17,7 @@ import type {
 } from '../model/types'
 import { LotForm } from '../components/LotForm'
 import { HiOutlinePencil, HiPlus } from 'react-icons/hi'
+import LabeledField from '@/components/shared/LabeledField'
 
 const LotsListPage = () => {
     const crud = useCrudOperations<Lot>()
@@ -31,7 +33,12 @@ const LotsListPage = () => {
         offset,
     }
 
-    const { data, isLoading } = useLotsList(queryParams)
+    const {
+        data,
+        isLoading,
+        error: listError,
+        refetch,
+    } = useLotsList(queryParams)
     const lots = data?.items ?? []
     const total = data?.pagination?.total ?? 0
 
@@ -67,12 +74,7 @@ const LotsListPage = () => {
 
     const getExpiryBadge = (lot: Lot) => {
         if (lot.isExpired) {
-            return (
-                <Badge
-                    content="Expirado"
-                    className="bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300"
-                />
-            )
+            return <StatusBadge tone="danger">Expirado</StatusBadge>
         }
         if (
             lot.daysToExpiry !== null &&
@@ -80,19 +82,11 @@ const LotsListPage = () => {
             lot.daysToExpiry <= 30
         ) {
             return (
-                <Badge
-                    content={`${lot.daysToExpiry} días`}
-                    className="bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300"
-                />
+                <StatusBadge tone="warning">{`${lot.daysToExpiry} días`}</StatusBadge>
             )
         }
         if (lot.expirationDate) {
-            return (
-                <Badge
-                    content="Vigente"
-                    className="bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
-                />
-            )
+            return <StatusBadge tone="success">Vigente</StatusBadge>
         }
         return (
             <span className="text-gray-400 italic text-sm">
@@ -181,6 +175,7 @@ const LotsListPage = () => {
                 <Button
                     size="sm"
                     variant="plain"
+                    aria-label="Editar"
                     icon={<HiOutlinePencil />}
                     onClick={() => crud.openEdit(props.row.original)}
                 />
@@ -191,78 +186,63 @@ const LotsListPage = () => {
     return (
         <>
             <Card className="mb-4">
-                <div className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                ID Producto
-                            </label>
-                            <Input
-                                type="number"
-                                placeholder="Filtrar por producto"
-                                value={productId}
-                                onChange={(e) => setProductId(e.target.value)}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Por vencer en (días)
-                            </label>
-                            <Input
-                                type="number"
-                                min={1}
-                                placeholder="Ej: 30"
-                                value={expiringInDays}
-                                onChange={(e) =>
-                                    setExpiringInDays(e.target.value)
-                                }
-                            />
-                        </div>
-                        <div className="flex items-end">
-                            <Button variant="plain" onClick={handleReset}>
-                                Limpiar Filtros
-                            </Button>
-                        </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <LabeledField label="ID Producto">
+                        <Input
+                            type="number"
+                            placeholder="Filtrar por producto"
+                            value={productId}
+                            onChange={(e) => setProductId(e.target.value)}
+                        />
+                    </LabeledField>
+                    <LabeledField label="Por vencer en (días)">
+                        <Input
+                            type="number"
+                            min={1}
+                            placeholder="Ej: 30"
+                            value={expiringInDays}
+                            onChange={(e) => setExpiringInDays(e.target.value)}
+                        />
+                    </LabeledField>
+                    <div className="flex items-end">
+                        <Button variant="plain" onClick={handleReset}>
+                            Limpiar Filtros
+                        </Button>
                     </div>
                 </div>
             </Card>
 
-            <Card>
-                <div className="p-4">
-                    <div className="flex justify-between items-center mb-4">
-                        <div>
-                            <h4 className="text-lg font-semibold">Lotes</h4>
-                            <p className="text-sm text-gray-500 mt-1">
-                                Gestiona los lotes de productos
-                            </p>
-                        </div>
-                        <Button
-                            variant="solid"
-                            size="sm"
-                            icon={<HiPlus />}
-                            onClick={crud.openCreate}
-                        >
-                            Nuevo Lote
-                        </Button>
-                    </div>
-
-                    <DataTable
-                        columns={columns}
-                        data={lots}
-                        loading={isLoading}
-                        pagingData={{
-                            total,
-                            pageIndex: crud.pageIndex,
-                            pageSize: crud.pageSize,
-                        }}
-                        onPaginationChange={(idx) =>
-                            crud.onPaginationChange(idx, crud.pageSize)
-                        }
-                        onSelectChange={(size) =>
-                            crud.onPaginationChange(1, size)
-                        }
-                    />
-                </div>
+            <PageHeader
+                title="Lotes"
+                description="Gestiona los lotes de productos"
+                actions={
+                    <Button
+                        variant="solid"
+                        size="sm"
+                        icon={<HiPlus />}
+                        onClick={crud.openCreate}
+                    >
+                        Nuevo Lote
+                    </Button>
+                }
+            />
+            <Card bodyClass="p-0">
+                <DataTable
+                    columns={columns}
+                    data={lots}
+                    loading={isLoading}
+                    error={listError}
+                    pagingData={{
+                        total,
+                        pageIndex: crud.pageIndex,
+                        pageSize: crud.pageSize,
+                    }}
+                    onRetry={refetch}
+                    onPaginationChange={(idx) =>
+                        crud.onPaginationChange(idx, crud.pageSize)
+                    }
+                    onSelectChange={(size) => crud.onPaginationChange(1, size)}
+                />
             </Card>
 
             <FormModal

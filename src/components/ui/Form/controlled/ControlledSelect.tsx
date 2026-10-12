@@ -37,7 +37,6 @@ const ControlledSelect = <
         control={control}
         render={({ field }) => (
             <Select<Option>
-                inputId={name}
                 options={options as unknown as Option[]}
                 value={options.find((opt) => opt.value === field.value) ?? null}
                 onChange={(option) => field.onChange(option?.value ?? null)}

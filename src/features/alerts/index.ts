@@ -5,7 +5,7 @@ export type {
     ExpiringLotsParams,
 } from './model/types'
 
-export { ALERT_TYPE_LABELS, ALERT_TYPE_CLASSES } from './model/types'
+export { ALERT_TYPE_LABELS, ALERT_TYPE_TONES } from './model/types'
 
 export {
     useLowStock,

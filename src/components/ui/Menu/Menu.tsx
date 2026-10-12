@@ -5,6 +5,7 @@ import type { CommonProps, TypeAttributes } from '../@types/common'
 import type { Ref } from 'react'
 
 export interface MenuProps extends CommonProps {
+    'aria-label'?: string
     defaultActiveKeys?: Array<string>
     defaultExpandedKeys?: Array<string>
     menuItemHeight?: number
@@ -20,7 +21,7 @@ const Menu = (props: MenuProps) => {
         className,
         defaultActiveKeys = [],
         defaultExpandedKeys = [],
-        menuItemHeight = 40,
+        menuItemHeight = 38,
         onSelect,
         ref,
         sideCollapsed = false,

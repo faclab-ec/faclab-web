@@ -12,7 +12,7 @@ export type {
 
 export {
     ADJUSTMENT_STATUS_LABELS,
-    ADJUSTMENT_STATUS_CLASSES,
+    ADJUSTMENT_STATUS_TONES,
     ADJUSTMENT_REASON_LABELS,
 } from './model/types'
 

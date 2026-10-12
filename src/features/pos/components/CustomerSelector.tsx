@@ -9,6 +9,7 @@ import { useCartTotals } from '../hooks/useCartTotals'
 import { usePOSCustomerSearch, useQuickCreateCustomer } from '../hooks/usePOS'
 import { HiOutlineUser } from 'react-icons/hi'
 import { TAX_TYPE_LABELS, type TaxType } from '@features/customers'
+import LabeledField from '@/components/shared/LabeledField'
 
 const FINAL_CONSUMER_MAX = 50
 
@@ -81,13 +82,14 @@ const CustomerSelector = () => {
                 <div className="flex items-center justify-between gap-2">
                     <div className="min-w-0">
                         <label
+                            htmlFor="pos-final-consumer"
                             className={`text-sm select-none ${
                                 finalConsumerBlocked
                                     ? 'text-gray-400 dark:text-gray-600'
                                     : 'text-gray-600 dark:text-gray-400 cursor-pointer'
                             }`}
                         >
-                            Consumidor Final
+                            Consumidor final
                         </label>
                         {finalConsumerBlocked && (
                             <p className="text-xs text-amber-500">
@@ -97,6 +99,7 @@ const CustomerSelector = () => {
                         )}
                     </div>
                     <Switcher
+                        id="pos-final-consumer"
                         checked={isFinalConsumer && !finalConsumerBlocked}
                         disabled={finalConsumerBlocked}
                         onChange={handleToggleFinalConsumer}
@@ -159,16 +162,13 @@ const CustomerSelector = () => {
                 <h4 className="text-lg font-bold mb-4">Buscar Cliente</h4>
 
                 <div className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-1">
-                            RUC / Cedula
-                        </label>
+                    <LabeledField label="RUC / Cedula">
                         <Input
                             value={taxId}
                             placeholder="Ingrese RUC o cedula..."
                             onChange={(e) => setTaxId(e.target.value)}
                         />
-                    </div>
+                    </LabeledField>
 
                     {searching && (
                         <p className="text-sm text-gray-500">Buscando...</p>

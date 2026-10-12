@@ -3,11 +3,11 @@
 }
 
 .pagination-pager {
-  @apply cursor-pointer relative mx-1 rounded inline-flex items-center h-8 w-8 justify-center text-sm font-semibold select-none;
+  @apply cursor-pointer relative mx-0.5 rounded-lg inline-flex items-center h-8 min-w-[2rem] px-1 justify-center text-sm font-semibold select-none transition-colors duration-150;
 }
 
 .pagination-pager-inactive {
-  @apply text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-100 dark:hover:bg-gray-600;
+  @apply text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-100 dark:hover:bg-gray-700;
 }
 
 .pagination-pager-disabled {

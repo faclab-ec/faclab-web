@@ -12,7 +12,7 @@ const PasswordInput = (props: PasswordInputProps) => {
 
     const [pwInputType, setPwInputType] = useState('password')
 
-    const onPasswordVisibleClick = (e: MouseEvent<HTMLSpanElement>) => {
+    const onPasswordVisibleClick = (e: MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
         const nextValue = pwInputType === 'password' ? 'text' : 'password'
         setPwInputType(nextValue)
@@ -25,8 +25,14 @@ const PasswordInput = (props: PasswordInputProps) => {
             {...rest}
             type={pwInputType}
             suffix={
-                <span
+                <button
+                    type="button"
                     className="cursor-pointer text-xl"
+                    aria-label={
+                        pwInputType === 'password'
+                            ? 'Mostrar contraseña'
+                            : 'Ocultar contraseña'
+                    }
                     onClick={onPasswordVisibleClick}
                 >
                     {pwInputType === 'password' ? (
@@ -34,7 +40,7 @@ const PasswordInput = (props: PasswordInputProps) => {
                     ) : (
                         <HiOutlineEye />
                     )}
-                </span>
+                </button>
             }
         />
     )

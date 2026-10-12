@@ -1,4 +1,5 @@
 import { Server, Response } from 'miragejs'
+import { singleQueryParams } from './queryParams'
 import { movementData } from '../data/movementData'
 
 export default function movementFakeApi(server: Server) {
@@ -11,7 +12,7 @@ export default function movementFakeApi(server: Server) {
             toDate,
             limit = '100',
             offset = '0',
-        } = request.queryParams
+        } = singleQueryParams(request)
 
         let filteredMovements = [...movementData]
 

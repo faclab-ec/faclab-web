@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import Table from '@/components/ui/Table'
-import Badge from '@/components/ui/Badge'
+import StatusBadge from '@/components/shared/StatusBadge'
 import Button from '@/components/ui/Button'
 import { HiOutlineRefresh } from 'react-icons/hi'
 import { formatDatetime } from '@shared/lib/format'
 import { notifyError, notifySuccess } from '@shared/ui/notify'
 import { useCan } from '@/stores'
 import {
-    INVOICE_STATUS_CLASSES,
+    INVOICE_STATUS_TONES,
     INVOICE_STATUS_LABELS,
     InvoiceReason,
     invoiceNumber,
@@ -19,6 +19,7 @@ import {
 import { useRequestInvoice } from '../hooks/useSales'
 import type { SaleStatus } from '../model/types'
 import InvoicePreviewDialog from './InvoicePreviewDialog'
+import EmptyState from '@/components/shared/EmptyState'
 
 const { Tr, Th, Td, THead, TBody } = Table
 
@@ -93,9 +94,10 @@ const SaleInvoicesTab = ({ saleId, saleStatus }: SaleInvoicesTabProps) => {
 
             {invoices.length === 0 ? (
                 !canRequest && (
-                    <div className="text-center py-8 text-gray-500">
-                        No hay facturas asociadas a esta venta
-                    </div>
+                    <EmptyState
+                        className="!py-8"
+                        title="No hay facturas asociadas a esta venta"
+                    />
                 )
             ) : (
                 <Table>
@@ -119,18 +121,13 @@ const SaleInvoicesTab = ({ saleId, saleStatus }: SaleInvoicesTabProps) => {
                                     {invoiceNumber(invoice.accessCode)}
                                 </Td>
                                 <Td>
-                                    <Badge
-                                        content={
-                                            INVOICE_STATUS_LABELS[
-                                                invoice.status
-                                            ]
+                                    <StatusBadge
+                                        tone={
+                                            INVOICE_STATUS_TONES[invoice.status]
                                         }
-                                        className={
-                                            INVOICE_STATUS_CLASSES[
-                                                invoice.status
-                                            ]
-                                        }
-                                    />
+                                    >
+                                        {INVOICE_STATUS_LABELS[invoice.status]}
+                                    </StatusBadge>
                                 </Td>
                                 <Td>
                                     <InvoiceReason invoice={invoice} />

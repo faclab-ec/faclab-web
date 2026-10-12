@@ -3,17 +3,19 @@ import { useNavigate } from 'react-router-dom'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import Badge from '@/components/ui/Badge'
+import StatusBadge from '@/components/shared/StatusBadge'
 import Select from '@/components/ui/Select'
 import { HiOutlineEye } from 'react-icons/hi'
 import { formatCurrency, formatDatetime } from '@shared/lib/format'
 import {
-    SHIFT_STATUS_CLASSES,
+    SHIFT_STATUS_TONES,
     SHIFT_STATUS_LABELS,
     useShifts,
     type Shift,
     type ShiftStatus,
 } from '@features/pos'
+import LabeledField from '@/components/shared/LabeledField'
+import PageHeader from '@/components/shared/PageHeader'
 
 const statusOptions = [
     { value: '', label: 'Todos' },
@@ -29,7 +31,12 @@ const ShiftsListPage = () => {
     const [pageIndex, setPageIndex] = useState(1)
     const [pageSize, setPageSize] = useState(10)
 
-    const { data, isLoading } = useShifts({
+    const {
+        data,
+        isLoading,
+        error: listError,
+        refetch,
+    } = useShifts({
         status: (statusFilter as ShiftStatus) || undefined,
         limit: pageSize,
         offset: (pageIndex - 1) * pageSize,
@@ -65,10 +72,9 @@ const ShiftsListPage = () => {
             cell: (props) => {
                 const status = props.row.original.status
                 return (
-                    <Badge
-                        content={SHIFT_STATUS_LABELS[status]}
-                        className={SHIFT_STATUS_CLASSES[status]}
-                    />
+                    <StatusBadge tone={SHIFT_STATUS_TONES[status]}>
+                        {SHIFT_STATUS_LABELS[status]}
+                    </StatusBadge>
                 )
             },
         },
@@ -116,12 +122,13 @@ const ShiftsListPage = () => {
 
     return (
         <>
+            <PageHeader
+                title="Turnos"
+                description="Historial de turnos de caja, del más reciente al más antiguo"
+            />
             <Card className="mb-4">
                 <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Estado
-                        </label>
+                    <LabeledField label="Estado">
                         <Select
                             options={statusOptions}
                             value={statusOptions.find(
@@ -132,31 +139,24 @@ const ShiftsListPage = () => {
                                 setPageIndex(1)
                             }}
                         />
-                    </div>
+                    </LabeledField>
                 </div>
             </Card>
 
-            <Card>
-                <div className="p-4">
-                    <div className="mb-4">
-                        <h4 className="text-lg font-semibold">Turnos</h4>
-                        <p className="text-sm text-gray-500 mt-1">
-                            Historial de turnos de caja, del más reciente al más
-                            antiguo
-                        </p>
-                    </div>
-                    <DataTable
-                        columns={columns}
-                        data={shifts}
-                        loading={isLoading}
-                        pagingData={{ total, pageIndex, pageSize }}
-                        onPaginationChange={setPageIndex}
-                        onSelectChange={(size) => {
-                            setPageSize(size)
-                            setPageIndex(1)
-                        }}
-                    />
-                </div>
+            <Card bodyClass="p-0">
+                <DataTable
+                    columns={columns}
+                    data={shifts}
+                    loading={isLoading}
+                    error={listError}
+                    pagingData={{ total, pageIndex, pageSize }}
+                    onRetry={refetch}
+                    onPaginationChange={setPageIndex}
+                    onSelectChange={(size) => {
+                        setPageSize(size)
+                        setPageIndex(1)
+                    }}
+                />
             </Card>
         </>
     )

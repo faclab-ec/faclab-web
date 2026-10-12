@@ -62,6 +62,7 @@ const Notification = (props: NotificationProps) => {
     return (
         <div
             ref={ref}
+            role="status"
             {...rest}
             className={notificationClass}
             style={{ width: width, ...style }}

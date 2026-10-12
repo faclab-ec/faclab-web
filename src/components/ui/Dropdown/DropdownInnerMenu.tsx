@@ -70,6 +70,7 @@ const Menu = (props: DropdownInnerMenuProps) => {
                         <motion.ul
                             ref={menuRef as Ref<HTMLUListElement>}
                             id={menuId}
+                            role="menu"
                             initial={initialStyle}
                             animate={enterStyle}
                             exit={exitStyle}

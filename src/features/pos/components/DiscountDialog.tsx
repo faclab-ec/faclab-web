@@ -9,6 +9,7 @@ import {
     getCartTotal,
 } from '../store/usePOSStore'
 import type { DiscountType } from '../model/types'
+import { formatCurrency } from '@shared/lib/format'
 
 interface DiscountDialogProps {
     isOpen: boolean
@@ -101,9 +102,11 @@ const DiscountDialog = ({ isOpen, onClose }: DiscountDialogProps) => {
 
             <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg space-y-1">
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Descuento: ${previewAmount.toFixed(2)}
+                    Descuento: {formatCurrency(previewAmount)}
                 </p>
-                <p className="font-bold">Nuevo total: ${newTotal.toFixed(2)}</p>
+                <p className="font-bold">
+                    Nuevo total: {formatCurrency(newTotal)}
+                </p>
             </div>
 
             <div className="flex gap-2 mt-4">

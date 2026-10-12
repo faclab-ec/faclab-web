@@ -1,7 +1,8 @@
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
+import PageHeader from '@/components/shared/PageHeader'
 import Button from '@/components/ui/Button'
-import Badge from '@/components/ui/Badge'
+import StatusBadge, { ActiveBadge } from '@/components/shared/StatusBadge'
 import { FormModal, DeleteConfirmDialog } from '@/components/shared'
 import useCrudOperations from '@shared/hooks/useCrudOperations'
 import { notifySuccess, notifyError } from '@shared/ui/notify'
@@ -16,7 +17,12 @@ const LocationsListPage = () => {
     const crud = useCrudOperations<Location>()
     const offset = (crud.pageIndex - 1) * crud.pageSize
 
-    const { data, isLoading } = useLocationsList({
+    const {
+        data,
+        isLoading,
+        error: listError,
+        refetch,
+    } = useLocationsList({
         limit: crud.pageSize,
         offset,
     })
@@ -105,13 +111,10 @@ const LocationsListPage = () => {
             header: 'Tipo',
             accessorKey: 'type',
             cell: (props) => (
-                <Badge
-                    content={
-                        LOCATION_TYPE_LABELS[props.row.original.type] ||
-                        props.row.original.type
-                    }
-                    className="bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300"
-                />
+                <StatusBadge tone="info">
+                    {LOCATION_TYPE_LABELS[props.row.original.type] ||
+                        props.row.original.type}
+                </StatusBadge>
             ),
         },
         {
@@ -129,16 +132,7 @@ const LocationsListPage = () => {
             header: 'Estado',
             accessorKey: 'isActive',
             cell: (props) => (
-                <Badge
-                    content={
-                        props.row.original.isActive ? 'Activo' : 'Inactivo'
-                    }
-                    className={
-                        props.row.original.isActive
-                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'
-                            : 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300'
-                    }
-                />
+                <ActiveBadge active={props.row.original.isActive} />
             ),
         },
         {
@@ -149,12 +143,14 @@ const LocationsListPage = () => {
                     <Button
                         size="sm"
                         variant="plain"
+                        aria-label="Editar"
                         icon={<HiOutlinePencil />}
                         onClick={() => crud.openEdit(props.row.original)}
                     />
                     <Button
                         size="sm"
                         variant="plain"
+                        aria-label="Eliminar"
                         icon={<HiOutlineTrash />}
                         onClick={() => crud.openDelete(props.row.original)}
                     />
@@ -165,44 +161,37 @@ const LocationsListPage = () => {
 
     return (
         <>
-            <Card>
-                <div className="p-4">
-                    <div className="flex justify-between items-center mb-4">
-                        <div>
-                            <h4 className="text-lg font-semibold">
-                                Ubicaciones
-                            </h4>
-                            <p className="text-sm text-gray-500 mt-1">
-                                Gestiona las ubicaciones dentro de las bodegas
-                            </p>
-                        </div>
-                        <Button
-                            variant="solid"
-                            size="sm"
-                            icon={<HiPlus />}
-                            onClick={crud.openCreate}
-                        >
-                            Nueva Ubicación
-                        </Button>
-                    </div>
-
-                    <DataTable
-                        columns={columns}
-                        data={locations}
-                        loading={isLoading}
-                        pagingData={{
-                            total,
-                            pageIndex: crud.pageIndex,
-                            pageSize: crud.pageSize,
-                        }}
-                        onPaginationChange={(idx) =>
-                            crud.onPaginationChange(idx, crud.pageSize)
-                        }
-                        onSelectChange={(size) =>
-                            crud.onPaginationChange(1, size)
-                        }
-                    />
-                </div>
+            <PageHeader
+                title="Ubicaciones"
+                description="Gestiona las ubicaciones dentro de los almacenes"
+                actions={
+                    <Button
+                        variant="solid"
+                        size="sm"
+                        icon={<HiPlus />}
+                        onClick={crud.openCreate}
+                    >
+                        Nueva Ubicación
+                    </Button>
+                }
+            />
+            <Card bodyClass="p-0">
+                <DataTable
+                    columns={columns}
+                    data={locations}
+                    loading={isLoading}
+                    error={listError}
+                    pagingData={{
+                        total,
+                        pageIndex: crud.pageIndex,
+                        pageSize: crud.pageSize,
+                    }}
+                    onRetry={refetch}
+                    onPaginationChange={(idx) =>
+                        crud.onPaginationChange(idx, crud.pageSize)
+                    }
+                    onSelectChange={(size) => crud.onPaginationChange(1, size)}
+                />
             </Card>
 
             <FormModal

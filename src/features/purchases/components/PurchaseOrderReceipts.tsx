@@ -1,6 +1,7 @@
 import Card from '@/components/ui/Card'
 import { formatDatetime } from '@shared/lib/format'
 import type { PurchaseOrder, PurchaseReceipt } from '../model/types'
+import EmptyState from '@/components/shared/EmptyState'
 
 type Props = {
     order: PurchaseOrder
@@ -14,9 +15,10 @@ export const PurchaseOrderReceipts = ({ order, receipts }: Props) => {
         <Card>
             <h5 className="mb-4">Recepciones ({receipts.length})</h5>
             {receipts.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                    No hay recepciones registradas
-                </div>
+                <EmptyState
+                    className="!py-8"
+                    title="No hay recepciones registradas"
+                />
             ) : (
                 <div className="space-y-3">
                     {receipts.map((receipt) => (

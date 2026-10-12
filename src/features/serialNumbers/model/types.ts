@@ -1,4 +1,5 @@
 import type { PaginationParams } from '@/@types/api'
+import type { StatusTone } from '@shared/lib/statusTone'
 
 export type SerialStatus =
     | 'available'
@@ -13,6 +14,14 @@ export const SERIAL_STATUS_LABELS: Record<SerialStatus, string> = {
     sold: 'Vendido',
     returned: 'Devuelto',
     scrapped: 'Descartado',
+}
+
+export const SERIAL_STATUS_TONES: Record<SerialStatus, StatusTone> = {
+    available: 'success',
+    reserved: 'warning',
+    sold: 'info',
+    returned: 'warning',
+    scrapped: 'danger',
 }
 
 export const VALID_TRANSITIONS: Record<SerialStatus, SerialStatus[]> = {

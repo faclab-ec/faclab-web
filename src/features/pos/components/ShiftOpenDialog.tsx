@@ -9,6 +9,7 @@ import { useOpenShift } from '../hooks/usePOS'
 import { useSession } from '@/stores/useAuthStore'
 import { InvoicingReadinessAlert } from '@features/invoicing'
 import { shiftOpenSchema, type ShiftOpenFormValues } from '../model/schemas'
+import { notifyError } from '@shared/ui/notify'
 
 const ShiftOpenDialog = () => {
     const navigate = useNavigate()
@@ -31,21 +32,23 @@ const ShiftOpenDialog = () => {
     const numberRegister = makeNumberRegister(register)
 
     const onSubmit = async (data: ShiftOpenFormValues) => {
-        await openShift.mutateAsync({
-            cashierName: data.cashierName,
-            openingBalance: data.openingBalance,
-            notes: data.notes || undefined,
-        })
+        try {
+            await openShift.mutateAsync({
+                cashierName: data.cashierName,
+                openingBalance: data.openingBalance,
+                notes: data.notes || undefined,
+            })
+        } catch (error: unknown) {
+            notifyError(error, 'No se pudo abrir el turno')
+        }
     }
 
     return (
-        <div className="flex items-center justify-center h-full">
-            <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
-                <h3 className="text-xl font-bold mb-6 text-center">
-                    Abrir Turno
-                </h3>
-                <p className="text-sm text-gray-500 text-center mb-6">
-                    Debe abrir un turno para usar el POS
+        <div className="flex h-full items-center justify-center overflow-y-auto p-4">
+            <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-pop dark:border-gray-700 dark:bg-gray-800 sm:p-8">
+                <h1 className="mb-1 text-center text-xl">Abrir turno</h1>
+                <p className="mb-6 text-center text-gray-500 dark:text-gray-400">
+                    Debes abrir un turno para usar el punto de venta
                 </p>
                 {/* Doesn't block: sales go through, invoices wait */}
                 <InvoicingReadinessAlert className="mb-6 text-sm" />
@@ -98,14 +101,14 @@ const ShiftOpenDialog = () => {
                         </FormItem>
                     </FormContainer>
 
-                    <div className="flex gap-3 mt-8">
+                    <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row">
                         <Button
                             block
                             type="button"
                             variant="default"
                             onClick={() => navigate('/home')}
                         >
-                            Volver al Dashboard
+                            Volver al inicio
                         </Button>
                         <Button
                             block
@@ -113,7 +116,7 @@ const ShiftOpenDialog = () => {
                             variant="solid"
                             loading={openShift.isPending}
                         >
-                            Abrir Turno
+                            Abrir turno
                         </Button>
                     </div>
                 </form>

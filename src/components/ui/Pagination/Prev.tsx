@@ -11,20 +11,13 @@ interface PrevProps extends CommonProps {
         active: string
         disabled: string
     }
-    onPrev: (e: MouseEvent<HTMLSpanElement>) => void
+    onPrev: (e: MouseEvent<HTMLButtonElement>) => void
 }
 
 const Prev = (props: PrevProps) => {
     const { currentPage, pagerClass, onPrev } = props
 
     const disabled = currentPage <= 1
-
-    const onPrevClick = (e: MouseEvent<HTMLSpanElement>) => {
-        if (disabled) {
-            return
-        }
-        onPrev(e)
-    }
 
     const pagerPrevClass = classNames(
         pagerClass.default,
@@ -33,13 +26,15 @@ const Prev = (props: PrevProps) => {
     )
 
     return (
-        <span
+        <button
+            type="button"
             className={pagerPrevClass}
-            role="presentation"
-            onClick={onPrevClick}
+            aria-label="Página anterior"
+            disabled={disabled}
+            onClick={onPrev}
         >
             <HiChevronLeft />
-        </span>
+        </button>
     )
 }
 

@@ -4,6 +4,7 @@ import Table from '@/components/ui/Table'
 import { formatCurrency } from '@shared/lib/format'
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi'
 import type { PurchaseOrder, PurchaseOrderItem } from '../model/types'
+import EmptyState from '@/components/shared/EmptyState'
 
 const { Tr, Th, Td, THead, TBody, TFoot } = Table
 
@@ -48,9 +49,7 @@ export const PurchaseOrderItems = ({
                 <div>Cargando items...</div>
             </div>
         ) : items.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-                No hay items en esta orden
-            </div>
+            <EmptyState className="!py-8" title="No hay items en esta orden" />
         ) : (
             <Table>
                 <THead>
@@ -95,12 +94,14 @@ export const PurchaseOrderItems = ({
                                             <Button
                                                 size="sm"
                                                 variant="plain"
+                                                aria-label="Editar"
                                                 icon={<HiOutlinePencil />}
                                                 onClick={() => onEdit(item)}
                                             />
                                             <Button
                                                 size="sm"
                                                 variant="plain"
+                                                aria-label="Eliminar"
                                                 icon={<HiOutlineTrash />}
                                                 onClick={() =>
                                                     onDeleteItem(item)

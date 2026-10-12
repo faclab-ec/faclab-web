@@ -2,7 +2,7 @@ const Total = (props: { total: number }) => {
     const { total } = props
     return (
         <div className="pagination-total">
-            Total <span>{total}</span> Items
+            <span>{total}</span> {total === 1 ? 'registro' : 'registros'}
         </div>
     )
 }

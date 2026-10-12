@@ -1,6 +1,7 @@
 import type { Meta } from '@/@types/api'
 import type { TaxCode } from '@/constants/tax.constant'
 import type { TaxType } from '@features/customers'
+import type { StatusTone } from '@shared/lib/statusTone'
 
 // === ENUMS ===
 export type ShiftStatus = 'OPEN' | 'CLOSED'
@@ -31,9 +32,9 @@ export const SHIFT_STATUS_LABELS: Record<ShiftStatus, string> = {
     CLOSED: 'Cerrado',
 }
 
-export const SHIFT_STATUS_CLASSES: Record<ShiftStatus, string> = {
-    OPEN: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
-    CLOSED: 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300',
+export const SHIFT_STATUS_TONES: Record<ShiftStatus, StatusTone> = {
+    OPEN: 'success',
+    CLOSED: 'neutral',
 }
 
 export const POS_SALE_STATUS_LABELS: Record<POSSaleStatus, string> = {
@@ -43,13 +44,11 @@ export const POS_SALE_STATUS_LABELS: Record<POSSaleStatus, string> = {
     CANCELLED: 'Cancelada',
 }
 
-export const POS_SALE_STATUS_CLASSES: Record<POSSaleStatus, string> = {
-    DRAFT: 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300',
-    CONFIRMED:
-        'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
-    INVOICED:
-        'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
-    CANCELLED: 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300',
+export const POS_SALE_STATUS_TONES: Record<POSSaleStatus, StatusTone> = {
+    DRAFT: 'neutral',
+    CONFIRMED: 'info',
+    INVOICED: 'success',
+    CANCELLED: 'danger',
 }
 
 export const POS_PAYMENT_STATUS_LABELS: Record<POSPaymentStatus, string> = {
@@ -58,11 +57,10 @@ export const POS_PAYMENT_STATUS_LABELS: Record<POSPaymentStatus, string> = {
     PAID: 'Pagado',
 }
 
-export const POS_PAYMENT_STATUS_CLASSES: Record<POSPaymentStatus, string> = {
-    PENDING:
-        'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300',
-    PARTIAL: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
-    PAID: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
+export const POS_PAYMENT_STATUS_TONES: Record<POSPaymentStatus, StatusTone> = {
+    PENDING: 'warning',
+    PARTIAL: 'info',
+    PAID: 'success',
 }
 
 export const POS_PAYMENT_METHOD_LABELS: Record<POSPaymentMethod, string> = {
@@ -78,9 +76,9 @@ export const CASH_MOVEMENT_TYPE_LABELS: Record<CashMovementType, string> = {
     OUT: 'Egreso',
 }
 
-export const CASH_MOVEMENT_TYPE_CLASSES: Record<CashMovementType, string> = {
-    IN: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
-    OUT: 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300',
+export const CASH_MOVEMENT_TYPE_TONES: Record<CashMovementType, StatusTone> = {
+    IN: 'success',
+    OUT: 'danger',
 }
 
 export const REFUND_STATUS_LABELS: Record<RefundStatus, string> = {
@@ -89,12 +87,10 @@ export const REFUND_STATUS_LABELS: Record<RefundStatus, string> = {
     CANCELLED: 'Cancelado',
 }
 
-export const REFUND_STATUS_CLASSES: Record<RefundStatus, string> = {
-    PENDING:
-        'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300',
-    COMPLETED:
-        'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
-    CANCELLED: 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300',
+export const REFUND_STATUS_TONES: Record<RefundStatus, StatusTone> = {
+    PENDING: 'warning',
+    COMPLETED: 'success',
+    CANCELLED: 'danger',
 }
 
 // === SHIFTS ===

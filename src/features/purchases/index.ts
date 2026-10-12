@@ -33,7 +33,7 @@ export type {
 
 export {
     PURCHASE_ORDER_STATUS_LABELS,
-    PURCHASE_ORDER_STATUS_CLASSES,
+    PURCHASE_ORDER_STATUS_TONES,
 } from './model/types'
 
 export {

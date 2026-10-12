@@ -1,11 +1,14 @@
 import classNames from 'classnames'
 import { Spinner } from '../Spinner'
 import { useConfig } from '../ConfigProvider'
+import { useFormItem } from '../Form/context'
 import useControllableState from '../hooks/useControllableState'
 import type { CommonProps } from '../@types/common'
 import type { ReactNode, ChangeEvent, Ref } from 'react'
 
 export interface SwitcherProps extends CommonProps {
+    id?: string
+    'aria-label'?: string
     checked?: boolean
     checkedContent?: string | ReactNode
     color?: string
@@ -38,7 +41,8 @@ const Switcher = (props: SwitcherProps) => {
         ...rest
     } = props
 
-    const { themeColor, primaryColorLevel } = useConfig()
+    const { accentColor } = useConfig()
+    const formItem = useFormItem()
 
     const [switcherChecked, setSwitcherChecked] = useControllableState<boolean>(
         {
@@ -54,7 +58,7 @@ const Switcher = (props: SwitcherProps) => {
         onChange?.(nextChecked, e)
     }
 
-    const switcherColor = color || `${themeColor}-${primaryColorLevel}`
+    const switcherColor = color || `${accentColor}-500`
 
     const switcherClass = classNames(
         'switcher',
@@ -68,7 +72,9 @@ const Switcher = (props: SwitcherProps) => {
         <label ref={labelRef} className={switcherClass}>
             <input
                 ref={ref}
+                id={formItem?.controlId}
                 type="checkbox"
+                role="switch"
                 disabled={disabled}
                 readOnly={readOnly}
                 name={name}

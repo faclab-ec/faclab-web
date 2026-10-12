@@ -21,8 +21,10 @@ const SearchBar = () => {
     }, [searchTerm])
 
     return (
-        <div className="mb-4">
+        <div className="mb-3">
             <Input
+                type="search"
+                aria-label="Buscar productos"
                 placeholder="Buscar por nombre, SKU o código de barras..."
                 value={localTerm}
                 prefix={<HiOutlineSearch className="text-lg" />}

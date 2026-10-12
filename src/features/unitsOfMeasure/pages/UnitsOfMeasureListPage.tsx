@@ -4,9 +4,10 @@ import {
     useUnitsOfMeasureList,
     useUnitOfMeasureMutations,
 } from '../hooks/useUnitsOfMeasure'
-import Badge from '@/components/ui/Badge'
+import { ActiveBadge } from '@/components/shared/StatusBadge'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
+import PageHeader from '@/components/shared/PageHeader'
 import type { UnitOfMeasure, UnitOfMeasureInput } from '../model/types'
 import type { UnitOfMeasureFormValues } from '../model/unitOfMeasure.schema'
 import { UnitOfMeasureForm } from '../components/UnitOfMeasureForm'
@@ -18,7 +19,12 @@ const UnitsOfMeasureListPage = () => {
     const crud = useCrudOperations<UnitOfMeasure>()
     const offset = (crud.pageIndex - 1) * crud.pageSize
 
-    const { data, isLoading } = useUnitsOfMeasureList({
+    const {
+        data,
+        isLoading,
+        error: listError,
+        refetch,
+    } = useUnitsOfMeasureList({
         limit: crud.pageSize,
         offset,
     })
@@ -103,16 +109,7 @@ const UnitsOfMeasureListPage = () => {
             header: 'Estado',
             accessorKey: 'isActive',
             cell: (props) => (
-                <Badge
-                    content={
-                        props.row.original.isActive ? 'Activo' : 'Inactivo'
-                    }
-                    className={
-                        props.row.original.isActive
-                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'
-                            : 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300'
-                    }
-                />
+                <ActiveBadge active={props.row.original.isActive} />
             ),
         },
         {
@@ -141,44 +138,37 @@ const UnitsOfMeasureListPage = () => {
 
     return (
         <>
-            <Card>
-                <div className="p-4">
-                    <div className="flex justify-between items-center mb-4">
-                        <div>
-                            <h4 className="text-lg font-semibold">
-                                Unidades de Medida
-                            </h4>
-                            <p className="text-sm text-gray-500 mt-1">
-                                Gestiona las unidades de medida de los productos
-                            </p>
-                        </div>
-                        <Button
-                            variant="solid"
-                            size="sm"
-                            icon={<HiPlus />}
-                            onClick={crud.openCreate}
-                        >
-                            Nueva Unidad
-                        </Button>
-                    </div>
-
-                    <DataTable
-                        columns={columns}
-                        data={units}
-                        loading={isLoading}
-                        pagingData={{
-                            total,
-                            pageIndex: crud.pageIndex,
-                            pageSize: crud.pageSize,
-                        }}
-                        onPaginationChange={(idx) =>
-                            crud.onPaginationChange(idx, crud.pageSize)
-                        }
-                        onSelectChange={(size) =>
-                            crud.onPaginationChange(1, size)
-                        }
-                    />
-                </div>
+            <PageHeader
+                title="Unidades de Medida"
+                description="Gestiona las unidades de medida de los productos"
+                actions={
+                    <Button
+                        variant="solid"
+                        size="sm"
+                        icon={<HiPlus />}
+                        onClick={crud.openCreate}
+                    >
+                        Nueva Unidad
+                    </Button>
+                }
+            />
+            <Card bodyClass="p-0">
+                <DataTable
+                    columns={columns}
+                    data={units}
+                    loading={isLoading}
+                    error={listError}
+                    pagingData={{
+                        total,
+                        pageIndex: crud.pageIndex,
+                        pageSize: crud.pageSize,
+                    }}
+                    onRetry={refetch}
+                    onPaginationChange={(idx) =>
+                        crud.onPaginationChange(idx, crud.pageSize)
+                    }
+                    onSelectChange={(size) => crud.onPaginationChange(1, size)}
+                />
             </Card>
 
             <FormModal

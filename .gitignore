@@ -2,6 +2,7 @@
 .*
 !.gitignore
 !.env.example
+!.npmrc
 !.eslintrc.*
 !.eslintignore
 !.prettierrc
@@ -19,6 +20,9 @@ build
 
 # Testing
 coverage
+test-results
+playwright-report
+blob-report
 
 # Logs
 logs

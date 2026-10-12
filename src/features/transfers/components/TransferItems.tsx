@@ -3,6 +3,7 @@ import Button from '@/components/ui/Button'
 import Table from '@/components/ui/Table'
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi'
 import type { TransferItem } from '../model/types'
+import EmptyState from '@/components/shared/EmptyState'
 
 const { Tr, Th, Td, THead, TBody } = Table
 
@@ -45,9 +46,10 @@ export const TransferItems = ({
                 <div>Cargando items...</div>
             </div>
         ) : items.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-                No hay items en esta transferencia
-            </div>
+            <EmptyState
+                className="!py-8"
+                title="No hay items en esta transferencia"
+            />
         ) : (
             <Table>
                 <THead>
@@ -76,12 +78,14 @@ export const TransferItems = ({
                                         <Button
                                             size="sm"
                                             variant="plain"
+                                            aria-label="Editar"
                                             icon={<HiOutlinePencil />}
                                             onClick={() => onEdit(item)}
                                         />
                                         <Button
                                             size="sm"
                                             variant="plain"
+                                            aria-label="Eliminar"
                                             icon={<HiOutlineTrash />}
                                             onClick={() => onDeleteItem(item)}
                                         />

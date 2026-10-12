@@ -14,8 +14,10 @@ const ListSearchInput = ({
     placeholder,
 }: ListSearchInputProps) => (
     <Input
+        type="search"
         size="sm"
-        className="min-w-[240px]"
+        className="w-full sm:w-80"
+        aria-label={placeholder}
         prefix={<HiOutlineSearch className="text-lg" />}
         placeholder={placeholder}
         value={value}

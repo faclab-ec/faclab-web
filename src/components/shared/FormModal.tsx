@@ -25,6 +25,7 @@ const FormModal = ({
 }: FormModalProps) => (
     <Dialog
         isOpen={isOpen}
+        contentLabel={title}
         width={width}
         shouldCloseOnEsc={!isSubmitting}
         shouldCloseOnOverlayClick={!isSubmitting}
@@ -32,11 +33,11 @@ const FormModal = ({
         onRequestClose={onClose}
     >
         <div className="flex flex-col h-full justify-between">
-            <h5 className="mb-4">{title}</h5>
+            <h4 className="mb-5 pr-8">{title}</h4>
             <div className="flex-1 max-h-[60vh] overflow-y-auto pr-1">
                 {children}
             </div>
-            <div className="flex justify-end gap-2 mt-6">
+            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                 <Button
                     type="button"
                     variant="plain"

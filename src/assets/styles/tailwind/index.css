@@ -3,46 +3,98 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
-    @apply text-gray-500 dark:text-gray-400 text-sm bg-gray-100 dark:bg-gray-900 leading-normal;
+    @apply text-gray-800 dark:text-gray-300 text-sm bg-gray-50 dark:bg-gray-900 leading-normal;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv11", "ss03";
   }
 
   h1,
   .h1 {
-    @apply text-4xl font-bold text-gray-900 dark:text-gray-100;
+    @apply text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-50;
   }
 
   h2,
   .h2 {
-    @apply text-3xl font-bold text-gray-900 dark:text-gray-100;
+    @apply text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50;
   }
 
   h3,
   .h3 {
-    @apply text-2xl font-semibold text-gray-900 dark:text-gray-100;
+    @apply text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50;
   }
 
   h4,
   .h4 {
-    @apply text-xl font-semibold text-gray-900 dark:text-gray-100;
+    @apply text-lg font-semibold text-gray-900 dark:text-gray-50;
   }
 
   h5,
   .h5 {
-    @apply text-lg font-semibold text-gray-900 dark:text-gray-100;
+    @apply text-base font-semibold text-gray-900 dark:text-gray-50;
   }
 
   h6,
   .h6 {
-    @apply text-base font-semibold text-gray-900 dark:text-gray-100;
+    @apply text-sm font-semibold text-gray-900 dark:text-gray-50;
   }
 
   hr {
-    @apply border-gray-200 dark:border-gray-600;
+    @apply border-gray-200 dark:border-gray-700;
   }
 
   .heading-text {
-    @apply text-gray-900 dark:text-gray-100;
+    @apply text-gray-900 dark:text-gray-50;
+  }
+
+  /*
+   * Foco visible único para todo lo que se alcanza con el teclado. Los campos
+   * de texto dibujan su propio anillo (ver _input.css).
+   */
+  :where(
+      a,
+      button,
+      summary,
+      [role="button"],
+      [role="tab"],
+      [role="menuitem"],
+      [role="option"],
+      [tabindex]:not([tabindex="-1"])
+    ):focus-visible {
+    outline: 2px solid theme("colors.primary.500");
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: theme("colors.primary.100");
+    color: theme("colors.gray.900");
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Enlace de texto: azul de interacción de la guía */
+  .link {
+    @apply font-medium text-primary-600 underline-offset-2 hover:underline dark:text-primary-400;
+  }
+
+  /* Degradado de marca (azul → verde) para el logotipo y acentos puntuales */
+  .text-brand-gradient {
+    @apply bg-gradient-to-r from-primary-500 to-accent-500 bg-clip-text text-transparent;
   }
 }

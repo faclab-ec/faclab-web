@@ -40,7 +40,7 @@
   }
 
   .select__control {
-    @apply dark:bg-transparent h-auto;
+    @apply bg-white dark:bg-gray-900/40 h-auto;
 
     &.hide-single-value {
       .select__single-value {
@@ -63,14 +63,14 @@
 }
 
 .select__menu {
-  @apply bg-white dark:bg-gray-700 dark:shadow-2xl;
+  @apply bg-white dark:bg-gray-800 rounded-xl shadow-pop border border-gray-200 dark:border-gray-700 overflow-hidden;
 }
 
 .select-option {
-  @apply flex items-center justify-between px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-default;
+  @apply flex items-center justify-between px-2 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-default;
 
   &.selected {
-    @apply bg-gray-100 dark:bg-gray-500;
+    @apply bg-primary-50 text-primary-700 dark:bg-primary-500/20 dark:text-primary-200;
   }
 
   &.disabled {
@@ -78,10 +78,10 @@
   }
 
   &.focused {
-    @apply bg-gray-50 dark:bg-gray-600;
+    @apply bg-gray-50 dark:bg-gray-700;
 
     &.selected {
-      @apply bg-gray-100 dark:bg-gray-500;
+      @apply bg-primary-50 dark:bg-primary-500/20;
     }
   }
 }

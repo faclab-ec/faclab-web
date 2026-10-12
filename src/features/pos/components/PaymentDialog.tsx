@@ -13,6 +13,7 @@ import {
     type QuickSalePaymentInput,
 } from '../model/types'
 import { HiOutlineTrash } from 'react-icons/hi'
+import { formatCurrency } from '@shared/lib/format'
 
 interface PaymentDialogProps {
     isOpen: boolean
@@ -113,15 +114,16 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
     return (
         <Dialog
             isOpen={isOpen}
+            contentLabel="Cobrar"
             width={500}
             overlayClassName="!z-[60]"
             onClose={handleClose}
         >
-            <h4 className="text-lg font-bold mb-4">Cobrar</h4>
+            <h4 className="mb-4">Cobrar</h4>
 
             <div className="text-center mb-6">
-                <p className="text-3xl font-bold text-primary-600">
-                    ${total.toFixed(2)}
+                <p className="text-3xl font-semibold tracking-tight text-gray-900 dark:text-gray-50">
+                    {formatCurrency(total)}
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                     Total a cobrar
@@ -137,6 +139,7 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
                             selectedMethod === method ? 'solid' : 'default'
                         }
                         size="sm"
+                        aria-pressed={selectedMethod === method}
                         onClick={() => setSelectedMethod(method)}
                     >
                         {POS_PAYMENT_METHOD_LABELS[method]}
@@ -147,6 +150,7 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
             <Input
                 type="number"
                 step="any"
+                aria-label="Monto recibido"
                 value={amount}
                 placeholder={total.toFixed(2)}
                 prefix="$"
@@ -157,6 +161,7 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
                 <Input
                     className="mt-3"
                     value={reference}
+                    aria-label="Referencia del pago"
                     placeholder="Referencia (opcional)"
                     onChange={(e) => setReference(e.target.value)}
                 />
@@ -168,7 +173,7 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
                         Cambio
                     </p>
                     <p className="text-xl font-bold text-emerald-600">
-                        ${change.toFixed(2)}
+                        {formatCurrency(change)}
                     </p>
                 </div>
             )}
@@ -182,12 +187,13 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
                             className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded"
                         >
                             <span className="text-sm">
-                                {POS_PAYMENT_METHOD_LABELS[p.paymentMethod]} — $
-                                {p.amount.toFixed(2)}
+                                {POS_PAYMENT_METHOD_LABELS[p.paymentMethod]} —
+                                {formatCurrency(p.amount)}
                             </span>
                             <Button
                                 size="xs"
                                 variant="plain"
+                                aria-label="Quitar pago"
                                 icon={
                                     <HiOutlineTrash className="text-red-500" />
                                 }
@@ -209,7 +215,8 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
             {payments.length === 0 && (
                 <div className="mt-3">
                     <button
-                        className="text-sm text-primary-600 hover:underline"
+                        type="button"
+                        className="link text-sm"
                         onClick={handleAddPayment}
                     >
                         Dividir pago
@@ -228,7 +235,7 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
                     disabled={!canComplete}
                     onClick={handleComplete}
                 >
-                    Completar Venta
+                    Completar venta
                 </Button>
             </div>
         </Dialog>

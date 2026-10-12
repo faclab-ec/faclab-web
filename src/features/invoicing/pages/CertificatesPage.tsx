@@ -1,4 +1,5 @@
 import Card from '@/components/ui/Card'
+import PageHeader from '@/components/shared/PageHeader'
 import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
 import { HiOutlineUpload } from 'react-icons/hi'
@@ -14,40 +15,32 @@ const CertificatesPage = () => {
 
     return (
         <>
+            <PageHeader
+                title="Certificados Digitales"
+                description="Gestiona los certificados .p12 para firma de facturas electrónicas"
+                actions={
+                    <Button
+                        variant="solid"
+                        size="sm"
+                        icon={<HiOutlineUpload />}
+                        onClick={actions.openUpload}
+                    >
+                        Subir Certificado
+                    </Button>
+                }
+            />
             <Card>
-                <div className="p-4">
-                    <div className="flex justify-between items-center mb-4">
-                        <div>
-                            <h4 className="text-lg font-semibold">
-                                Certificados Digitales
-                            </h4>
-                            <p className="text-sm text-gray-500 mt-1">
-                                Gestiona los certificados .p12 para firma de
-                                facturas electrónicas
-                            </p>
-                        </div>
-                        <Button
-                            variant="solid"
-                            size="sm"
-                            icon={<HiOutlineUpload />}
-                            onClick={actions.openUpload}
-                        >
-                            Subir Certificado
-                        </Button>
-                    </div>
-
-                    <CertificatesTable
-                        certificates={certificates}
-                        activeCertificateId={config?.signingCertId ?? null}
-                        isLoading={isLoading}
-                        onDelete={actions.openDelete}
-                    />
-                    <p className="text-xs text-gray-500 mt-3">
-                        Después de subir un certificado, selecciónalo en la
-                        Configuración Fiscal. El certificado en uso no se puede
-                        eliminar.
-                    </p>
-                </div>
+                <CertificatesTable
+                    certificates={certificates}
+                    activeCertificateId={config?.signingCertId ?? null}
+                    isLoading={isLoading}
+                    onDelete={actions.openDelete}
+                />
+                <p className="text-xs text-gray-500 mt-3">
+                    Después de subir un certificado, selecciónalo en la
+                    Configuración Fiscal. El certificado en uso no se puede
+                    eliminar.
+                </p>
             </Card>
 
             <UploadCertificateDialog

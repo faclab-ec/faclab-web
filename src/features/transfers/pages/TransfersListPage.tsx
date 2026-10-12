@@ -2,14 +2,15 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
+import PageHeader from '@/components/shared/PageHeader'
 import Button from '@/components/ui/Button'
-import Badge from '@/components/ui/Badge'
+import StatusBadge from '@/components/shared/StatusBadge'
 import Select from '@/components/ui/Select'
 import { useTransfersList } from '../hooks/useTransfers'
 import { useLocationsList } from '@features/locations'
 import {
     TRANSFER_STATUS_LABELS,
-    TRANSFER_STATUS_CLASSES,
+    TRANSFER_STATUS_TONES,
     type Transfer,
     type TransferListParams,
     type TransferStatus,
@@ -17,6 +18,7 @@ import {
 import TransferForm from '../components/TransferForm'
 import { HiPlus, HiOutlineEye } from 'react-icons/hi'
 import { formatDate } from '@shared/lib/format'
+import LabeledField from '@/components/shared/LabeledField'
 
 const statusOptions = [
     { value: '', label: 'Todos' },
@@ -56,7 +58,12 @@ const TransfersListPage = () => {
         offset,
     }
 
-    const { data, isLoading } = useTransfersList(queryParams)
+    const {
+        data,
+        isLoading,
+        error: listError,
+        refetch,
+    } = useTransfersList(queryParams)
     const transfers = data?.items ?? []
     const total = data?.pagination?.total ?? 0
 
@@ -103,10 +110,9 @@ const TransfersListPage = () => {
             cell: (props) => {
                 const status = props.row.original.status
                 return (
-                    <Badge
-                        content={TRANSFER_STATUS_LABELS[status]}
-                        className={TRANSFER_STATUS_CLASSES[status]}
-                    />
+                    <StatusBadge tone={TRANSFER_STATUS_TONES[status]}>
+                        {TRANSFER_STATUS_LABELS[status]}
+                    </StatusBadge>
                 )
             },
         },
@@ -134,6 +140,7 @@ const TransfersListPage = () => {
                 <Button
                     size="sm"
                     variant="plain"
+                    aria-label="Ver detalle"
                     icon={<HiOutlineEye />}
                     onClick={() =>
                         navigate(`/transfers/${props.row.original.id}`)
@@ -146,82 +153,69 @@ const TransfersListPage = () => {
     return (
         <>
             <Card className="mb-4">
-                <div className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Estado
-                            </label>
-                            <Select
-                                placeholder="Filtrar por estado"
-                                options={statusOptions}
-                                value={statusOptions.find(
-                                    (o) => o.value === statusFilter
-                                )}
-                                onChange={(option) => {
-                                    setStatusFilter(option?.value || '')
-                                    setPageIndex(1)
-                                }}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Ubicación Origen
-                            </label>
-                            <Select
-                                placeholder="Filtrar por ubicación origen"
-                                options={locationOptions}
-                                value={locationOptions.find(
-                                    (o) => o.value === sourceLocationFilter
-                                )}
-                                onChange={(option) => {
-                                    setSourceLocationFilter(option?.value || '')
-                                    setPageIndex(1)
-                                }}
-                            />
-                        </div>
-                        <div className="flex items-end">
-                            <Button variant="plain" onClick={handleReset}>
-                                Limpiar Filtros
-                            </Button>
-                        </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <LabeledField label="Estado">
+                        <Select
+                            placeholder="Filtrar por estado"
+                            options={statusOptions}
+                            value={statusOptions.find(
+                                (o) => o.value === statusFilter
+                            )}
+                            onChange={(option) => {
+                                setStatusFilter(option?.value || '')
+                                setPageIndex(1)
+                            }}
+                        />
+                    </LabeledField>
+                    <LabeledField label="Ubicación Origen">
+                        <Select
+                            placeholder="Filtrar por ubicación origen"
+                            options={locationOptions}
+                            value={locationOptions.find(
+                                (o) => o.value === sourceLocationFilter
+                            )}
+                            onChange={(option) => {
+                                setSourceLocationFilter(option?.value || '')
+                                setPageIndex(1)
+                            }}
+                        />
+                    </LabeledField>
+                    <div className="flex items-end">
+                        <Button variant="plain" onClick={handleReset}>
+                            Limpiar Filtros
+                        </Button>
                     </div>
                 </div>
             </Card>
 
-            <Card>
-                <div className="p-4">
-                    <div className="flex justify-between items-center mb-4">
-                        <div>
-                            <h4 className="text-lg font-semibold">
-                                Transferencias de Inventario
-                            </h4>
-                            <p className="text-sm text-gray-500 mt-1">
-                                Gestiona las transferencias entre ubicaciones
-                            </p>
-                        </div>
-                        <Button
-                            variant="solid"
-                            size="sm"
-                            icon={<HiPlus />}
-                            onClick={() => setIsFormOpen(true)}
-                        >
-                            Nueva Transferencia
-                        </Button>
-                    </div>
-
-                    <DataTable
-                        columns={columns}
-                        data={transfers}
-                        loading={isLoading}
-                        pagingData={{ total, pageIndex, pageSize }}
-                        onPaginationChange={setPageIndex}
-                        onSelectChange={(size) => {
-                            setPageSize(size)
-                            setPageIndex(1)
-                        }}
-                    />
-                </div>
+            <PageHeader
+                title="Transferencias de Inventario"
+                description="Gestiona las transferencias entre ubicaciones"
+                actions={
+                    <Button
+                        variant="solid"
+                        size="sm"
+                        icon={<HiPlus />}
+                        onClick={() => setIsFormOpen(true)}
+                    >
+                        Nueva Transferencia
+                    </Button>
+                }
+            />
+            <Card bodyClass="p-0">
+                <DataTable
+                    columns={columns}
+                    data={transfers}
+                    loading={isLoading}
+                    error={listError}
+                    pagingData={{ total, pageIndex, pageSize }}
+                    onRetry={refetch}
+                    onPaginationChange={setPageIndex}
+                    onSelectChange={(size) => {
+                        setPageSize(size)
+                        setPageIndex(1)
+                    }}
+                />
             </Card>
 
             <TransferForm

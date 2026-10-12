@@ -46,6 +46,8 @@ const Spinner = (props: SpinnerProps) => {
     return (
         <Component
             ref={ref}
+            role="status"
+            aria-label="Cargando"
             style={spinnerStyle}
             className={spinnerClass}
             {...rest}

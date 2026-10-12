@@ -89,14 +89,14 @@ const Pagination = (props: PaginationProps) => {
     const pagerClass = {
         default: 'pagination-pager',
         inactive: 'pagination-pager-inactive',
-        active: `text-${themeColor}-${primaryColorLevel} bg-${themeColor}-50 hover:bg-${themeColor}-50 dark:bg-${themeColor}-${primaryColorLevel} dark:text-gray-100`,
+        active: `text-white bg-${themeColor}-${primaryColorLevel} hover:bg-${themeColor}-${primaryColorLevel}`,
         disabled: 'pagination-pager-disabled',
     }
 
     const paginationClass = classNames('pagination', className)
 
     return (
-        <div className={paginationClass}>
+        <nav className={paginationClass} aria-label="Paginación">
             {displayTotal && <Total total={total} />}
             <Prev
                 currentPage={internalCurrentPage ?? 1}
@@ -115,7 +115,7 @@ const Pagination = (props: PaginationProps) => {
                 pagerClass={pagerClass}
                 onNext={onNext}
             />
-        </div>
+        </nav>
     )
 }
 

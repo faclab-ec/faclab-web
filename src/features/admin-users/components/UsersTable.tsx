@@ -4,6 +4,7 @@ import Select from '@/components/ui/Select'
 import { ROLE_LABELS, ALL_ROLES } from '@/constants/roles.constant'
 import type { RoleCode } from '@/constants/roles.constant'
 import type { AdminUserResponse } from '@/@types/auth'
+import { ActiveBadge } from '@/components/shared/StatusBadge'
 
 const roleOptions = ALL_ROLES.map((role) => ({
     value: role,
@@ -95,16 +96,9 @@ const UsersTable = ({
         {
             header: 'Estado',
             accessorKey: 'isActive',
-            cell: (props) =>
-                props.row.original.isActive ? (
-                    <span className="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 rounded text-xs font-medium">
-                        Activo
-                    </span>
-                ) : (
-                    <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 rounded text-xs font-medium">
-                        Inactivo
-                    </span>
-                ),
+            cell: (props) => (
+                <ActiveBadge active={props.row.original.isActive} />
+            ),
         },
         {
             header: 'Último acceso',

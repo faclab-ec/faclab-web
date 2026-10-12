@@ -6,6 +6,7 @@ import ValuationTab from '../components/ValuationTab'
 import RotationTab from '../components/RotationTab'
 import MovementsTab from '../components/MovementsTab'
 import WarehouseSummaryTab from '../components/WarehouseSummaryTab'
+import PageHeader from '@/components/shared/PageHeader'
 
 const { TabList, TabNav, TabContent } = Tabs
 
@@ -24,6 +25,11 @@ const ReportsPage = () => {
 
     return (
         <div className="flex flex-col gap-4">
+            <PageHeader
+                className="!mb-1"
+                title="Reportes de Inventario"
+                description="Valorización, rotación, movimientos y resumen por almacén"
+            />
             <Card>
                 <Tabs value={activeTab} onChange={setActiveTab}>
                     <TabList>

@@ -9,16 +9,10 @@ import ProtectedRoute from '@/components/route/ProtectedRoute'
 import PublicRoute from '@/components/route/PublicRoute'
 import AuthorityGuard from '@/components/route/AuthorityGuard'
 import AppRoute from '@/components/route/AppRoute'
-import type { LayoutType } from '@/@types/theme'
-
-interface AppViewsProps {
-    pageContainerType?: 'default' | 'gutterless' | 'contained'
-    layout?: LayoutType
-}
 
 const { authenticatedEntryPath } = appConfig
 
-const AllRoutes = (props: AppViewsProps) => {
+const AllRoutes = () => {
     const userAuthority = useSession()?.permissions ?? []
 
     return (
@@ -28,20 +22,19 @@ const AllRoutes = (props: AppViewsProps) => {
                     path="/"
                     element={<Navigate replace to={authenticatedEntryPath} />}
                 />
-                {protectedRoutes.map((route, index) => (
+                {protectedRoutes.map((route) => (
                     <Route
-                        key={route.key + index}
+                        key={route.key}
                         path={route.path}
                         element={
                             <AuthorityGuard
                                 userAuthority={userAuthority}
                                 authority={route.authority}
                             >
-                                <PageContainer {...props} {...route.meta}>
+                                <PageContainer>
                                     <AppRoute
                                         routeKey={route.key}
                                         component={route.component}
-                                        {...route.meta}
                                     />
                                 </PageContainer>
                             </AuthorityGuard>
@@ -59,7 +52,6 @@ const AllRoutes = (props: AppViewsProps) => {
                             <AppRoute
                                 routeKey={route.key}
                                 component={route.component}
-                                {...route.meta}
                             />
                         }
                     />
@@ -69,10 +61,10 @@ const AllRoutes = (props: AppViewsProps) => {
     )
 }
 
-const AppViews = (props: AppViewsProps) => {
+const AppViews = () => {
     return (
         <Suspense fallback={<Loading loading={true} />}>
-            <AllRoutes {...props} />
+            <AllRoutes />
         </Suspense>
     )
 }

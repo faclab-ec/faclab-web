@@ -1,6 +1,7 @@
 import Table from '@/components/ui/Table'
 import { formatCurrency, formatProductLabel } from '@shared/lib/format'
 import { useSaleItems } from '../hooks/useSales'
+import EmptyState from '@/components/shared/EmptyState'
 
 const { Tr, Th, Td, THead, TBody, TFoot } = Table
 
@@ -23,9 +24,7 @@ const SaleItemsTab = ({ saleId }: SaleItemsTabProps) => {
 
     if (items.length === 0) {
         return (
-            <div className="text-center py-8 text-gray-500">
-                No hay items en esta venta
-            </div>
+            <EmptyState className="!py-8" title="No hay items en esta venta" />
         )
     }
 

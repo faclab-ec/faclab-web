@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { useStockList } from '../hooks/useStock'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
+import PageHeader from '@/components/shared/PageHeader'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 import type { Stock } from '../model/types'
+import LabeledField from '@/components/shared/LabeledField'
 
 const StockPage = () => {
     const [productId, setProductId] = useState<string>('')
@@ -19,7 +21,12 @@ const StockPage = () => {
         offset,
     }
 
-    const { data, isLoading } = useStockList(queryParams)
+    const {
+        data,
+        isLoading,
+        error: listError,
+        refetch,
+    } = useStockList(queryParams)
     const stock = data?.items ?? []
     const total = data?.pagination?.total ?? 0
 
@@ -75,51 +82,41 @@ const StockPage = () => {
     return (
         <>
             <Card className="mb-4">
-                <div className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                ID Producto
-                            </label>
-                            <Input
-                                type="number"
-                                placeholder="Filtrar por producto"
-                                value={productId}
-                                onChange={(e) => setProductId(e.target.value)}
-                            />
-                        </div>
-                        <div className="flex items-end">
-                            <Button variant="plain" onClick={handleReset}>
-                                Limpiar Filtros
-                            </Button>
-                        </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <LabeledField label="ID Producto">
+                        <Input
+                            type="number"
+                            placeholder="Filtrar por producto"
+                            value={productId}
+                            onChange={(e) => setProductId(e.target.value)}
+                        />
+                    </LabeledField>
+                    <div className="flex items-end">
+                        <Button variant="plain" onClick={handleReset}>
+                            Limpiar Filtros
+                        </Button>
                     </div>
                 </div>
             </Card>
 
-            <Card>
-                <div className="p-4">
-                    <div className="flex justify-between items-center mb-4">
-                        <div>
-                            <h4 className="text-lg font-semibold">Stock</h4>
-                            <p className="text-sm text-gray-500 mt-1">
-                                Consulta el stock disponible por producto
-                            </p>
-                        </div>
-                    </div>
-
-                    <DataTable
-                        columns={columns}
-                        data={stock}
-                        loading={isLoading}
-                        pagingData={{ total, pageIndex, pageSize }}
-                        onPaginationChange={setPageIndex}
-                        onSelectChange={(size) => {
-                            setPageSize(size)
-                            setPageIndex(1)
-                        }}
-                    />
-                </div>
+            <PageHeader
+                title="Stock"
+                description="Consulta el stock disponible por producto"
+            />
+            <Card bodyClass="p-0">
+                <DataTable
+                    columns={columns}
+                    data={stock}
+                    loading={isLoading}
+                    error={listError}
+                    pagingData={{ total, pageIndex, pageSize }}
+                    onRetry={refetch}
+                    onPaginationChange={setPageIndex}
+                    onSelectChange={(size) => {
+                        setPageSize(size)
+                        setPageIndex(1)
+                    }}
+                />
             </Card>
         </>
     )

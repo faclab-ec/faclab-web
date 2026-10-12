@@ -1,5 +1,5 @@
 .tag {
-  @apply rounded-full py-1 px-2.5 border items-center border-gray-200 dark:border-gray-600 inline-flex text-xs font-semibold whitespace-nowrap;
+  @apply rounded-full py-0.5 px-2.5 border items-center border-gray-200 dark:border-gray-600 inline-flex text-xs font-semibold whitespace-nowrap;
 }
 
 .tag-affix {

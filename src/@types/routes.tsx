@@ -1,21 +1,10 @@
-import { LayoutType } from './theme'
-import type { JSX, LazyExoticComponent, ReactNode } from 'react'
-
-export interface Meta {
-    pageContainerType?: 'default' | 'gutterless' | 'contained'
-    header?: string | ReactNode
-    headerContainer?: boolean
-    extraHeader?: LazyExoticComponent<() => JSX.Element>
-    footer?: boolean
-    layout?: LayoutType
-}
+import type { JSX, LazyExoticComponent } from 'react'
 
 export type Route = {
     key: string
     path: string
-    component: LazyExoticComponent<<T extends Meta>(props: T) => JSX.Element>
+    component: LazyExoticComponent<() => JSX.Element>
     authority: string[]
-    meta?: Meta
 }
 
 export type Routes = Route[]

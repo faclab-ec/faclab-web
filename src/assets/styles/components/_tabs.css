@@ -3,11 +3,11 @@
 }
 
 .tab-list-underline {
-  @apply border-b border-gray-200 dark:border-gray-600;
+  @apply border-b border-gray-200 dark:border-gray-700;
 }
 
 .tab-nav {
-  @apply font-semibold flex items-center justify-center transition duration-200 ease-in-out cursor-pointer;
+  @apply font-semibold flex items-center justify-center whitespace-nowrap transition duration-150 ease-out cursor-pointer;
 
   &.tab-nav-disabled {
     @apply opacity-60 cursor-not-allowed;
@@ -15,11 +15,11 @@
 }
 
 .tab-nav-underline {
-  @apply py-3 px-5 border-b-2 border-transparent;
+  @apply py-3 px-4 border-b-2 border-transparent;
 }
 
 .tab-nav-pill {
-  @apply py-2 px-5 mr-1 rtl:ml-1 rounded-md;
+  @apply py-2 px-4 mr-1 rtl:ml-1 rounded-lg;
 }
 
 .tab-nav-icon {

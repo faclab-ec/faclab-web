@@ -4,6 +4,7 @@ import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import { formatCurrency } from '@shared/lib/format'
 import { useWarehouseSummary } from '../hooks/useReports'
 import type { WarehouseSummary } from '../model/types'
+import LabeledField from '@/components/shared/LabeledField'
 
 type Option = { value: string; label: string }
 
@@ -90,10 +91,7 @@ const WarehouseSummaryTab = ({ warehouseOptions }: Props) => {
     return (
         <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div>
-                    <label className="block text-sm font-medium mb-2">
-                        Almacén
-                    </label>
+                <LabeledField label="Almacén">
                     <Select
                         placeholder="Todos los almacenes"
                         options={warehouseOptions}
@@ -104,7 +102,7 @@ const WarehouseSummaryTab = ({ warehouseOptions }: Props) => {
                             setSummaryWarehouse(option?.value || '')
                         }
                     />
-                </div>
+                </LabeledField>
             </div>
 
             <DataTable

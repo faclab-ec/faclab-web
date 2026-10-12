@@ -1,4 +1,5 @@
 import type { TaxCode } from '@/constants/tax.constant'
+import type { StatusTone } from '@shared/lib/statusTone'
 
 export type SaleStatus = 'DRAFT' | 'CONFIRMED' | 'INVOICED' | 'CANCELLED'
 export type PaymentStatus = 'PENDING' | 'PARTIAL' | 'PAID'
@@ -19,13 +20,11 @@ export const SALE_STATUS_LABELS: Record<SaleStatus, string> = {
     CANCELLED: 'Cancelada',
 }
 
-export const SALE_STATUS_CLASSES: Record<SaleStatus, string> = {
-    DRAFT: 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300',
-    CONFIRMED:
-        'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
-    INVOICED:
-        'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
-    CANCELLED: 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300',
+export const SALE_STATUS_TONES: Record<SaleStatus, StatusTone> = {
+    DRAFT: 'neutral',
+    CONFIRMED: 'info',
+    INVOICED: 'success',
+    CANCELLED: 'danger',
 }
 
 export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
@@ -34,11 +33,10 @@ export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
     PAID: 'Pagado',
 }
 
-export const PAYMENT_STATUS_CLASSES: Record<PaymentStatus, string> = {
-    PENDING:
-        'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300',
-    PARTIAL: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
-    PAID: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
+export const PAYMENT_STATUS_TONES: Record<PaymentStatus, StatusTone> = {
+    PENDING: 'warning',
+    PARTIAL: 'info',
+    PAID: 'success',
 }
 
 export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {

@@ -2,14 +2,15 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
+import PageHeader from '@/components/shared/PageHeader'
 import Button from '@/components/ui/Button'
-import Badge from '@/components/ui/Badge'
+import StatusBadge from '@/components/shared/StatusBadge'
 import Select from '@/components/ui/Select'
 import { useAdjustmentsList } from '../hooks/useAdjustments'
 import { useWarehousesList } from '@features/warehouses'
 import {
     ADJUSTMENT_STATUS_LABELS,
-    ADJUSTMENT_STATUS_CLASSES,
+    ADJUSTMENT_STATUS_TONES,
     ADJUSTMENT_REASON_LABELS,
     type Adjustment,
     type AdjustmentListParams,
@@ -18,6 +19,7 @@ import {
 import AdjustmentForm from '../components/AdjustmentForm'
 import { HiPlus, HiOutlineEye } from 'react-icons/hi'
 import { formatDate } from '@shared/lib/format'
+import LabeledField from '@/components/shared/LabeledField'
 
 const statusOptions = [
     { value: '', label: 'Todos' },
@@ -55,7 +57,12 @@ const AdjustmentsListPage = () => {
         offset,
     }
 
-    const { data, isLoading } = useAdjustmentsList(queryParams)
+    const {
+        data,
+        isLoading,
+        error: listError,
+        refetch,
+    } = useAdjustmentsList(queryParams)
     const adjustments = data?.items ?? []
     const total = data?.pagination?.total ?? 0
 
@@ -100,10 +107,9 @@ const AdjustmentsListPage = () => {
             cell: (props) => {
                 const status = props.row.original.status
                 return (
-                    <Badge
-                        content={ADJUSTMENT_STATUS_LABELS[status]}
-                        className={ADJUSTMENT_STATUS_CLASSES[status]}
-                    />
+                    <StatusBadge tone={ADJUSTMENT_STATUS_TONES[status]}>
+                        {ADJUSTMENT_STATUS_LABELS[status]}
+                    </StatusBadge>
                 )
             },
         },
@@ -131,6 +137,7 @@ const AdjustmentsListPage = () => {
                 <Button
                     size="sm"
                     variant="plain"
+                    aria-label="Ver detalle"
                     icon={<HiOutlineEye />}
                     onClick={() =>
                         navigate(`/adjustments/${props.row.original.id}`)
@@ -143,82 +150,69 @@ const AdjustmentsListPage = () => {
     return (
         <>
             <Card className="mb-4">
-                <div className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Estado
-                            </label>
-                            <Select
-                                placeholder="Filtrar por estado"
-                                options={statusOptions}
-                                value={statusOptions.find(
-                                    (o) => o.value === statusFilter
-                                )}
-                                onChange={(option) => {
-                                    setStatusFilter(option?.value || '')
-                                    setPageIndex(1)
-                                }}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Almacén
-                            </label>
-                            <Select
-                                placeholder="Filtrar por almacén"
-                                options={warehouseOptions}
-                                value={warehouseOptions.find(
-                                    (o) => o.value === warehouseFilter
-                                )}
-                                onChange={(option) => {
-                                    setWarehouseFilter(option?.value || '')
-                                    setPageIndex(1)
-                                }}
-                            />
-                        </div>
-                        <div className="flex items-end">
-                            <Button variant="plain" onClick={handleReset}>
-                                Limpiar Filtros
-                            </Button>
-                        </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <LabeledField label="Estado">
+                        <Select
+                            placeholder="Filtrar por estado"
+                            options={statusOptions}
+                            value={statusOptions.find(
+                                (o) => o.value === statusFilter
+                            )}
+                            onChange={(option) => {
+                                setStatusFilter(option?.value || '')
+                                setPageIndex(1)
+                            }}
+                        />
+                    </LabeledField>
+                    <LabeledField label="Almacén">
+                        <Select
+                            placeholder="Filtrar por almacén"
+                            options={warehouseOptions}
+                            value={warehouseOptions.find(
+                                (o) => o.value === warehouseFilter
+                            )}
+                            onChange={(option) => {
+                                setWarehouseFilter(option?.value || '')
+                                setPageIndex(1)
+                            }}
+                        />
+                    </LabeledField>
+                    <div className="flex items-end">
+                        <Button variant="plain" onClick={handleReset}>
+                            Limpiar Filtros
+                        </Button>
                     </div>
                 </div>
             </Card>
 
-            <Card>
-                <div className="p-4">
-                    <div className="flex justify-between items-center mb-4">
-                        <div>
-                            <h4 className="text-lg font-semibold">
-                                Ajustes de Inventario
-                            </h4>
-                            <p className="text-sm text-gray-500 mt-1">
-                                Gestiona los ajustes de inventario
-                            </p>
-                        </div>
-                        <Button
-                            variant="solid"
-                            size="sm"
-                            icon={<HiPlus />}
-                            onClick={() => setIsFormOpen(true)}
-                        >
-                            Nuevo Ajuste
-                        </Button>
-                    </div>
-
-                    <DataTable
-                        columns={columns}
-                        data={adjustments}
-                        loading={isLoading}
-                        pagingData={{ total, pageIndex, pageSize }}
-                        onPaginationChange={setPageIndex}
-                        onSelectChange={(size) => {
-                            setPageSize(size)
-                            setPageIndex(1)
-                        }}
-                    />
-                </div>
+            <PageHeader
+                title="Ajustes de Inventario"
+                description="Gestiona los ajustes de inventario"
+                actions={
+                    <Button
+                        variant="solid"
+                        size="sm"
+                        icon={<HiPlus />}
+                        onClick={() => setIsFormOpen(true)}
+                    >
+                        Nuevo Ajuste
+                    </Button>
+                }
+            />
+            <Card bodyClass="p-0">
+                <DataTable
+                    columns={columns}
+                    data={adjustments}
+                    loading={isLoading}
+                    error={listError}
+                    pagingData={{ total, pageIndex, pageSize }}
+                    onRetry={refetch}
+                    onPaginationChange={setPageIndex}
+                    onSelectChange={(size) => {
+                        setPageSize(size)
+                        setPageIndex(1)
+                    }}
+                />
             </Card>
 
             <AdjustmentForm

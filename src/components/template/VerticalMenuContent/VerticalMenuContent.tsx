@@ -11,31 +11,28 @@ import {
 } from '@/constants/navigation.constant'
 import useMenuActive from '@/utils/hooks/useMenuActive'
 import { useTranslation } from 'react-i18next'
-import { Direction, NavMode } from '@/@types/theme'
 import type { NavigationTree } from '@/@types/navigation'
 
 export interface VerticalMenuContentProps {
-    navMode: NavMode
     collapsed?: boolean
     routeKey: string
     navigationTree?: NavigationTree[]
     userAuthority: string[]
     onMenuItemClick?: () => void
-    direction?: Direction
 }
 
 const { MenuGroup } = Menu
 
 const VerticalMenuContent = (props: VerticalMenuContentProps) => {
     const {
-        navMode = themeConfig.navMode,
         collapsed,
         routeKey,
         navigationTree = [],
         userAuthority = [],
         onMenuItemClick,
-        direction = themeConfig.direction,
     } = props
+
+    const { navMode, direction } = themeConfig
 
     const { t } = useTranslation()
 
@@ -45,79 +42,58 @@ const VerticalMenuContent = (props: VerticalMenuContentProps) => {
         activedRoute?.parentKey ? [activedRoute.parentKey] : []
     )
 
-    const handleLinkClick = () => {
-        onMenuItemClick?.()
-    }
+    const renderItem = (nav: NavigationTree) =>
+        nav.subMenu.length > 0 ? (
+            <VerticalCollapsedMenuItem
+                key={nav.key}
+                nav={nav}
+                sideCollapsed={collapsed}
+                userAuthority={userAuthority}
+                direction={direction}
+                onLinkClick={onMenuItemClick}
+            />
+        ) : (
+            <VerticalSingleMenuItem
+                key={nav.key}
+                nav={nav}
+                isCurrent={nav.key === routeKey}
+                sideCollapsed={collapsed}
+                userAuthority={userAuthority}
+                direction={direction}
+                onLinkClick={onMenuItemClick}
+            />
+        )
 
     const getNavItem = (nav: NavigationTree) => {
         if (nav.subMenu.length === 0 && nav.type === NAV_ITEM_TYPE_ITEM) {
-            return (
-                <VerticalSingleMenuItem
-                    key={nav.key}
-                    nav={nav}
-                    sideCollapsed={collapsed}
-                    userAuthority={userAuthority}
-                    direction={direction}
-                    onLinkClick={handleLinkClick}
-                />
-            )
+            return <ul key={nav.key}>{renderItem(nav)}</ul>
         }
 
         if (nav.subMenu.length > 0 && nav.type === NAV_ITEM_TYPE_COLLAPSE) {
+            return <ul key={nav.key}>{renderItem(nav)}</ul>
+        }
+
+        if (nav.type === NAV_ITEM_TYPE_TITLE && nav.subMenu.length > 0) {
             return (
-                <VerticalCollapsedMenuItem
+                <AuthorityCheck
                     key={nav.key}
-                    nav={nav}
-                    sideCollapsed={collapsed}
                     userAuthority={userAuthority}
-                    direction={direction}
-                    onLinkClick={onMenuItemClick}
-                />
+                    authority={nav.authority}
+                >
+                    <MenuGroup label={t(nav.translateKey) || nav.title}>
+                        {nav.subMenu.map(renderItem)}
+                    </MenuGroup>
+                </AuthorityCheck>
             )
         }
 
-        if (nav.type === NAV_ITEM_TYPE_TITLE) {
-            if (nav.subMenu.length > 0) {
-                return (
-                    <AuthorityCheck
-                        key={nav.key}
-                        userAuthority={userAuthority}
-                        authority={nav.authority}
-                    >
-                        <MenuGroup label={t(nav.translateKey) || nav.title}>
-                            {nav.subMenu.map((subNav) =>
-                                subNav.subMenu.length > 0 ? (
-                                    <VerticalCollapsedMenuItem
-                                        key={subNav.key}
-                                        nav={subNav}
-                                        sideCollapsed={collapsed}
-                                        userAuthority={userAuthority}
-                                        direction={direction}
-                                        onLinkClick={onMenuItemClick}
-                                    />
-                                ) : (
-                                    <VerticalSingleMenuItem
-                                        key={subNav.key}
-                                        nav={subNav}
-                                        sideCollapsed={collapsed}
-                                        userAuthority={userAuthority}
-                                        direction={direction}
-                                        onLinkClick={onMenuItemClick}
-                                    />
-                                )
-                            )}
-                        </MenuGroup>
-                    </AuthorityCheck>
-                )
-            } else {
-                ;<MenuGroup label={nav.title} />
-            }
-        }
+        return null
     }
 
     return (
         <Menu
-            className="px-4 pb-4"
+            aria-label="Navegación principal"
+            className={collapsed ? 'px-3 pb-4' : 'px-3 pb-6'}
             variant={navMode}
             sideCollapsed={collapsed}
             defaultActiveKeys={activedRoute?.key ? [activedRoute.key] : []}

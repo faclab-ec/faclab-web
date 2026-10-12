@@ -1,88 +1,83 @@
+import { Link } from 'react-router-dom'
+import { HiChevronDown, HiOutlineKey, HiOutlineLogout } from 'react-icons/hi'
 import Avatar from '@/components/ui/Avatar'
 import Dropdown from '@/components/ui/Dropdown'
-import withHeaderItem from '@/utils/hoc/withHeaderItem'
 import useAuth from '@/utils/hooks/useAuth'
-import { Link } from 'react-router-dom'
-import classNames from 'classnames'
-import { HiOutlineLogout, HiOutlineUser } from 'react-icons/hi'
-import type { CommonProps } from '@/@types/common'
-import type { JSX } from 'react'
+import { ROLE_LABELS } from '@/constants/roles.constant'
+import { useSession } from '@/stores'
 
-type DropdownList = {
-    label: string
-    path: string
-    icon: JSX.Element
-}
+const initialsOf = (username: string) => username.slice(0, 2).toUpperCase()
 
-const dropdownItemList: DropdownList[] = []
-
-const UserDropdown = ({ className }: CommonProps) => {
+/** Quién tiene la sesión abierta, y las acciones sobre su cuenta. */
+const UserDropdown = () => {
     const { signOut } = useAuth()
+    const session = useSession()
 
-    const UserAvatar = (
-        <div className={classNames(className, 'flex items-center gap-2')}>
-            <Avatar size={32} shape="circle" icon={<HiOutlineUser />} />
-            <div className="hidden md:block">
-                <div className="text-xs capitalize">admin</div>
-                <div className="font-bold">User01</div>
+    if (!session) {
+        return null
+    }
+
+    const roleLabel = ROLE_LABELS[session.role]
+
+    const trigger = (
+        <div className="flex items-center gap-2.5 rounded-lg py-1 pl-1 pr-2 transition-colors duration-150 hover:bg-gray-100 dark:hover:bg-gray-800">
+            <Avatar size={34} shape="circle" className="font-semibold">
+                {initialsOf(session.username)}
+            </Avatar>
+            <div className="hidden text-left leading-tight md:block">
+                <div className="font-semibold text-gray-900 dark:text-gray-50">
+                    {session.username}
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {roleLabel}
+                </div>
             </div>
+            <HiChevronDown className="hidden text-gray-400 md:block" />
         </div>
     )
 
     return (
-        <div>
-            <Dropdown
-                menuStyle={{ minWidth: 240 }}
-                renderTitle={UserAvatar}
-                placement="bottom-end"
-            >
-                <Dropdown.Item variant="header">
-                    <div className="py-2 px-3 flex items-center gap-2">
-                        <Avatar shape="circle" icon={<HiOutlineUser />} />
-                        <div>
-                            <div className="font-bold text-gray-900 dark:text-gray-100">
-                                User01
-                            </div>
-                            <div className="text-xs">user01@mail.com</div>
+        <Dropdown
+            aria-label="Menú de usuario"
+            menuStyle={{ minWidth: 240 }}
+            renderTitle={trigger}
+            placement="bottom-end"
+        >
+            <Dropdown.Item variant="header">
+                <div className="flex items-center gap-3 px-3 py-2">
+                    <Avatar shape="circle" className="font-semibold">
+                        {initialsOf(session.username)}
+                    </Avatar>
+                    <div className="min-w-0">
+                        <div className="truncate font-semibold text-gray-900 dark:text-gray-50">
+                            {session.username}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                            {roleLabel}
                         </div>
                     </div>
-                </Dropdown.Item>
-                <Dropdown.Item variant="divider" />
-                {dropdownItemList.map((item) => (
-                    <Dropdown.Item
-                        key={item.label}
-                        eventKey={item.label}
-                        className="mb-1 px-0"
-                    >
-                        <Link
-                            className="flex h-full w-full px-2"
-                            to={item.path}
-                        >
-                            <span className="flex gap-2 items-center w-full">
-                                <span className="text-xl opacity-50">
-                                    {item.icon}
-                                </span>
-                                <span>{item.label}</span>
-                            </span>
-                        </Link>
-                    </Dropdown.Item>
-                ))}
-                {/* <Dropdown.Item variant="divider" /> */}
-                <Dropdown.Item
-                    eventKey="Sign Out"
-                    className="gap-2"
-                    onClick={signOut}
+                </div>
+            </Dropdown.Item>
+            <Dropdown.Item variant="divider" />
+            <Dropdown.Item eventKey="changePassword" className="px-0">
+                <Link
+                    className="flex h-full w-full items-center gap-2 px-3"
+                    to="/change-password"
                 >
-                    <span className="text-xl opacity-50">
-                        <HiOutlineLogout />
-                    </span>
-                    <span>Sign Out</span>
-                </Dropdown.Item>
-            </Dropdown>
-        </div>
+                    <HiOutlineKey className="text-lg text-gray-400" />
+                    <span>Cambiar contraseña</span>
+                </Link>
+            </Dropdown.Item>
+            <Dropdown.Item
+                eventKey="signOut"
+                className="gap-2"
+                onClick={signOut}
+            >
+                <HiOutlineLogout className="text-lg text-gray-400" />
+                <span>Cerrar sesión</span>
+            </Dropdown.Item>
+        </Dropdown>
     )
 }
 
-const UserDropdownHeader = withHeaderItem(UserDropdown)
-
-export default UserDropdownHeader
+export default UserDropdown

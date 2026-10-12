@@ -17,6 +17,7 @@ import { SendOrderDialog } from '../components/SendOrderDialog'
 import PurchaseOrderItemForm from '../components/PurchaseOrderItemForm'
 import ReceiveForm from '../components/ReceiveForm'
 import { formatProductLabel } from '@shared/lib/format'
+import EmptyState from '@/components/shared/EmptyState'
 
 const PurchaseOrderDetailPage = () => {
     const { id } = useParams<{ id: string }>()
@@ -51,16 +52,19 @@ const PurchaseOrderDetailPage = () => {
 
     if (!order) {
         return (
-            <div className="flex flex-col items-center justify-center h-96">
-                <h4 className="mb-4">Orden de compra no encontrada</h4>
-                <Button
-                    variant="solid"
-                    icon={<HiOutlineArrowLeft />}
-                    onClick={() => navigate('/purchase-orders')}
-                >
-                    Volver a Órdenes de Compra
-                </Button>
-            </div>
+            <EmptyState
+                className="min-h-[24rem]"
+                title="Orden de compra no encontrada"
+                action={
+                    <Button
+                        size="sm"
+                        icon={<HiOutlineArrowLeft />}
+                        onClick={() => navigate('/purchase-orders')}
+                    >
+                        Volver a Órdenes de Compra
+                    </Button>
+                }
+            />
         )
     }
 

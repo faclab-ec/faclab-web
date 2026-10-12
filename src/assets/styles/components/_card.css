@@ -1,17 +1,18 @@
+/* min-w-0: dentro de una grilla o flex, una tabla ancha no ensancha la tarjeta */
 .card {
-  @apply bg-white rounded-lg dark:bg-gray-800;
+  @apply bg-white rounded-xl min-w-0 dark:bg-gray-800;
 }
 
 .card-border {
-  @apply border border-gray-200 dark:border-gray-600;
+  @apply border border-gray-200 shadow-card dark:border-gray-700 dark:shadow-none;
 }
 
 .card-shadow {
-  @apply shadow border-b border-gray-200 dark:border-gray-600 dark:border-none;
+  @apply shadow-card border border-gray-200 dark:border-gray-700 dark:shadow-none;
 }
 
 .card-header-border {
-  @apply border-b border-gray-200 dark:border-gray-600;
+  @apply border-b border-gray-200 dark:border-gray-700;
 }
 
 .card-header-extra {
@@ -19,11 +20,11 @@
 }
 
 .card-footer {
-  @apply rounded-bl-lg rounded-br-lg;
+  @apply rounded-bl-xl rounded-br-xl;
 }
 
 .card-footer-border {
-  @apply border-t border-gray-200 dark:border-gray-600;
+  @apply border-t border-gray-200 dark:border-gray-700;
 }
 
 .card-header,

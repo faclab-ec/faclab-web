@@ -11,20 +11,24 @@ import appConfig from '@/configs/app.config'
 import './locales'
 import '@/configs/zod.config'
 
-const environment = process.env.NODE_ENV
-
 /**
  * Set enableMock(Default false) to true at configs/app.config.js
  * If you wish to enable mock api
  */
-if (environment !== 'production' && appConfig.enableMock) {
-    mockServer({ environment })
+if (!import.meta.env.PROD && appConfig.enableMock) {
+    mockServer({ environment: import.meta.env.MODE })
 }
 
 function App() {
     return (
         <QueryClientProvider client={queryClient}>
-            <BrowserRouter>
+            {/* Comportamiento de React Router 7, activado de antemano */}
+            <BrowserRouter
+                future={{
+                    v7_startTransition: true,
+                    v7_relativeSplatPath: true,
+                }}
+            >
                 <NavigationBinder />
                 <Theme>
                     <AuthBootstrap>

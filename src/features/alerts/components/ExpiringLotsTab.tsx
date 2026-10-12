@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom'
-import Badge from '@/components/ui/Badge'
+import StatusBadge from '@/components/shared/StatusBadge'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import { type StockAlert } from '../model/types'
+import EmptyState from '@/components/shared/EmptyState'
 
 interface ExpiringLotsTabProps {
     data: StockAlert[]
@@ -64,14 +65,9 @@ const ExpiringLotsTab = ({ data, loading }: ExpiringLotsTabProps) => {
                 if (d === null) return '-'
                 const isUrgent = d <= 7
                 return (
-                    <Badge
-                        content={`${d} días`}
-                        className={
-                            isUrgent
-                                ? 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300'
-                                : 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300'
-                        }
-                    />
+                    <StatusBadge
+                        tone={isUrgent ? 'danger' : 'warning'}
+                    >{`${d} días`}</StatusBadge>
                 )
             },
         },
@@ -79,9 +75,7 @@ const ExpiringLotsTab = ({ data, loading }: ExpiringLotsTabProps) => {
 
     if (data.length === 0 && !loading) {
         return (
-            <div className="text-center py-8 text-gray-500">
-                Sin lotes próximos a vencer
-            </div>
+            <EmptyState className="!py-8" title="Sin lotes próximos a vencer" />
         )
     }
 

@@ -2,6 +2,7 @@ import Table from '@/components/ui/Table'
 import { formatCurrency, formatDate } from '@shared/lib/format'
 import { PAYMENT_METHOD_LABELS } from '../model/types'
 import { useSalePayments } from '../hooks/useSales'
+import EmptyState from '@/components/shared/EmptyState'
 
 const { Tr, Th, Td, THead, TBody, TFoot } = Table
 
@@ -24,11 +25,7 @@ const SalePaymentsTab = ({ saleId, saleTotal }: SalePaymentsTabProps) => {
     }
 
     if (payments.length === 0) {
-        return (
-            <div className="text-center py-8 text-gray-500">
-                No hay pagos registrados
-            </div>
-        )
+        return <EmptyState className="!py-8" title="No hay pagos registrados" />
     }
 
     return (

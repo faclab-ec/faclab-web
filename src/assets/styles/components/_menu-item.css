@@ -1,27 +1,29 @@
 .menu-item {
-  @apply cursor-pointer font-semibold px-3 rounded-md flex items-center w-full whitespace-nowrap gap-x-2;
+  @apply cursor-pointer font-medium px-3 rounded-lg flex items-center w-full whitespace-nowrap gap-x-2 transition-colors duration-150 ease-out;
 
+  /* Menús desplegables sobre fondo claro */
   &.menu-item-light {
-    @apply text-gray-600;
+    @apply text-gray-700;
 
     &.menu-item-hoverable {
       @apply hover:text-gray-900 hover:bg-gray-100;
     }
 
     &.menu-item-active {
-      @apply text-gray-900 bg-gray-200 hover:bg-gray-200;
+      @apply text-primary-700 bg-primary-50 hover:bg-primary-50;
     }
   }
 
+  /* Navegación principal y menús en modo oscuro */
   &.menu-item-dark {
-    @apply text-gray-400 dark:text-gray-400;
+    @apply text-gray-300;
 
     &.menu-item-hoverable {
-      @apply hover:text-gray-100 hover:bg-gray-700;
+      @apply hover:text-white hover:bg-white/[.06];
     }
 
     &.menu-item-active {
-      @apply text-gray-100 bg-gray-600 hover:bg-gray-600;
+      @apply text-white bg-primary-600 hover:bg-primary-600 shadow-sm;
     }
   }
 
@@ -41,7 +43,7 @@
     @apply text-gray-600 dark:text-gray-400;
 
     &.menu-item-hoverable {
-      @apply hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-900/[.1] dark:hover:bg-white/[.1];
+      @apply hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-900/[.06] dark:hover:bg-white/[.06];
     }
 
     &.menu-item-active {
@@ -51,14 +53,14 @@
 }
 
 .menu-collapse-item {
-  @apply cursor-pointer select-none font-semibold px-3 h-10 rounded-md flex items-center justify-between;
+  @apply cursor-pointer select-none font-medium px-3 h-10 rounded-lg flex items-center justify-between transition-colors duration-150 ease-out;
 
   &.menu-collapse-item-light {
-    @apply text-gray-600 hover:text-gray-900 hover:bg-gray-100;
+    @apply text-gray-700 hover:text-gray-900 hover:bg-gray-100;
   }
 
   &.menu-collapse-item-dark {
-    @apply text-gray-400 dark:text-gray-400 hover:text-gray-100 dark:hover:text-gray-100 hover:bg-gray-700;
+    @apply text-gray-300 hover:text-white hover:bg-white/[.06];
   }
 
   &.menu-collapse-item-themed {
@@ -66,12 +68,12 @@
   }
 
   &.menu-collapse-item-transparent {
-    @apply text-gray-600 hover:text-gray-900 hover:bg-gray-900/[.1] dark:text-gray-400 dark:hover:text-gray-100 dark:hover:bg-white/[.1];
+    @apply text-gray-600 hover:text-gray-900 hover:bg-gray-900/[.06] dark:text-gray-400 dark:hover:text-gray-100 dark:hover:bg-white/[.06];
   }
 }
 
 .menu-item-divider {
-  @apply border-b border-gray-200 dark:border-gray-600 my-2;
+  @apply border-b border-gray-200 dark:border-gray-700 my-1.5;
 }
 
 .menu-item-disabled {
