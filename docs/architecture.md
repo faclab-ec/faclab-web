@@ -51,8 +51,10 @@ Each feature is self-contained and exposes a single public surface (`index.ts`).
 | Path | Purpose |
 |---|---|
 | `shared/lib/http/httpClient.ts` | The only HTTP client. Returns `T`; attaches the token, rejects with `ApiError`, refreshes on `TOKEN_EXPIRED` and retries once |
-| `shared/lib/auth/session.ts` | `refreshSession()` / `forceSignOut()` — the only way to renew or drop tokens; all token writes go through `useAuthStore` |
-| `shared/lib/auth/refreshManager.ts` | `refreshOnce()` — deduplicated `/auth/refresh` network call (no persistence) |
+| `shared/lib/auth/session.ts` | `refreshSession()` / `forceSignOut()` — the only way to renew or drop tokens; all token writes go through `useAuthStore` (memory only) and are shared with other tabs |
+| `shared/lib/auth/refreshManager.ts` | `refreshOnce()` — deduplicated `/auth/refresh` call with the HttpOnly refresh cookie (`withCredentials`, no body, no persistence) |
+| `shared/lib/auth/sessionHint.ts` | Non-secret `fc.hasSession` flag: whether to restore the session with the cookie on load |
+| `shared/lib/auth/authChannel.ts` | `BroadcastChannel` that shares new access tokens and logouts between tabs |
 | `features/auth/lib/refreshScheduler.ts` | `start(expiresIn)` / `stop()` — proactive JWT refresh scheduler (auth-feature owned), uses `refreshSession()` |
 | `shared/lib/format.ts` | `formatCurrency`, `formatDate`, `formatDatetime`, `formatPercent` |
 
