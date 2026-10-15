@@ -1,22 +1,47 @@
 import { test, expect } from '../support/test'
 import { mockEmptyBackend } from '../fixtures/backend'
 import { mockSuppliers } from '../fixtures/suppliers'
-import { ADMIN, AUTH, POS, apiError, noContent, ok } from '../support/mockApi'
 import {
+    ADMIN,
+    AUTH,
+    POS,
+    MockApi,
+    apiError,
+    noContent,
+    ok,
+} from '../support/mockApi'
+import {
+    REFRESH_COOKIE,
     TOKENS,
     buildSession,
     mockSessionEndpoints,
     type SessionOptions,
 } from '../support/session'
 import { ROLE } from '@/constants/roles.constant'
-import type { MockApi } from '../support/mockApi'
 import type { Page } from '@playwright/test'
 
-/** El backend acepta las credenciales y devuelve la sesión indicada. */
+/**
+ * El backend acepta las credenciales y devuelve la sesión indicada; el
+ * refresh token llega, como en el backend real, en una cookie HttpOnly.
+ */
 const acceptLogin = (api: MockApi, options: SessionOptions = {}) => {
-    api.post(`${AUTH}/login`, () => ok(TOKENS))
+    api.post(`${AUTH}/login`, () => ({
+        ...ok(TOKENS),
+        headers: {
+            'set-cookie': `${REFRESH_COOKIE}=e2e-refresh; Path=/api/auth; HttpOnly; SameSite=Strict`,
+        },
+    }))
     mockSessionEndpoints(api, buildSession(options))
 }
+
+/** Todo lo que la app dejó en localStorage y sessionStorage. */
+const browserStorage = (page: Page) =>
+    page.evaluate(() =>
+        JSON.stringify([
+            Object.entries(window.localStorage),
+            Object.entries(window.sessionStorage),
+        ])
+    )
 
 const submitCredentials = async (page: Page) => {
     await page.getByLabel('Usuario', { exact: true }).fill('admin')
@@ -59,6 +84,54 @@ test.describe('Inicio de sesión', () => {
 
         await expect(page.getByRole('alert')).toContainText(
             'Usuario o contraseña inválidos'
+        )
+        await expect(page).toHaveURL(/\/sign-in/)
+    })
+
+    test('guarda el access token solo en memoria y recupera la sesión con la cookie', async ({
+        page,
+        api,
+    }) => {
+        mockEmptyBackend(api)
+        acceptLogin(api)
+
+        await page.goto('/sign-in')
+        await submitCredentials(page)
+        await expect(page).toHaveURL(/\/home$/)
+
+        // Ningún token en el almacenamiento del navegador
+        expect(await browserStorage(page)).not.toContain(TOKENS.accessToken)
+        expect(await browserStorage(page)).not.toContain('e2e-refresh')
+
+        // Al recargar, el refresh viaja con la cookie y sin cuerpo
+        await page.reload()
+        await expect(
+            page.getByRole('heading', { name: 'Resumen', exact: true })
+        ).toBeVisible()
+        const [refresh] = api.callsTo('POST', `${AUTH}/refresh`)
+        expect(refresh.body).toBeUndefined()
+        expect(refresh.headers.cookie).toContain(
+            `${REFRESH_COOKIE}=e2e-refresh`
+        )
+    })
+
+    test('tras muchos intentos fallidos muestra el bloqueo', async ({
+        page,
+        api,
+    }) => {
+        api.post(`${AUTH}/login`, () =>
+            apiError(
+                429,
+                'LOGIN_LOCKED',
+                'too many failed login attempts; try again later'
+            )
+        )
+
+        await page.goto('/sign-in')
+        await submitCredentials(page)
+
+        await expect(page.getByRole('alert')).toContainText(
+            'Demasiados intentos fallidos. Espera unos minutos e intenta de nuevo.'
         )
         await expect(page).toHaveURL(/\/sign-in/)
     })
@@ -185,12 +258,43 @@ test.describe('Cierre de sesión', () => {
         await page.getByRole('menuitem', { name: 'Cerrar sesión' }).click()
 
         await expect(page).toHaveURL(/\/sign-in/)
-        expect(api.callsTo('POST', `${AUTH}/logout`)[0].body).toEqual({
-            refreshToken: TOKENS.refreshToken,
-        })
+        // Sin cuerpo: el backend revoca la sesión de la cookie y la borra
+        expect(api.callsTo('POST', `${AUTH}/logout`)[0].body).toBeUndefined()
 
-        // La sesión no vuelve al recargar
+        // La sesión no vuelve al recargar: ni siquiera se intenta un refresh
         await page.reload()
         await expect(page).toHaveURL(/\/sign-in/)
+        expect(api.callsTo('POST', `${AUTH}/refresh`)).toHaveLength(1)
+    })
+
+    test('cerrar sesión en una pestaña la cierra en las demás', async ({
+        page,
+        api,
+        signIn,
+    }) => {
+        mockEmptyBackend(api)
+        const session = await signIn()
+        api.post(`${AUTH}/logout`, () => noContent())
+        await page.goto('/home')
+        await expect(
+            page.getByRole('heading', { name: 'Resumen', exact: true })
+        ).toBeVisible()
+
+        const otherTab = await page.context().newPage()
+        const otherApi = await MockApi.attach(otherTab)
+        mockEmptyBackend(otherApi)
+        mockSessionEndpoints(otherApi, session)
+        await otherTab.goto('/home')
+        await expect(
+            otherTab.getByRole('heading', { name: 'Resumen', exact: true })
+        ).toBeVisible()
+
+        await page.getByRole('button', { name: 'Menú de usuario' }).click()
+        await page.getByRole('menuitem', { name: 'Cerrar sesión' }).click()
+
+        await expect(page).toHaveURL(/\/sign-in/)
+        await expect(otherTab).toHaveURL(/\/sign-in/)
+        expect(otherApi.unhandled).toEqual([])
+        await otherTab.close()
     })
 })

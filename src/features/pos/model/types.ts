@@ -114,7 +114,6 @@ export interface ShiftListParams {
 }
 
 export interface OpenShiftInput {
-    cashierName: string
     openingBalance: number
     notes?: string
 }
@@ -175,7 +174,6 @@ export interface CreateSaleInput {
     customerId?: number | null
     isFinalConsumer?: boolean
     notes?: string
-    createdBy?: string
 }
 
 export interface QuickSaleInput {
@@ -185,7 +183,6 @@ export interface QuickSaleInput {
     discountType?: DiscountType
     discountValue?: number
     notes?: string
-    createdBy?: string
 }
 
 export interface QuickSaleItemInput {
@@ -272,7 +269,6 @@ export interface CreateRefundInput {
     originalSaleId: number
     items: { saleItemId: number; quantity: number }[]
     reason?: string
-    refundedBy?: string
 }
 
 export interface ProcessRefundInput {
@@ -298,7 +294,6 @@ export interface CashMovementInput {
     type: CashMovementType
     amount: number
     reason?: string
-    performedBy?: string
 }
 
 export interface CashSummary {

@@ -38,11 +38,11 @@ const TransferForm = ({ open, onClose, onCreated }: TransferFormProps) => {
         formState: { errors, isSubmitting },
     } = useForm<TransferFormValues>({
         resolver: zodResolver(transferSchema),
-        defaultValues: { notes: '', requestedBy: '' },
+        defaultValues: { notes: '' },
     })
 
     useEffect(() => {
-        if (open) reset({ notes: '', requestedBy: '' })
+        if (open) reset({ notes: '' })
     }, [open, reset])
 
     const onSubmit = async (values: TransferFormValues) => {
@@ -51,7 +51,6 @@ const TransferForm = ({ open, onClose, onCreated }: TransferFormProps) => {
                 sourceLocationId: values.sourceLocationId,
                 destinationLocationId: values.destinationLocationId,
                 notes: values.notes || undefined,
-                requestedBy: values.requestedBy || undefined,
             })
             notifySuccess(
                 'Transferencia creada',
@@ -106,20 +105,6 @@ const TransferForm = ({ open, onClose, onCreated }: TransferFormProps) => {
                                 options={locationOptions}
                                 isDisabled={isSubmitting}
                                 placeholder="Seleccionar ubicación destino"
-                            />
-                        </FormItem>
-
-                        <FormItem
-                            label="Solicitado por"
-                            invalid={!!errors.requestedBy}
-                            errorMessage={errors.requestedBy?.message}
-                        >
-                            <Input
-                                type="text"
-                                placeholder="Nombre del solicitante"
-                                disabled={isSubmitting}
-                                invalid={!!errors.requestedBy}
-                                {...register('requestedBy')}
                             />
                         </FormItem>
 

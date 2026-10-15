@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from 'react'
-import { useMe } from '@features/auth'
+import { useAuthChannelSync, useMe, useRestoreSession } from '@features/auth'
 import { useAccessToken, useSession } from '@/stores/useAuthStore'
 import Loading from '@/components/shared/Loading'
 
@@ -26,11 +26,14 @@ const AuthBootstrap = ({ children }: AuthBootstrapProps) => {
         migrateLegacyStorage()
     }, [])
 
+    const restoring = useRestoreSession()
+    useAuthChannelSync()
+
     const accessToken = useAccessToken()
     const session = useSession()
     const { isLoading } = useMe()
 
-    if (accessToken && !session && isLoading) {
+    if (restoring || (accessToken && !session && isLoading)) {
         return <Loading loading={true} />
     }
 

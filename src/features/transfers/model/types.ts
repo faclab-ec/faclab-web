@@ -32,12 +32,10 @@ export interface TransferInput {
     sourceLocationId: number
     destinationLocationId: number
     notes?: string | null
-    requestedBy?: string | null
 }
 
 export interface TransferUpdateInput {
     notes?: string | null
-    requestedBy?: string | null
 }
 
 export interface TransferItem {

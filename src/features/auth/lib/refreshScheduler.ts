@@ -9,7 +9,8 @@ export const refreshScheduler = {
         const delay = Math.max(0, (expiresIn - 60) * 1000)
         timer = setTimeout(async () => {
             timer = null
-            if (!useAuthStore.getState().refreshToken) return
+            // Sin sesión (logout, en esta u otra pestaña) no hay nada que renovar
+            if (!useAuthStore.getState().accessToken) return
             try {
                 const newTokens = await refreshSession()
                 refreshScheduler.start(newTokens.expiresIn)

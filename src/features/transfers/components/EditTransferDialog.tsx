@@ -29,16 +29,6 @@ export const EditTransferDialog = ({
     >
         <h5 className="mb-4">Editar Transferencia</h5>
         <div className="space-y-4">
-            <LabeledField label="Solicitado por">
-                <Input
-                    type="text"
-                    placeholder="Nombre del solicitante"
-                    value={editData.requestedBy || ''}
-                    onChange={(e) =>
-                        onChange({ ...editData, requestedBy: e.target.value })
-                    }
-                />
-            </LabeledField>
             <LabeledField label="Notas">
                 <Input
                     textArea

@@ -111,7 +111,7 @@ src/
 │   ├── hooks/      # useCrudOperations
 │   ├── lib/
 │   │   ├── http/   # httpClient
-│   │   ├── auth/   # session, refreshManager, tokenStorage, navigationRef
+│   │   ├── auth/   # session, refreshManager, sessionHint, authChannel, navigationRef
 │   │   ├── schemas/# primitivas Zod compartidas (optionalEmail, taxTypeSchema)
 │   │   └── ...     # format, getErrorMessage, dateToIsoStartOfDay, react-query
 │   └── ui/         # notify (toasts)
@@ -184,12 +184,16 @@ queryFn: async () => {
 
 ### Autenticación
 
-- JWT con access y refresh token. La sesión (rol y permisos) se hidrata con `GET /api/auth/me` desde `AuthBootstrap`.
+- JWT con access y refresh token. **El access token vive solo en memoria** (`useAuthStore`) y **el refresh token en la cookie HttpOnly `faclab_refresh`** que pone faclab-core (`SameSite=Strict`, `Path=/api/auth`); JavaScript nunca lo ve. En `localStorage` solo queda la marca no secreta `fc.hasSession`.
+- Login, refresh y logout van con `withCredentials: true` para que el navegador guarde y envíe la cookie. El resto de llamadas no lleva credenciales (faclab-invoicing no las acepta por CORS). El origen del frontend tiene que estar en `CORS_ORIGINS` de faclab-core.
+- **Al abrir o recargar la app**, `AuthBootstrap` (`useRestoreSession`) pide un access token con la cookie si existe la marca de sesión, y luego hidrata rol y permisos con `GET /api/auth/me`.
 - **Refresh proactivo:** `features/auth/lib/refreshScheduler.ts` renueva el token 60 s antes de que venza.
-- **Refresh reactivo:** si una petición responde `TOKEN_EXPIRED`, `httpClient` renueva el token y reintenta una vez. Las renovaciones concurrentes se deduplican en `refreshOnce`, porque el backend rota el refresh token.
-- `INVALID_TOKEN` o un refresh fallido → cierre de sesión (`forceSignOut`): limpia el store y la caché, y redirige a `/sign-in`.
-- `PASSWORD_CHANGE_REQUIRED` → redirige a `/change-password`.
-- **Regla:** los tokens se escriben solo a través de `useAuthStore` (`setTokens` / `clear`), que persiste en `localStorage`. Para renovar o cerrar sesión desde código usa `refreshSession()` / `forceSignOut()` de `@shared/lib/auth/session`.
+- **Refresh reactivo:** si una petición responde `TOKEN_EXPIRED`, `httpClient` renueva el token y reintenta una vez. Las renovaciones concurrentes se deduplican en `refreshOnce`, porque el backend rota el refresh token y revoca la sesión si ve uno ya usado (`TOKEN_REUSED`).
+- **Varias pestañas:** `authChannel` (`BroadcastChannel`) comparte el access token nuevo y el cierre de sesión entre pestañas; cerrar sesión en una la cierra en todas.
+- `INVALID_TOKEN`, `TOKEN_REUSED` o un refresh fallido → cierre de sesión (`forceSignOut`): limpia el store y la caché, avisa a las otras pestañas y redirige a `/sign-in`.
+- `PASSWORD_CHANGE_REQUIRED` → redirige a `/change-password`. `LOGIN_LOCKED` (demasiados intentos fallidos) se muestra en el login con un mensaje propio.
+- **Regla:** los tokens se escriben solo a través de `useAuthStore` (`setTokens` / `clear`); nunca en `localStorage` ni `sessionStorage`. Para renovar o cerrar sesión desde código usa `refreshSession()` / `forceSignOut()` de `@shared/lib/auth/session`.
+- **Autoría:** el backend firma turnos, ventas, devoluciones, movimientos de caja, ajustes y transferencias con el usuario autenticado (su nombre completo o, si no tiene, su usuario). Los formularios no envían esos campos; el nombre completo se edita en Configuración → Usuarios.
 
 ### Roles y permisos
 

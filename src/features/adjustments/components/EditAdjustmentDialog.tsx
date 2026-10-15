@@ -29,16 +29,6 @@ export const EditAdjustmentDialog = ({
     >
         <h5 className="mb-4">Editar Ajuste</h5>
         <div className="space-y-4">
-            <LabeledField label="Responsable">
-                <Input
-                    type="text"
-                    placeholder="Nombre del responsable"
-                    value={editData.adjustedBy || ''}
-                    onChange={(e) =>
-                        onChange({ ...editData, adjustedBy: e.target.value })
-                    }
-                />
-            </LabeledField>
             <LabeledField label="Notas">
                 <Input
                     textArea

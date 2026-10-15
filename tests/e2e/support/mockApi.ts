@@ -19,11 +19,15 @@ export interface MockRequest {
     query: URLSearchParams
     params: Record<string, string>
     body: unknown
+    /** Cabeceras que envió el navegador, incluida `cookie`. */
+    headers: Record<string, string>
 }
 
 export interface MockResponse {
     status: number
     body?: unknown
+    /** P. ej. `set-cookie`, para simular la cookie del refresh token. */
+    headers?: Record<string, string>
 }
 
 export type Handler = (
@@ -202,6 +206,7 @@ export class MockApi {
             query: url.searchParams,
             params,
             body: parseBody(request.postData()),
+            headers: await request.allHeaders(),
         }
         this.calls.push(mockRequest)
 
@@ -214,11 +219,15 @@ export class MockApi {
 
     private async fulfill(route: Route, response: MockResponse): Promise<void> {
         if (response.body === undefined) {
-            await route.fulfill({ status: response.status })
+            await route.fulfill({
+                status: response.status,
+                headers: response.headers,
+            })
             return
         }
         await route.fulfill({
             status: response.status,
+            headers: response.headers,
             contentType: 'application/json',
             body: JSON.stringify(response.body),
         })

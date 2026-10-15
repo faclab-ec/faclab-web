@@ -45,11 +45,11 @@ const AdjustmentForm = ({ open, onClose, onCreated }: AdjustmentFormProps) => {
         formState: { errors, isSubmitting },
     } = useForm<AdjustmentFormValues>({
         resolver: zodResolver(adjustmentSchema),
-        defaultValues: { reason: 'physical_count', notes: '', adjustedBy: '' },
+        defaultValues: { reason: 'physical_count', notes: '' },
     })
 
     useEffect(() => {
-        if (open) reset({ reason: 'physical_count', notes: '', adjustedBy: '' })
+        if (open) reset({ reason: 'physical_count', notes: '' })
     }, [open, reset])
 
     const onSubmit = async (values: AdjustmentFormValues) => {
@@ -58,7 +58,6 @@ const AdjustmentForm = ({ open, onClose, onCreated }: AdjustmentFormProps) => {
                 warehouseId: values.warehouseId,
                 reason: values.reason,
                 notes: values.notes || undefined,
-                adjustedBy: values.adjustedBy || undefined,
             })
             notifySuccess('Ajuste creado', 'El ajuste se creó correctamente')
             onClose()
@@ -110,20 +109,6 @@ const AdjustmentForm = ({ open, onClose, onCreated }: AdjustmentFormProps) => {
                                 options={reasonOptions}
                                 isDisabled={isSubmitting}
                                 placeholder="Seleccionar motivo"
-                            />
-                        </FormItem>
-
-                        <FormItem
-                            label="Responsable"
-                            invalid={!!errors.adjustedBy}
-                            errorMessage={errors.adjustedBy?.message}
-                        >
-                            <Input
-                                type="text"
-                                placeholder="Nombre del responsable"
-                                disabled={isSubmitting}
-                                invalid={!!errors.adjustedBy}
-                                {...register('adjustedBy')}
                             />
                         </FormItem>
 

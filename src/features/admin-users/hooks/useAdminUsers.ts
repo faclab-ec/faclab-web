@@ -42,6 +42,20 @@ export const useUpdateUserRole = () => {
     })
 }
 
+export const useUpdateUserProfile = () => {
+    const qc = useQueryClient()
+    return useMutation({
+        mutationFn: ({
+            id,
+            fullName,
+        }: {
+            id: number
+            fullName: string | null
+        }) => api.updateProfile(id, { fullName }).then((r) => r.data),
+        onSuccess: () => qc.invalidateQueries({ queryKey: USERS_KEY }),
+    })
+}
+
 export const useActivateUser = () => {
     const qc = useQueryClient()
     return useMutation({

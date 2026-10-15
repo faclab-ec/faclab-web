@@ -30,6 +30,8 @@ export type ApiErrorResponse = {
 export type Session = {
     id: number
     username: string
+    /** Nombre con el que firma documentos; null si solo tiene username */
+    fullName: string | null
     role: RoleCode
     permissions: Permission[]
     mustChangePassword: boolean
@@ -40,15 +42,11 @@ export type LoginRequest = {
     password: string
 }
 
+/** El refresh token no viene aquí: llega en la cookie HttpOnly `faclab_refresh`. */
 export type LoginResponse = {
     accessToken: string
-    refreshToken: string
     tokenType: 'Bearer'
     expiresIn: number
-}
-
-export type RefreshRequest = {
-    refreshToken: string
 }
 
 export type RefreshResponse = LoginResponse
@@ -64,6 +62,7 @@ export type AdminUserResponse = {
     id: number
     username: string
     email: string
+    fullName: string | null
     role: RoleCode
     isActive: boolean
     mustChangePassword: boolean
@@ -83,6 +82,11 @@ export type CreateUserRequest = {
     email: string
     password: string
     role: RoleCode
+    fullName?: string | null
+}
+
+export type UpdateUserProfileRequest = {
+    fullName: string | null
 }
 
 export type UpdateUserRoleRequest = {

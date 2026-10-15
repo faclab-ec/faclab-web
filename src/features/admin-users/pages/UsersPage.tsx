@@ -13,6 +13,7 @@ import { useAdminUsers } from '../hooks/useAdminUsers'
 import { useAdminUserActions } from '../hooks/useAdminUserActions'
 import CreateUserModal from '../components/CreateUserModal'
 import ResetPasswordModal from '../components/ResetPasswordModal'
+import EditNameModal from '../components/EditNameModal'
 import UsersTable from '../components/UsersTable'
 
 const roleFilterOptions = ALL_ROLES.map((role) => ({
@@ -110,12 +111,21 @@ const UsersPage = () => {
                     onSelectChange={(size) => crud.onPaginationChange(1, size)}
                     onRoleChange={actions.handleRoleChange}
                     onReset={actions.openReset}
+                    onEditName={actions.openEditName}
                     onDeactivate={actions.openDeactivate}
                     onActivate={actions.handleActivate}
                 />
             </Card>
 
             <CreateUserModal open={crud.isCreateOpen} onClose={crud.closeAll} />
+
+            {actions.nameDialog.user && (
+                <EditNameModal
+                    open={actions.nameDialog.open}
+                    user={actions.nameDialog.user}
+                    onClose={actions.closeEditName}
+                />
+            )}
 
             {actions.resetDialog.open && (
                 <ResetPasswordModal
