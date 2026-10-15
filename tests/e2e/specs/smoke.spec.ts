@@ -87,6 +87,6 @@ test.describe('Pantallas principales', () => {
         await expect(
             page.getByRole('heading', { name: 'Abrir turno' })
         ).toBeVisible()
-        await expect(page.getByLabel('Nombre del cajero')).toBeVisible()
+        await expect(page.getByLabel('Saldo inicial')).toBeVisible()
     })
 })

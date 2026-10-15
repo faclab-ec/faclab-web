@@ -34,6 +34,7 @@ interface UsersTableProps {
     togglingId: number | null
     onRoleChange: (userId: number, role: RoleCode) => void
     onReset: (user: AdminUserResponse) => void
+    onEditName: (user: AdminUserResponse) => void
     onDeactivate: (user: AdminUserResponse) => void
     onActivate: (userId: number) => void
 }
@@ -50,6 +51,7 @@ const UsersTable = ({
     togglingId,
     onRoleChange,
     onReset,
+    onEditName,
     onDeactivate,
     onActivate,
 }: UsersTableProps) => {
@@ -57,16 +59,21 @@ const UsersTable = ({
         {
             header: 'Usuario',
             accessorKey: 'username',
-            cell: (props) => (
-                <div>
-                    <p className="font-semibold">
-                        {props.row.original.username}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {props.row.original.email}
-                    </p>
-                </div>
-            ),
+            cell: (props) => {
+                const user = props.row.original
+                return (
+                    <div>
+                        <p className="font-semibold">
+                            {user.fullName || user.username}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {user.fullName
+                                ? `${user.username} · ${user.email}`
+                                : user.email}
+                        </p>
+                    </div>
+                )
+            },
         },
         {
             header: 'Rol',
@@ -117,6 +124,13 @@ const UsersTable = ({
                 const isToggling = togglingId === user.id
                 return (
                     <div className="flex gap-1 flex-wrap">
+                        <Button
+                            size="xs"
+                            variant="plain"
+                            onClick={() => onEditName(user)}
+                        >
+                            Editar nombre
+                        </Button>
                         <Button
                             size="xs"
                             variant="plain"

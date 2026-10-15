@@ -29,7 +29,6 @@ export function useTransferActions(
     const [editDialogOpen, setEditDialogOpen] = useState(false)
     const [editData, setEditData] = useState<TransferUpdateInput>({
         notes: '',
-        requestedBy: '',
     })
     const [itemFormOpen, setItemFormOpen] = useState(false)
     const [selectedItem, setSelectedItem] = useState<TransferItem | null>(null)
@@ -46,7 +45,6 @@ export function useTransferActions(
         if (transfer) {
             setEditData({
                 notes: transfer.notes || '',
-                requestedBy: transfer.requestedBy || '',
             })
             setEditDialogOpen(true)
         }
@@ -58,7 +56,6 @@ export function useTransferActions(
                 id: transferId,
                 data: {
                     notes: editData.notes || undefined,
-                    requestedBy: editData.requestedBy || undefined,
                 },
             })
             notifySuccess(

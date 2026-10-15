@@ -26,13 +26,14 @@ test.describe('Punto de venta', () => {
         await expect(
             page.getByRole('heading', { name: 'Abrir turno' })
         ).toBeVisible()
-        // Viene precargado con el usuario de la sesión
-        const cashier = page.getByLabel('Nombre del cajero')
-        await expect(cashier).toHaveValue('caja1')
-        await cashier.clear()
+        // El cajero es el usuario de la sesión; no se puede escribir otro
+        await expect(page.getByText('Cajero: caja1')).toBeVisible()
+        await expect(page.getByLabel('Nombre del cajero')).toHaveCount(0)
+        const balance = page.getByLabel('Saldo inicial')
+        await balance.fill('-5')
         await page.getByRole('button', { name: 'Abrir turno' }).click()
 
-        await expect(cashier).toHaveAttribute('aria-invalid', 'true')
+        await expect(balance).toHaveAttribute('aria-invalid', 'true')
         expect(api.callsTo('POST', `${POS}/shifts/open`)).toHaveLength(0)
     })
 
@@ -63,16 +64,16 @@ test.describe('Punto de venta', () => {
         })
         await page.goto('/pos')
 
-        await page.getByLabel('Nombre del cajero').fill('Luis')
         await page.getByLabel('Saldo inicial').fill('80')
         await page.getByRole('button', { name: 'Abrir turno' }).click()
 
         await expect(
             page.getByRole('heading', { name: 'Hola, Luis' })
         ).toBeVisible()
-        expect(api.callsTo('POST', `${POS}/shifts/open`)[0].body).toMatchObject(
-            { cashierName: 'Luis', openingBalance: 80 }
-        )
+        // El backend toma el cajero del token: el cuerpo no lo lleva
+        expect(api.callsTo('POST', `${POS}/shifts/open`)[0].body).toEqual({
+            openingBalance: 80,
+        })
     })
 
     test('con el carrito vacío no se puede cobrar', async ({ page, api }) => {

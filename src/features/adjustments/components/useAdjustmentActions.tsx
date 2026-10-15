@@ -28,7 +28,6 @@ export function useAdjustmentActions(
     const [editDialogOpen, setEditDialogOpen] = useState(false)
     const [editData, setEditData] = useState<AdjustmentUpdateInput>({
         notes: '',
-        adjustedBy: '',
     })
     const [itemFormOpen, setItemFormOpen] = useState(false)
     const [selectedItem, setSelectedItem] = useState<AdjustmentItem | null>(
@@ -46,7 +45,6 @@ export function useAdjustmentActions(
         if (adjustment) {
             setEditData({
                 notes: adjustment.notes || '',
-                adjustedBy: adjustment.adjustedBy || '',
             })
             setEditDialogOpen(true)
         }
@@ -58,7 +56,6 @@ export function useAdjustmentActions(
                 id: adjustmentId,
                 data: {
                     notes: editData.notes || undefined,
-                    adjustedBy: editData.adjustedBy || undefined,
                 },
             })
             notifySuccess(

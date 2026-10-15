@@ -15,6 +15,8 @@ const ShiftOpenDialog = () => {
     const navigate = useNavigate()
     const session = useSession()
     const openShift = useOpenShift()
+    // El backend firma el turno con el usuario autenticado
+    const cashierName = session?.fullName || session?.username
 
     const {
         register,
@@ -23,7 +25,6 @@ const ShiftOpenDialog = () => {
     } = useForm<ShiftOpenFormValues>({
         resolver: zodResolver(shiftOpenSchema),
         defaultValues: {
-            cashierName: session?.username || '',
             openingBalance: 0,
             notes: '',
         },
@@ -34,7 +35,6 @@ const ShiftOpenDialog = () => {
     const onSubmit = async (data: ShiftOpenFormValues) => {
         try {
             await openShift.mutateAsync({
-                cashierName: data.cashierName,
                 openingBalance: data.openingBalance,
                 notes: data.notes || undefined,
             })
@@ -55,19 +55,14 @@ const ShiftOpenDialog = () => {
 
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <FormContainer>
-                        <FormItem
-                            asterisk
-                            label="Nombre del cajero"
-                            invalid={!!errors.cashierName}
-                            errorMessage={errors.cashierName?.message}
-                        >
-                            <Input
-                                placeholder="Nombre del cajero"
-                                disabled={isSubmitting}
-                                invalid={!!errors.cashierName}
-                                {...register('cashierName')}
-                            />
-                        </FormItem>
+                        {cashierName && (
+                            <p className="mb-6 text-gray-500 dark:text-gray-400">
+                                Cajero:{' '}
+                                <span className="font-semibold text-gray-900 dark:text-gray-100">
+                                    {cashierName}
+                                </span>
+                            </p>
+                        )}
 
                         <FormItem
                             asterisk

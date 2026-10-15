@@ -36,6 +36,7 @@ const CreateUserModal = ({ open, onClose }: CreateUserModalProps) => {
         resolver: zodResolver(createUserSchema),
         defaultValues: {
             username: '',
+            fullName: '',
             email: '',
             password: '',
             role: ROLE.VIEWER,
@@ -51,7 +52,10 @@ const CreateUserModal = ({ open, onClose }: CreateUserModalProps) => {
 
     const onSubmit = async (values: CreateUserFormValues) => {
         try {
-            await createUser.mutateAsync(values as CreateUserRequest)
+            await createUser.mutateAsync({
+                ...values,
+                fullName: values.fullName || null,
+            } as CreateUserRequest)
             notifySuccess('Usuario creado')
             reset()
             onClose()
@@ -96,6 +100,18 @@ const CreateUserModal = ({ open, onClose }: CreateUserModalProps) => {
                             placeholder="nombre.usuario"
                             invalid={!!errors.username}
                             {...register('username')}
+                        />
+                    </FormItem>
+                    <FormItem
+                        label="Nombre completo (opcional)"
+                        invalid={!!errors.fullName}
+                        errorMessage={errors.fullName?.message}
+                    >
+                        <Input
+                            autoComplete="off"
+                            placeholder="Con este nombre firma ventas y documentos"
+                            invalid={!!errors.fullName}
+                            {...register('fullName')}
                         />
                     </FormItem>
                     <FormItem

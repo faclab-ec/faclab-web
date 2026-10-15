@@ -5,6 +5,7 @@ import type {
     AdminUserResponse,
     AdminUserListParams,
     CreateUserRequest,
+    UpdateUserProfileRequest,
     UpdateUserRoleRequest,
     ResetUserPasswordRequest,
 } from '@/@types/auth'
@@ -22,6 +23,12 @@ export const createUser = (data: CreateUserRequest) =>
 
 export const updateRole = (id: number, data: UpdateUserRoleRequest) =>
     httpClient.put<DataResponse<AdminUserResponse>>(`${BASE}/${id}/role`, data)
+
+export const updateProfile = (id: number, data: UpdateUserProfileRequest) =>
+    httpClient.put<DataResponse<AdminUserResponse>>(
+        `${BASE}/${id}/profile`,
+        data
+    )
 
 export const activateUser = (id: number) =>
     httpClient.post<DataResponse<AdminUserResponse>>(`${BASE}/${id}/activate`)

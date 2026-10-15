@@ -18,6 +18,7 @@ const UserDropdown = () => {
     }
 
     const roleLabel = ROLE_LABELS[session.role]
+    const displayName = session.fullName || session.username
 
     const trigger = (
         <div className="flex items-center gap-2.5 rounded-lg py-1 pl-1 pr-2 transition-colors duration-150 hover:bg-gray-100 dark:hover:bg-gray-800">
@@ -26,7 +27,7 @@ const UserDropdown = () => {
             </Avatar>
             <div className="hidden text-left leading-tight md:block">
                 <div className="font-semibold text-gray-900 dark:text-gray-50">
-                    {session.username}
+                    {displayName}
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">
                     {roleLabel}
@@ -50,7 +51,7 @@ const UserDropdown = () => {
                     </Avatar>
                     <div className="min-w-0">
                         <div className="truncate font-semibold text-gray-900 dark:text-gray-50">
-                            {session.username}
+                            {displayName}
                         </div>
                         <div className="text-xs text-gray-500 dark:text-gray-400">
                             {roleLabel}

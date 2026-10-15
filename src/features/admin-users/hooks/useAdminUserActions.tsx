@@ -16,6 +16,11 @@ interface ResetDialogState {
     defaultPassword: string
 }
 
+interface NameDialogState {
+    open: boolean
+    user: AdminUserResponse | null
+}
+
 interface DeactivateDialogState {
     open: boolean
     userId: number | null
@@ -27,6 +32,8 @@ const closedReset: ResetDialogState = {
     user: null,
     defaultPassword: '',
 }
+
+const closedName: NameDialogState = { open: false, user: null }
 
 const closedDeactivate: DeactivateDialogState = {
     open: false,
@@ -45,6 +52,7 @@ export function useAdminUserActions() {
         useState<ResetDialogState>(closedReset)
     const [deactivateDialog, setDeactivateDialog] =
         useState<DeactivateDialogState>(closedDeactivate)
+    const [nameDialog, setNameDialog] = useState<NameDialogState>(closedName)
     const [updatingRoleId, setUpdatingRoleId] = useState<number | null>(null)
     const [togglingId, setTogglingId] = useState<number | null>(null)
 
@@ -107,9 +115,14 @@ export function useAdminUserActions() {
         })
     const closeDeactivate = () => setDeactivateDialog(closedDeactivate)
 
+    const openEditName = (user: AdminUserResponse) =>
+        setNameDialog({ open: true, user })
+    const closeEditName = () => setNameDialog(closedName)
+
     return {
         resetDialog,
         deactivateDialog,
+        nameDialog,
         updatingRoleId,
         togglingId,
         handleRoleChange,
@@ -119,5 +132,7 @@ export function useAdminUserActions() {
         closeReset,
         openDeactivate,
         closeDeactivate,
+        openEditName,
+        closeEditName,
     }
 }

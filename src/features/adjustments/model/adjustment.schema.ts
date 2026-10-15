@@ -14,7 +14,6 @@ export const adjustmentSchema = z.object({
     warehouseId: z.number().int().min(1),
     reason: z.enum(adjustmentReasons),
     notes: z.string().optional(),
-    adjustedBy: z.string().optional(),
 })
 
 export type AdjustmentFormValues = z.infer<typeof adjustmentSchema>

@@ -49,12 +49,10 @@ export interface AdjustmentInput {
     warehouseId: number
     reason: AdjustmentReason
     notes?: string | null
-    adjustedBy?: string | null
 }
 
 export interface AdjustmentUpdateInput {
     notes?: string | null
-    adjustedBy?: string | null
 }
 
 export interface AdjustmentItem {
