@@ -63,6 +63,8 @@ VITE_INVOICING_API_URL=http://localhost:3173   # faclab-invoicing
 
 `src/configs/app.config.ts` arma los hosts de cada API (`inventoryApiHost`, `posApiHost`, `invoicingApiHost`) a partir de estas variables. En ese archivo también está `enableMock` para activar MirageJS.
 
+Las URLs también se pueden fijar al cargar la página, sin reconstruir: `index.html` carga `/config.js` antes del bundle, y lo que ese archivo define en `window.__FACLAB_CONFIG__` (`apiBaseUrl`, `invoicingApiUrl`) tiene prioridad sobre los `VITE_*`. En desarrollo `public/config.js` no define nada, así que mandan los `.env`. La imagen de Docker lo reemplaza al arrancar (ver [Despliegue con Docker](#despliegue-con-docker)).
+
 Sobre las variables de entorno:
 
 - **No definas `NODE_ENV` en los `.env`.** Vite lo fija según el comando (`development` con `npm start`, `production` con `npm run build`) e ignora cualquier otro valor con un warning.
@@ -328,6 +330,7 @@ Cada PR y cada push a `master` corren `.github/workflows/ci.yml` en GitHub Actio
 |---|---|---|
 | `checks` | `npm ci`, `npm run typecheck`, `npm run lint`, `npm test`, `npm run build` | Sí |
 | `e2e` | `npx playwright test --ignore-snapshots` en Chromium | No, hasta que la suite sea estable en Linux |
+| `image` | Construye la imagen de Docker sin publicarla. Comprueba que no arranque sin URLs, que `/pos` devuelva `index.html`, que `/config.js` traiga las URLs sin caché y que un asset inexistente dé 404 | Sí |
 
 El job `e2e` omite las comparaciones de `visual.spec.ts` porque solo hay capturas de referencia de macOS; esas se siguen validando en local. Su reporte queda como artefacto `playwright-report`.
 
@@ -337,6 +340,39 @@ Para correr lo mismo en local:
 npm ci && npm run typecheck && npm run lint && npm test && npm run build
 npm run test:e2e
 ```
+
+## Despliegue con Docker
+
+El `Dockerfile` hace el build con Node 22 (Debian, igual que CI) y sirve el resultado con Caddy en una imagen Alpine de unos 60 MB:
+
+- Corre como `app` (uid 10001) en el puerto `8080`. Los estáticos son de root, y no necesita capacidades extra, así que arranca también con `cap_drop: ALL`.
+- `HEALTHCHECK` contra `/health`.
+- `docker/Caddyfile` sirve el SPA sin TLS ni API de administración, porque el TLS lo pone el proxy de entrada (ADR-0011 del core). Comprime con zstd o gzip y define la caché por ruta:
+
+| Ruta | Respuesta | `Cache-Control` |
+|---|---|---|
+| `/assets/*` | El archivo (nombres con hash), o 404 si no existe | `public, max-age=31536000, immutable` |
+| `/config.js` | Las URLs de este entorno | `no-store` |
+| Cualquier otra (`/pos`, `/catalog/products`…) | El archivo si existe; si no, `index.html` | `no-cache` |
+
+Las URLs de API se configuran al arrancar el contenedor, sin reconstruir la imagen:
+
+| Variable | Ejemplo | Uso |
+|---|---|---|
+| `API_BASE_URL` | `https://api.faclab.ec` | faclab-core (`/api/auth`, `/api/admin`, `/api/pos`) |
+| `INVOICING_API_URL` | `https://facturacion.faclab.ec` | faclab-invoicing |
+
+`docker/entrypoint.sh` exige las dos y las valida: deben ser `http://` o `https://` y no tener espacios, comillas ni `<` `>`. Si alguna falta o no es válida, el contenedor no arranca y lo dice. Les quita la barra final y escribe `/config.js` antes de arrancar Caddy. Para cambiarlas basta con reiniciar el contenedor con otros valores.
+
+```bash
+docker build -t faclab-web .
+docker run --rm -p 5173:8080 \
+  -e API_BASE_URL=http://localhost:3000 \
+  -e INVOICING_API_URL=http://localhost:3173 \
+  faclab-web
+```
+
+En local conviene publicarlo en el puerto 5173, porque es el origen que faclab-core y faclab-invoicing permiten por CORS por defecto. En otro entorno, ese origen tiene que estar en `CORS_ORIGINS` de los dos backends. Con sistema de archivos de solo lectura, `/srv/runtime` necesita un tmpfs del usuario `app` (`--tmpfs /srv/runtime:uid=10001,gid=10001`).
 
 ## Convenciones
 
