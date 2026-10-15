@@ -320,6 +320,24 @@ test('lista los proveedores', async ({ page, api, signIn }) => {
 
 Busca los elementos como los encontraría una persona: `getByRole`, `getByLabel`, `getByText`. No uses clases CSS ni `waitForTimeout`.
 
+## Integración continua
+
+Cada PR y cada push a `master` corren `.github/workflows/ci.yml` en GitHub Actions con Node 22:
+
+| Job | Qué corre | ¿Bloquea? |
+|---|---|---|
+| `checks` | `npm ci`, `npm run typecheck`, `npm run lint`, `npm test`, `npm run build` | Sí |
+| `e2e` | `npx playwright test --ignore-snapshots` en Chromium | No, hasta que la suite sea estable en Linux |
+
+El job `e2e` omite las comparaciones de `visual.spec.ts` porque solo hay capturas de referencia de macOS; esas se siguen validando en local. Su reporte queda como artefacto `playwright-report`.
+
+Para correr lo mismo en local:
+
+```bash
+npm ci && npm run typecheck && npm run lint && npm test && npm run build
+npm run test:e2e
+```
+
 ## Convenciones
 
 - Commits con [Conventional Commits](https://www.conventionalcommits.org/) (`feat(scope): …`, `fix(scope): …`).
