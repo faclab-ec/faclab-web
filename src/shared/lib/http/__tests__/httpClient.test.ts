@@ -50,7 +50,6 @@ const makeAdapter = (...replies: Reply[]) => {
 
 const newTokens = {
     accessToken: 'new-at',
-    refreshToken: 'new-rt',
     expiresIn: 900,
     tokenType: 'Bearer' as const,
 }
@@ -61,7 +60,6 @@ describe('httpClient', () => {
     beforeEach(() => {
         useAuthStore.getState().setTokens({
             accessToken: 'old-at',
-            refreshToken: 'old-rt',
             expiresIn: 900,
         })
     })
@@ -70,6 +68,21 @@ describe('httpClient', () => {
         useAuthStore.getState().clear()
         vi.restoreAllMocks()
         mockNavigate.mockClear()
+    })
+
+    it('las llamadas normales no envían credenciales', async () => {
+        const adapter = vi.fn(async (config: InternalAxiosRequestConfig) => ({
+            data: { data: 1 },
+            status: 200,
+            statusText: '',
+            headers: {},
+            config,
+        }))
+
+        await httpClient.get('/x', { adapter })
+
+        // faclab-invoicing no acepta credenciales por CORS
+        expect(adapter.mock.calls[0][0].withCredentials).toBeFalsy()
     })
 
     it('adjunta el access token del store', async () => {
@@ -97,10 +110,13 @@ describe('httpClient', () => {
 
         expect(body).toEqual({ data: 'ok' })
         expect(post).toHaveBeenCalledTimes(1)
-        expect(post.mock.calls[0][1]).toEqual({ refreshToken: 'old-rt' })
+        // El refresh token va en la cookie HttpOnly: sin cuerpo, con credenciales
+        const [url, refreshBody, config] = post.mock.calls[0]
+        expect(url).toMatch(/\/api\/auth\/refresh$/)
+        expect(refreshBody).toBeUndefined()
+        expect(config).toMatchObject({ withCredentials: true })
         expect(authHeaders).toEqual(['Bearer old-at', 'Bearer new-at'])
         expect(useAuthStore.getState().accessToken).toBe('new-at')
-        expect(useAuthStore.getState().refreshToken).toBe('new-rt')
         expect(mockNavigate).not.toHaveBeenCalled()
     })
 
@@ -148,7 +164,7 @@ describe('httpClient', () => {
         expect(isApiError(err) && err.code).toBe('TOKEN_EXPIRED')
         expect(useAuthStore.getState().accessToken).toBeNull()
         expect(useAuthStore.getState().session).toBeNull()
-        expect(localStorage.getItem('fc.access')).toBeNull()
+        expect(localStorage.getItem('fc.hasSession')).toBeNull()
         expect(mockNavigate).toHaveBeenCalledWith('/sign-in', {
             replace: true,
         })

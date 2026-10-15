@@ -17,6 +17,16 @@ import { signInSchema, type SignInFormValues } from '../model/schemas'
 import { useLogin } from '../hooks/useAuth'
 import { safeRedirectPath } from '../lib/safeRedirect'
 
+const LOGIN_LOCKED_MESSAGE =
+    'Demasiados intentos fallidos. Espera unos minutos e intenta de nuevo.'
+
+const signInErrorMessage = (err: unknown): string => {
+    if (isApiError(err)) {
+        return err.code === 'LOGIN_LOCKED' ? LOGIN_LOCKED_MESSAGE : err.message
+    }
+    return err instanceof Error ? err.message : String(err)
+}
+
 const SignInForm = () => {
     const navigate = useNavigate()
     const query = useQuery()
@@ -49,13 +59,7 @@ const SignInForm = () => {
                 )
             }
         } catch (err) {
-            setMessage(
-                isApiError(err)
-                    ? err.message
-                    : err instanceof Error
-                    ? err.message
-                    : String(err)
-            )
+            setMessage(signInErrorMessage(err))
         }
     }
 

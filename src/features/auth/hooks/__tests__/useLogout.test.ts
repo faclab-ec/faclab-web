@@ -18,9 +18,7 @@ function wrapper({ children }: { children: React.ReactNode }) {
 
 beforeEach(() => {
     vi.clearAllMocks()
-    useAuthStore
-        .getState()
-        .setTokens({ accessToken: 'a', refreshToken: 'r', expiresIn: 900 })
+    useAuthStore.getState().setTokens({ accessToken: 'a', expiresIn: 900 })
 })
 
 describe('useLogout', () => {
@@ -30,8 +28,10 @@ describe('useLogout', () => {
 
         await act(() => result.current.mutateAsync())
 
-        expect(api.apiLogout).toHaveBeenCalledWith('r')
-        expect(useAuthStore.getState().refreshToken).toBeNull()
+        // Sin cuerpo: el backend lee la cookie del refresh token
+        expect(api.apiLogout).toHaveBeenCalledWith()
+        expect(useAuthStore.getState().accessToken).toBeNull()
+        expect(localStorage.getItem('fc.hasSession')).toBeNull()
     })
 
     it('clears the local session even if the server call fails', async () => {

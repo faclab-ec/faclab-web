@@ -116,13 +116,15 @@ const err = (status: number, code: string, message: string, field?: string) =>
         { errors: [{ code, message, field: field ?? null }], meta: meta() }
     )
 const accessFor = (id: number) => `mock-access-${id}`
-const refreshFor = (id: number) => `mock-refresh-${id}`
 const buildTokens = (id: number) => ({
     accessToken: accessFor(id),
-    refreshToken: refreshFor(id),
     tokenType: 'Bearer',
     expiresIn: 900,
 })
+
+// Mirage no puede escribir cookies HttpOnly: el usuario de la "cookie" de
+// refresh vive aquí mientras dure la página
+let refreshUserId: number | null = null
 
 function userIdFromAccessToken(authHeader: string | null): number | null {
     if (!authHeader) return null
@@ -149,17 +151,18 @@ export default function authFakeApi(server: Server) {
                 'INVALID_CREDENTIALS',
                 'Usuario o contraseña inválidos'
             )
+        refreshUserId = user.id
         return ok(buildTokens(user.id))
     })
 
-    server.post('/api/auth/refresh', (schema, { requestBody }) => {
-        const { refreshToken } = JSON.parse(requestBody)
-        if (!refreshToken || !refreshToken.startsWith('mock-refresh-')) {
-            return err(400, 'INVALID_TOKEN', 'Token inválido')
-        }
-        const id = Number(refreshToken.replace('mock-refresh-', ''))
-        if (!Number.isFinite(id))
-            return err(400, 'INVALID_TOKEN', 'Token inválido')
+    server.post('/api/auth/logout', () => {
+        refreshUserId = null
+        return new Response(204, {}, '')
+    })
+
+    server.post('/api/auth/refresh', (schema) => {
+        const id = refreshUserId
+        if (id === null) return err(401, 'INVALID_TOKEN', 'Token inválido')
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const user = (schema.db as any).usersData.find(id)
         if (!user)
@@ -189,6 +192,7 @@ export default function authFakeApi(server: Server) {
         return ok({
             id: user.id,
             username: user.username,
+            fullName: user.fullName ?? null,
             role: user.role,
             permissions: ROLE_PERMISSIONS[user.role] ?? [],
             mustChangePassword: user.mustChangePassword,

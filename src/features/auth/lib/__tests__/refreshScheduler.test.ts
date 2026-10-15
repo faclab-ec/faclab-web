@@ -21,9 +21,8 @@ describe('refreshScheduler', () => {
     beforeEach(() => {
         vi.useFakeTimers()
         mockGetState.mockReturnValue({
-            refreshToken: 'mock-rt',
             setTokens: vi.fn(),
-            accessToken: null,
+            accessToken: 'mock-at',
             clear: vi.fn(),
             setSession: vi.fn(),
         } as never)
@@ -67,7 +66,6 @@ describe('refreshScheduler', () => {
     it('calls refreshSession when timer fires and re-schedules on success', async () => {
         const newTokens = {
             accessToken: 'new-at',
-            refreshToken: 'new-rt',
             expiresIn: 300,
             tokenType: 'Bearer' as const,
         }
@@ -97,9 +95,8 @@ describe('refreshScheduler', () => {
         expect(refreshScheduler._isRunning()).toBe(false)
     })
 
-    it('does nothing if refreshToken is absent', async () => {
+    it('does nothing once the session is gone', async () => {
         mockGetState.mockReturnValue({
-            refreshToken: null,
             setTokens: vi.fn(),
             accessToken: null,
             clear: vi.fn(),

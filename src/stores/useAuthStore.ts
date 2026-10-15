@@ -2,18 +2,21 @@ import { create } from 'zustand'
 import type { Session } from '@/@types/auth'
 import type { Permission } from '@/constants/permissions.constant'
 import type { RoleCode } from '@/constants/roles.constant'
-import tokenStorage from '@shared/lib/auth/tokenStorage'
+import sessionHint from '@shared/lib/auth/sessionHint'
 import { resetRefreshManager } from '@shared/lib/auth/refreshManager'
 
 type SetTokensPayload = {
     accessToken: string
-    refreshToken: string
     expiresIn: number
 }
 
+/**
+ * El access token solo vive en memoria: se pierde al recargar y se recupera
+ * con la cookie de refresh (ver `useRestoreSession`). El refresh token nunca
+ * llega a JavaScript.
+ */
 interface AuthState {
     accessToken: string | null
-    refreshToken: string | null
     accessExpiresAt: number | null
     session: Session | null
 
@@ -23,28 +26,25 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-    accessToken: tokenStorage.getAccessToken(),
-    refreshToken: tokenStorage.getRefreshToken(),
-    accessExpiresAt: tokenStorage.getAccessExpiresAt(),
+    accessToken: null,
+    accessExpiresAt: null,
     session: null,
 
-    setTokens: (payload) => {
-        tokenStorage.setTokens(payload)
+    setTokens: ({ accessToken, expiresIn }) => {
+        sessionHint.mark()
         set({
-            accessToken: payload.accessToken,
-            refreshToken: payload.refreshToken,
-            accessExpiresAt: Date.now() + payload.expiresIn * 1000,
+            accessToken,
+            accessExpiresAt: Date.now() + expiresIn * 1000,
         })
     },
 
     setSession: (session) => set({ session }),
 
     clear: () => {
-        tokenStorage.clearTokens()
+        sessionHint.clear()
         resetRefreshManager()
         set({
             accessToken: null,
-            refreshToken: null,
             accessExpiresAt: null,
             session: null,
         })

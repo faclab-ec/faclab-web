@@ -1,5 +1,7 @@
 export {
     useMe,
+    useRestoreSession,
+    useAuthChannelSync,
     useLogin,
     useLogout,
     useChangePassword,
