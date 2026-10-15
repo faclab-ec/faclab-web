@@ -9,6 +9,7 @@
 !.prettierrc.*
 !.prettierignore
 !.github/
+!.dockerignore
 
 # Dependencias
 node_modules

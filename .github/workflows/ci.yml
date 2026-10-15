@@ -73,3 +73,39 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 7
+
+  # Builds the production image without publishing it (that comes with S8.2)
+  image:
+    name: image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build image
+        run: docker build -t faclab-web:ci .
+
+      - name: Refuse to start without API URLs
+        run: |
+          if docker run --rm faclab-web:ci > startup.log 2>&1; then
+            echo "The image started without API_BASE_URL and INVOICING_API_URL"
+            exit 1
+          fi
+          cat startup.log
+          grep -q 'API_BASE_URL is required' startup.log
+
+      - name: Serve the SPA with runtime settings
+        run: |
+          docker run -d --name web -p 8080:8080 \
+            -e API_BASE_URL=https://api.example.test \
+            -e INVOICING_API_URL=https://invoicing.example.test \
+            faclab-web:ci
+          for _ in $(seq 1 30); do
+            curl -fsS http://localhost:8080/health > /dev/null && break
+            sleep 1
+          done
+          docker logs web
+          curl -fsS http://localhost:8080/pos | grep -q 'id="root"'
+          curl -fsS http://localhost:8080/config.js | grep -q '"apiBaseUrl":"https://api.example.test"'
+          curl -fsSI http://localhost:8080/config.js | grep -qi '^cache-control: no-store'
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/assets/missing.js)" = 404

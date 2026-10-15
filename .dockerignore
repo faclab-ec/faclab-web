@@ -1,0 +1,26 @@
+# Secretos y estado local: nunca en la imagen
+.env
+.env.*
+
+# Control de versiones, editores y asistentes
+.git
+.github
+.claude
+.idea
+.vscode
+.DS_Store
+
+# Se generan dentro de la imagen
+node_modules
+build
+coverage
+*.tsbuildinfo
+
+# Pruebas y documentación
+tests
+test-results
+playwright-report
+blob-report
+docs
+*.md
+Dockerfile

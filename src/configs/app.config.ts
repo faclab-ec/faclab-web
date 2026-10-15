@@ -13,13 +13,24 @@ export type AppConfig = {
     invoicingApiHost: string
 }
 
+/**
+ * URLs que el contenedor escribe en `/config.js` al arrancar
+ * (`docker/entrypoint.sh`), para cambiarlas sin reconstruir la imagen. Ese
+ * script corre antes del bundle; en desarrollo `public/config.js` lo deja
+ * vacío y mandan los `VITE_*`.
+ */
+const runtimeConfig: FaclabRuntimeConfig =
+    (typeof window !== 'undefined' && window.__FACLAB_CONFIG__) || {}
+
 const apiBaseUrl =
-    (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
-    'http://localhost:3000'
+    runtimeConfig.apiBaseUrl ||
+    ((import.meta.env.VITE_API_BASE_URL as string | undefined) ??
+        'http://localhost:3000')
 
 const invoicingApiUrl =
-    (import.meta.env.VITE_INVOICING_API_URL as string | undefined) ??
-    'http://localhost:3173'
+    runtimeConfig.invoicingApiUrl ||
+    ((import.meta.env.VITE_INVOICING_API_URL as string | undefined) ??
+        'http://localhost:3173')
 
 const appConfig: AppConfig = {
     apiPrefix: '',
