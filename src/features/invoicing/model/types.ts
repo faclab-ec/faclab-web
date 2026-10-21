@@ -8,7 +8,6 @@ export interface Certificate {
     validFrom: string
     validTo: string
     fileName: string
-    s3Url: string
     uploadedAt: string
 }
 
@@ -159,6 +158,15 @@ export interface Invoice {
     nextAttemptAt: string | null
     createdAt: string
     updatedAt: string
+}
+
+// GET /api/invoices: one page, latest first
+export interface InvoiceQueryParams {
+    // Only pending ones or those whose last attempt failed, latest change first
+    attention?: boolean
+    status?: InvoiceStatus
+    limit?: number
+    offset?: number
 }
 
 export const isFinalInvoice = (invoice: Invoice) =>
