@@ -1,8 +1,13 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+    keepPreviousData,
+    useQuery,
+    useMutation,
+    useQueryClient,
+} from '@tanstack/react-query'
 import { isApiError } from '@/utils/errors/ApiError'
 import { useCan } from '@/stores'
 import * as api from '../api/client'
-import type { CompanyConfigInput } from '../model/types'
+import type { CompanyConfigInput, InvoiceQueryParams } from '../model/types'
 
 // Everything faclab-invoicing serves lives under this key: a change to the
 // config or the certificates, or a retry, refreshes status and invoices too
@@ -28,14 +33,14 @@ export function useInvoicingStatus() {
     })
 }
 
-export function useInvoices(params?: { attention?: boolean }) {
-    const attention = params?.attention ?? false
+export function useInvoices(params: InvoiceQueryParams = {}) {
     return useQuery({
-        queryKey: [...INVOICES_KEY, { attention }],
+        queryKey: [...INVOICES_KEY, params],
         queryFn: async () => {
-            const response = await api.getInvoices({ attention })
-            return response.data
+            const body = await api.getInvoices(params)
+            return { items: body.data, pagination: body.meta.pagination }
         },
+        placeholderData: keepPreviousData,
     })
 }
 

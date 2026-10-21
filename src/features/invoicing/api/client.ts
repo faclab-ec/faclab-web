@@ -1,11 +1,12 @@
 import appConfig from '@/configs/app.config'
 import { httpClient } from '@shared/lib/http/httpClient'
-import type { DataResponse } from '@/@types/api'
+import type { DataResponse, PaginatedResponse } from '@/@types/api'
 import type {
     Certificate,
     CompanyConfig,
     CompanyConfigInput,
     Invoice,
+    InvoiceQueryParams,
     InvoicingStatus,
 } from '../model/types'
 
@@ -53,14 +54,20 @@ export const getInvoicingStatus = () =>
         `${HOST}/api/invoicing/status`
     )
 
-// faclab-invoicing returns every invoice (no pagination yet). `attention`:
-// only pending ones or those whose last attempt failed
-export const getInvoices = (params?: { attention?: boolean }) =>
-    httpClient.get<InvoicesResponse>(
-        params?.attention
-            ? `${HOST}/api/invoices?attention=true`
-            : `${HOST}/api/invoices`
+// One page of invoices, with the total in meta.pagination
+export const getInvoices = (params: InvoiceQueryParams = {}) => {
+    const query = new URLSearchParams()
+    if (params.attention) query.append('attention', 'true')
+    if (params.status) query.append('status', params.status)
+    if (params.limit !== undefined) query.append('limit', String(params.limit))
+    if (params.offset !== undefined)
+        query.append('offset', String(params.offset))
+
+    const qs = query.toString()
+    return httpClient.get<PaginatedResponse<Invoice>>(
+        qs ? `${HOST}/api/invoices?${qs}` : `${HOST}/api/invoices`
     )
+}
 
 export const getInvoicesBySale = (saleId: string | number) =>
     httpClient.get<InvoicesResponse>(`${HOST}/api/invoices/by-sale/${saleId}`)

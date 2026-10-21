@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
@@ -50,29 +50,17 @@ const InvoicesListPage = () => {
     const [selected, setSelected] = useState<Invoice | null>(null)
     const canRetry = useCan('sale:write')
 
-    const {
-        data: invoices = [],
-        isLoading,
-        isError,
-        refetch,
-    } = useInvoices({
+    // faclab-invoicing filters, sorts (latest first) and pages
+    const { data, isLoading, isError, refetch } = useInvoices({
         attention,
+        status: (statusFilter as InvoiceStatus) || undefined,
+        limit: pageSize,
+        offset: (pageIndex - 1) * pageSize,
     })
+    const invoices = data?.items ?? []
+    const total = data?.pagination?.total ?? 0
     const retry = useInvoiceRetryAction()
     const retryAll = useRetryInvoices()
-
-    // faclab-invoicing returns them all: filter, sort and page here
-    const filtered = useMemo(
-        () =>
-            invoices
-                .filter((i) => !statusFilter || i.status === statusFilter)
-                .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
-        [invoices, statusFilter]
-    )
-    const page = filtered.slice(
-        (pageIndex - 1) * pageSize,
-        pageIndex * pageSize
-    )
 
     const handleRetryAll = async () => {
         try {
@@ -188,7 +176,7 @@ const InvoicesListPage = () => {
                 actions={
                     attention &&
                     canRetry &&
-                    invoices.length > 0 && (
+                    total > 0 && (
                         <Button
                             size="sm"
                             icon={<HiOutlineRefresh />}
@@ -240,7 +228,7 @@ const InvoicesListPage = () => {
             <Card bodyClass="p-0">
                 <DataTable
                     columns={columns}
-                    data={page}
+                    data={invoices}
                     loading={isLoading}
                     error={
                         isError
@@ -250,7 +238,7 @@ const InvoicesListPage = () => {
                             : undefined
                     }
                     pagingData={{
-                        total: filtered.length,
+                        total,
                         pageIndex,
                         pageSize,
                     }}

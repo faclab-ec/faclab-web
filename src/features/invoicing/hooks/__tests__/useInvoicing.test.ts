@@ -97,19 +97,33 @@ describe('useInvoicingStatus', () => {
 })
 
 describe('useInvoices', () => {
-    it('asks only for invoices that need attention', async () => {
+    it('asks the server for one page of the invoices that need attention', async () => {
         vi.mocked(api.getInvoices).mockResolvedValue({
             data: [PENDING],
-            meta: META,
+            meta: { ...META, pagination: { total: 11, limit: 10, offset: 10 } },
         })
+        const params = { attention: true, limit: 10, offset: 10 }
 
-        const { result } = renderHook(() => useInvoices({ attention: true }), {
-            wrapper,
-        })
+        const { result } = renderHook(() => useInvoices(params), { wrapper })
 
         await waitFor(() => expect(result.current.isSuccess).toBe(true))
-        expect(api.getInvoices).toHaveBeenCalledWith({ attention: true })
-        expect(result.current.data?.[0].issue?.code).toBe('CONFIG_MISSING')
+        expect(api.getInvoices).toHaveBeenCalledWith(params)
+        expect(result.current.data?.items[0].issue?.code).toBe('CONFIG_MISSING')
+        expect(result.current.data?.pagination.total).toBe(11)
+    })
+
+    it('filters by status on the server', async () => {
+        vi.mocked(api.getInvoices).mockResolvedValue({
+            data: [],
+            meta: { ...META, pagination: { total: 0, limit: 10, offset: 0 } },
+        })
+        const params = { status: 'rejected' as const, limit: 10, offset: 0 }
+
+        const { result } = renderHook(() => useInvoices(params), { wrapper })
+
+        await waitFor(() => expect(result.current.isSuccess).toBe(true))
+        expect(api.getInvoices).toHaveBeenCalledWith(params)
+        expect(result.current.data?.items).toEqual([])
     })
 })
 
