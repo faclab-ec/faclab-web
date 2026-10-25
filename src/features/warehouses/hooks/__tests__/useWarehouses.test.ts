@@ -9,6 +9,7 @@ vi.mock('../../api/client')
 
 const mockWarehouse = {
     id: 1,
+    branchId: 1,
     name: 'Bodega Central',
     code: 'BOD-001',
     address: null,
@@ -82,6 +83,7 @@ describe('useWarehouseMutations.create', () => {
         })
 
         result.current.create.mutate({
+            branchId: 1,
             name: 'Bodega Central',
             code: 'BOD-001',
         })
@@ -89,6 +91,7 @@ describe('useWarehouseMutations.create', () => {
         await waitFor(() => expect(result.current.create.isSuccess).toBe(true))
 
         expect(api.createWarehouse).toHaveBeenCalledWith({
+            branchId: 1,
             name: 'Bodega Central',
             code: 'BOD-001',
         })

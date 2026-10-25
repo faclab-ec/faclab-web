@@ -2,7 +2,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import axios, { AxiosError } from 'axios'
 import type { AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import { httpClient } from '../httpClient'
+import appConfig from '@/configs/app.config'
 import { useAuthStore } from '@/stores/useAuthStore'
+import { useWorkplaceStore } from '@/stores/useWorkplaceStore'
+import { ROLE } from '@/constants/roles.constant'
+import type { Session } from '@/@types/auth'
 import { navigateTo } from '@shared/lib/auth/navigationRef'
 import { isApiError, type ApiError } from '@/utils/errors/ApiError'
 
@@ -244,5 +248,161 @@ describe('httpClient', () => {
         expect(err.status).toBe(400)
         expect(mockNavigate).not.toHaveBeenCalled()
         expect(useAuthStore.getState().accessToken).toBe('old-at')
+    })
+
+    it('TOKEN_EXPIRED sin sesión en memoria solo rechaza, sin renovar', async () => {
+        // P. ej. venció el token de selección de empresa: la cookie de
+        // refresh podría ser de otra sesión
+        useAuthStore.getState().clear()
+        const post = vi.spyOn(axios, 'post')
+        const { adapter, authHeaders } = makeAdapter({
+            status: 401,
+            data: errorBody('TOKEN_EXPIRED'),
+        })
+
+        const err = await httpClient
+            .post(
+                '/select-tenant',
+                {},
+                {
+                    adapter,
+                    headers: { Authorization: 'Bearer selection' },
+                }
+            )
+            .catch((e: ApiError) => e)
+
+        expect(isApiError(err) && err.code).toBe('TOKEN_EXPIRED')
+        expect(authHeaders).toEqual(['Bearer selection'])
+        expect(post).not.toHaveBeenCalled()
+        expect(mockNavigate).not.toHaveBeenCalled()
+    })
+
+    it('un token explícito en la llamada gana al del store', async () => {
+        const { adapter, authHeaders } = makeAdapter({ status: 200, data: {} })
+
+        await httpClient.get('/me', {
+            adapter,
+            headers: { Authorization: 'Bearer de-la-otra-empresa' },
+        })
+
+        expect(authHeaders).toEqual(['Bearer de-la-otra-empresa'])
+    })
+
+    it('BRANCH_ACCESS_DENIED: renueva (sucursales nuevas) y reintenta una vez', async () => {
+        const post = vi
+            .spyOn(axios, 'post')
+            .mockResolvedValue({ data: { data: newTokens } })
+        const { adapter, authHeaders } = makeAdapter(
+            { status: 403, data: errorBody('BRANCH_ACCESS_DENIED') },
+            { status: 200, data: { data: 'ok' } }
+        )
+
+        const body = await httpClient.get('/x', { adapter })
+
+        expect(body).toEqual({ data: 'ok' })
+        expect(post).toHaveBeenCalledTimes(1)
+        expect(authHeaders).toEqual(['Bearer old-at', 'Bearer new-at'])
+    })
+
+    it('BRANCH_ACCESS_DENIED tras el reintento se rechaza sin cerrar sesión', async () => {
+        vi.spyOn(axios, 'post').mockResolvedValue({ data: { data: newTokens } })
+        const { adapter } = makeAdapter(
+            { status: 403, data: errorBody('BRANCH_ACCESS_DENIED') },
+            { status: 403, data: errorBody('BRANCH_ACCESS_DENIED') }
+        )
+
+        const err = await httpClient
+            .get('/x', { adapter })
+            .catch((e: ApiError) => e)
+
+        expect(isApiError(err) && err.code).toBe('BRANCH_ACCESS_DENIED')
+        expect(useAuthStore.getState().accessToken).toBe('new-at')
+        expect(mockNavigate).not.toHaveBeenCalled()
+    })
+})
+
+describe('httpClient: sucursal y caja', () => {
+    const session: Session = {
+        id: 1,
+        username: 'caja1',
+        fullName: null,
+        role: ROLE.CASHIER,
+        permissions: [],
+        mustChangePassword: false,
+        tenant: {
+            id: 'tenant-a',
+            ruc: '0190000000001',
+            legalName: 'A',
+            tradeName: null,
+        },
+        tenants: [],
+        branches: [
+            { id: 3, establishmentCode: '003', name: 'Sur', isMain: true },
+        ],
+    }
+
+    /** Encabezados de sucursal y caja que salieron en cada llamada */
+    const placementOf = async (url: string) => {
+        const adapter = vi.fn(async (config: InternalAxiosRequestConfig) => ({
+            data: {},
+            status: 200,
+            statusText: '',
+            headers: {},
+            config,
+        }))
+        await httpClient.get(url, { adapter })
+        const { headers } = adapter.mock.calls[0][0]
+        return {
+            branch: headers.get('X-Branch-Id') ?? null,
+            terminal: headers.get('X-Terminal-Id') ?? null,
+        }
+    }
+
+    beforeEach(() => {
+        useAuthStore
+            .getState()
+            .signIn({ accessToken: 'at', expiresIn: 900 }, session)
+        useWorkplaceStore.setState({
+            branchByTenant: {},
+            terminalByBranch: { 'tenant-a:3': 31 },
+        })
+    })
+
+    afterEach(() => {
+        useAuthStore.getState().clear()
+    })
+
+    it('la administración lleva la sucursal, sin caja', async () => {
+        expect(
+            await placementOf(`${appConfig.inventoryApiHost}/products?limit=5`)
+        ).toEqual({ branch: '3', terminal: null })
+        expect(
+            await placementOf(`${appConfig.adminUsersApiHost}/7/branches`)
+        ).toEqual({ branch: '3', terminal: null })
+    })
+
+    it('el POS lleva la sucursal y la caja vinculada', async () => {
+        expect(
+            await placementOf(`${appConfig.posApiHost}/shifts/active`)
+        ).toEqual({ branch: '3', terminal: '31' })
+    })
+
+    it('auth y facturación no llevan ninguna', async () => {
+        expect(await placementOf(`${appConfig.authApiHost}/me`)).toEqual({
+            branch: null,
+            terminal: null,
+        })
+        expect(
+            await placementOf(`${appConfig.invoicingApiHost}/api/invoices`)
+        ).toEqual({ branch: null, terminal: null })
+    })
+
+    it('sin caja vinculada el POS solo lleva la sucursal', async () => {
+        useWorkplaceStore.setState({ terminalByBranch: {} })
+
+        expect(await placementOf(`${appConfig.posApiHost}/terminals`)).toEqual({
+            branch: '3',
+            terminal: null,
+        })
     })
 })

@@ -1,5 +1,7 @@
 export type Warehouse = {
     id: number
+    /** Sucursal de la bodega; se fija al crearla */
+    branchId: number
     name: string
     code: string
     address?: string | null
@@ -18,4 +20,5 @@ export type WarehouseListParams = {
     limit?: number
     offset?: number
     isActive?: boolean
+    branchId?: number
 }

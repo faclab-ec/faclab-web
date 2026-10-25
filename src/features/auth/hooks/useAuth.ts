@@ -1,22 +1,63 @@
 import { useEffect, useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+    useMutation,
+    useQuery,
+    useQueryClient,
+    type QueryClient,
+} from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/useAuthStore'
-import { apiChangePassword, apiLogin, apiLogout, apiMe } from '../api/client'
+import {
+    apiChangePassword,
+    apiLogin,
+    apiLogout,
+    apiMe,
+    apiSelectTenant,
+} from '../api/client'
 import { navigateTo } from '@shared/lib/auth/navigationRef'
 import appConfig from '@/configs/app.config'
-import { refreshSession } from '@shared/lib/auth/session'
+import { forceSignOut, refreshSession } from '@shared/lib/auth/session'
 import { authChannel } from '@shared/lib/auth/authChannel'
 import sessionHint from '@shared/lib/auth/sessionHint'
 import { queryClient } from '@shared/lib/react-query'
 import { refreshScheduler } from '../lib/refreshScheduler'
+import { entryPathFor } from '../lib/entryPath'
 import type {
     ChangePasswordRequest,
     LoginRequest,
-    LoginResponse,
     MeResponse,
+    Session,
+    TenantOption,
 } from '@/@types/auth'
 
 export const ME_QUERY_KEY = ['auth', 'me'] as const
+
+type Tokens = { accessToken: string; expiresIn: number }
+
+/**
+ * Abre la sesión con los tokens de una empresa: lee `/me` con el token nuevo,
+ * guarda tokens y sesión de una vez, avisa a las otras pestañas y programa la
+ * renovación. `tenant` les avisa que cambió la empresa (descartan lo cargado).
+ */
+async function adoptTokens(
+    qc: QueryClient,
+    tokens: Tokens,
+    notify: 'tokens' | 'tenant' | null
+): Promise<Session> {
+    const session = await qc.fetchQuery({
+        queryKey: ME_QUERY_KEY,
+        queryFn: async () => (await apiMe(tokens.accessToken)).data,
+    })
+    useAuthStore.getState().signIn(tokens, session)
+    if (notify) {
+        authChannel.post({
+            type: notify,
+            accessToken: tokens.accessToken,
+            expiresIn: tokens.expiresIn,
+        })
+    }
+    refreshScheduler.start(tokens.expiresIn)
+    return session
+}
 
 export function useMe() {
     const accessToken = useAuthStore((s) => s.accessToken)
@@ -80,6 +121,16 @@ export function useAuthChannelSync(): void {
                     refreshScheduler.start(message.expiresIn)
                     return
                 }
+                if (message.type === 'tenant') {
+                    // Nada de lo cargado es de la empresa nueva
+                    queryClient.clear()
+                    adoptTokens(queryClient, message, null)
+                        .then((session) =>
+                            navigateTo(entryPathFor(session), { replace: true })
+                        )
+                        .catch(() => useAuthStore.getState().clear())
+                    return
+                }
                 if (!useAuthStore.getState().accessToken) return
                 refreshScheduler.stop()
                 useAuthStore.getState().clear()
@@ -92,27 +143,75 @@ export function useAuthChannelSync(): void {
     )
 }
 
+/**
+ * Con una sola empresa el login abre la sesión; con varias devuelve el token
+ * de selección (solo en memoria, dura pocos minutos) y la lista para elegir.
+ */
+export type LoginResult =
+    | { status: 'signed-in'; session: Session }
+    | {
+          status: 'select-tenant'
+          selectionToken: string
+          tenants: TenantOption[]
+      }
+
 export function useLogin() {
     const qc = useQueryClient()
-    const setTokens = useAuthStore((s) => s.setTokens)
-    const setSession = useAuthStore((s) => s.setSession)
 
-    return useMutation<LoginResponse, unknown, LoginRequest>({
-        mutationFn: async (body) => (await apiLogin(body)).data,
-        onSuccess: async (tokens) => {
-            setTokens(tokens)
-            authChannel.post({
-                type: 'tokens',
-                accessToken: tokens.accessToken,
-                expiresIn: tokens.expiresIn,
-            })
-            refreshScheduler.start(tokens.expiresIn)
-            const session = await qc.fetchQuery({
-                queryKey: ME_QUERY_KEY,
-                queryFn: async () => (await apiMe()).data,
-            })
-            setSession(session)
+    return useMutation<LoginResult, unknown, LoginRequest>({
+        mutationFn: async (body) => {
+            const { data } = await apiLogin(body)
+            if ('selectionToken' in data) {
+                return {
+                    status: 'select-tenant',
+                    selectionToken: data.selectionToken,
+                    tenants: data.tenants,
+                }
+            }
+            const session = await adoptTokens(qc, data, 'tokens')
+            return { status: 'signed-in', session }
         },
+    })
+}
+
+/** Segundo paso del login: abre la sesión en la empresa elegida. */
+export function useSelectTenant() {
+    const qc = useQueryClient()
+
+    return useMutation<
+        Session,
+        unknown,
+        { tenantId: string; selectionToken: string }
+    >({
+        mutationFn: async ({ tenantId, selectionToken }) => {
+            const { data } = await apiSelectTenant({ tenantId }, selectionToken)
+            return adoptTokens(qc, data, 'tokens')
+        },
+    })
+}
+
+/**
+ * Cambia de empresa sin cerrar sesión: el backend cierra la sesión actual y
+ * abre otra. Descarta la caché (ninguna clave incluye la empresa) y lleva a la
+ * pantalla de inicio de la empresa nueva, también en las otras pestañas.
+ */
+export function useSwitchTenant() {
+    const qc = useQueryClient()
+
+    return useMutation<Session, unknown, string>({
+        mutationFn: async (tenantId) => {
+            const { data } = await apiSelectTenant({ tenantId })
+            qc.clear()
+            try {
+                return await adoptTokens(qc, data, 'tenant')
+            } catch (err) {
+                // La sesión anterior ya está cerrada en el servidor
+                forceSignOut()
+                throw err
+            }
+        },
+        onSuccess: (session) =>
+            navigateTo(entryPathFor(session), { replace: true }),
     })
 }
 

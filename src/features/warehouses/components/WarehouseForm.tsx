@@ -1,8 +1,13 @@
 import Input from '@/components/ui/Input'
 import { FormItem, FormContainer } from '@/components/ui/Form'
-import { ControlledSwitcher } from '@/components/ui/Form/controlled'
+import {
+    ControlledSelect,
+    ControlledSwitcher,
+} from '@/components/ui/Form/controlled'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useActiveBranch, useSession } from '@/stores'
+import { branchOptions } from '../model/branch'
 import {
     warehouseSchema,
     type WarehouseFormValues,
@@ -17,6 +22,8 @@ interface WarehouseFormProps {
 }
 
 const emptyValues: WarehouseFormValues = {
+    // 0: sin sucursal elegida
+    branchId: 0,
     name: '',
     code: '',
     address: '',
@@ -35,8 +42,11 @@ export const WarehouseForm = ({
     isSubmitting = false,
     onSubmit,
 }: WarehouseFormProps) => {
+    const session = useSession()
+    const activeBranch = useActiveBranch()
     const defaultValues: WarehouseFormValues = warehouse
         ? {
+              branchId: warehouse.branchId,
               name: warehouse.name,
               code: warehouse.code,
               address: warehouse.address ?? '',
@@ -48,7 +58,7 @@ export const WarehouseForm = ({
               isActive: warehouse.isActive,
               isDefault: warehouse.isDefault,
           }
-        : emptyValues
+        : { ...emptyValues, branchId: activeBranch?.id ?? 0 }
 
     const {
         register,
@@ -63,6 +73,27 @@ export const WarehouseForm = ({
     return (
         <form id={formId} onSubmit={handleSubmit(onSubmit)}>
             <FormContainer>
+                <FormItem
+                    asterisk
+                    htmlFor="branchId"
+                    label="Sucursal"
+                    invalid={!!errors.branchId}
+                    errorMessage={errors.branchId?.message}
+                >
+                    <ControlledSelect
+                        inputId="branchId"
+                        name="branchId"
+                        control={control}
+                        placeholder="Selecciona la sucursal"
+                        options={branchOptions(
+                            session?.branches ?? [],
+                            warehouse?.branchId
+                        )}
+                        // La sucursal se fija al crear la bodega
+                        isDisabled={isSubmitting || !!warehouse}
+                    />
+                </FormItem>
+
                 <div className="grid grid-cols-2 gap-4">
                     <FormItem
                         asterisk

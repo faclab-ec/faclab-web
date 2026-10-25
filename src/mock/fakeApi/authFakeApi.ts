@@ -116,10 +116,21 @@ const err = (status: number, code: string, message: string, field?: string) =>
         { errors: [{ code, message, field: field ?? null }], meta: meta() }
     )
 const accessFor = (id: number) => `mock-access-${id}`
+// Una sola empresa con su matriz: el mock no simula la elección de empresa
+const MOCK_TENANT = {
+    id: '00000000-0000-4000-8000-000000000001',
+    ruc: '0190000000001',
+    legalName: 'Empresa de demostración',
+    tradeName: null,
+}
+const MOCK_BRANCHES = [
+    { id: 1, establishmentCode: '001', name: 'Matriz', isMain: true },
+]
 const buildTokens = (id: number) => ({
     accessToken: accessFor(id),
     tokenType: 'Bearer',
     expiresIn: 900,
+    tenant: MOCK_TENANT,
 })
 
 // Mirage no puede escribir cookies HttpOnly: el usuario de la "cookie" de
@@ -196,6 +207,9 @@ export default function authFakeApi(server: Server) {
             role: user.role,
             permissions: ROLE_PERMISSIONS[user.role] ?? [],
             mustChangePassword: user.mustChangePassword,
+            tenant: MOCK_TENANT,
+            tenants: [{ ...MOCK_TENANT, role: user.role }],
+            branches: MOCK_BRANCHES,
         })
     })
 
