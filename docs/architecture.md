@@ -58,6 +58,13 @@ Each feature is self-contained and exposes a single public surface (`index.ts`).
 | `features/auth/lib/refreshScheduler.ts` | `start(expiresIn)` / `stop()` — proactive JWT refresh scheduler (auth-feature owned), uses `refreshSession()` |
 | `shared/lib/format.ts` | `formatCurrency`, `formatDate`, `formatDatetime`, `formatPercent` |
 
+## Company, branch and terminal (S2.9)
+
+- The session (`/api/auth/me`) carries the company (`tenant`), the user's companies (`tenants`) and the active branches they may enter (`branches`). The company never travels as a header: it is the token's `tid`.
+- `stores/useWorkplaceStore.ts` remembers, per browser, the branch chosen in each company and the POS terminal bound in each branch; `activeBranch()` validates the branch against the session every time.
+- `shared/lib/http/httpClient.ts` adds `X-Branch-Id` to `/api/admin` and `/api/pos` calls and `X-Terminal-Id` to `/api/pos` ones, never to `/api/auth` or faclab-invoicing. A call can bring its own headers.
+- `features/organization` owns branches, emission points and POS terminals (admin screens); `features/pos` only reads the active terminals of its branch (`GET /api/pos/terminals`) through `TerminalGuard`.
+
 ## Directory Structure
 
 ```
