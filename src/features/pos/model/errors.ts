@@ -1,5 +1,8 @@
 import { isApiError } from '@/utils/errors/ApiError'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import {
+    getErrorMessage,
+    type ErrorMessages,
+} from '@shared/lib/getErrorMessage'
 
 /**
  * Respuestas del backend que dicen que la caja de este navegador ya no sirve
@@ -18,7 +21,7 @@ export const isTerminalUnavailable = (error: unknown): boolean =>
     isApiError(error) && TERMINAL_UNAVAILABLE_CODES.has(error.code)
 
 // El backend responde en inglés: estos casos los ve el cajero
-const POS_ERROR_MESSAGES: Record<string, string> = {
+export const POS_ERROR_MESSAGES: ErrorMessages = {
     SHIFT_ALREADY_OPEN: 'Ya hay un turno abierto en esta caja.',
     POS_TERMINAL_INACTIVE: 'La caja está desactivada. Elige otra caja.',
     POS_TERMINAL_OUTSIDE_BRANCH: 'La caja no pertenece a la sucursal elegida.',
@@ -30,5 +33,4 @@ const POS_ERROR_MESSAGES: Record<string, string> = {
 }
 
 export const posErrorMessage = (error: unknown, fallback: string): string =>
-    (isApiError(error) && POS_ERROR_MESSAGES[error.code]) ||
-    getErrorMessage(error, fallback)
+    getErrorMessage(error, fallback, POS_ERROR_MESSAGES)

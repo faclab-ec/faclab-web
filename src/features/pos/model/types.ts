@@ -94,17 +94,8 @@ export const REFUND_STATUS_TONES: Record<RefundStatus, StatusTone> = {
 }
 
 // === TERMINALS ===
-/** Caja (terminal POS) de una sucursal: emite por su punto de emisión y
- *  descuenta stock de su ubicación por defecto */
-export interface PosTerminal {
-    id: number
-    branchId: number
-    emissionPointId: number
-    defaultLocationId: number
-    code: string
-    name: string
-    isActive: boolean
-}
+// Una caja es de organización: el POS solo lee las de su sucursal
+export type { PosTerminal } from '@features/organization'
 
 // === SHIFTS ===
 export interface Shift {

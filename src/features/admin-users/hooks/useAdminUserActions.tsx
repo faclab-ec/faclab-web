@@ -35,6 +35,8 @@ const closedReset: ResetDialogState = {
 
 const closedName: NameDialogState = { open: false, user: null }
 
+type BranchesDialogState = NameDialogState
+
 const closedDeactivate: DeactivateDialogState = {
     open: false,
     userId: null,
@@ -53,6 +55,8 @@ export function useAdminUserActions() {
     const [deactivateDialog, setDeactivateDialog] =
         useState<DeactivateDialogState>(closedDeactivate)
     const [nameDialog, setNameDialog] = useState<NameDialogState>(closedName)
+    const [branchesDialog, setBranchesDialog] =
+        useState<BranchesDialogState>(closedName)
     const [updatingRoleId, setUpdatingRoleId] = useState<number | null>(null)
     const [togglingId, setTogglingId] = useState<number | null>(null)
 
@@ -119,10 +123,15 @@ export function useAdminUserActions() {
         setNameDialog({ open: true, user })
     const closeEditName = () => setNameDialog(closedName)
 
+    const openBranches = (user: AdminUserResponse) =>
+        setBranchesDialog({ open: true, user })
+    const closeBranches = () => setBranchesDialog(closedName)
+
     return {
         resetDialog,
         deactivateDialog,
         nameDialog,
+        branchesDialog,
         updatingRoleId,
         togglingId,
         handleRoleChange,
@@ -134,5 +143,7 @@ export function useAdminUserActions() {
         closeDeactivate,
         openEditName,
         closeEditName,
+        openBranches,
+        closeBranches,
     }
 }

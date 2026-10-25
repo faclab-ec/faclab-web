@@ -35,6 +35,7 @@ interface UsersTableProps {
     onRoleChange: (userId: number, role: RoleCode) => void
     onReset: (user: AdminUserResponse) => void
     onEditName: (user: AdminUserResponse) => void
+    onBranches: (user: AdminUserResponse) => void
     onDeactivate: (user: AdminUserResponse) => void
     onActivate: (userId: number) => void
 }
@@ -52,6 +53,7 @@ const UsersTable = ({
     onRoleChange,
     onReset,
     onEditName,
+    onBranches,
     onDeactivate,
     onActivate,
 }: UsersTableProps) => {
@@ -130,6 +132,13 @@ const UsersTable = ({
                             onClick={() => onEditName(user)}
                         >
                             Editar nombre
+                        </Button>
+                        <Button
+                            size="xs"
+                            variant="plain"
+                            onClick={() => onBranches(user)}
+                        >
+                            Sucursales
                         </Button>
                         <Button
                             size="xs"

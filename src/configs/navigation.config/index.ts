@@ -312,6 +312,16 @@ const navigationConfig: NavigationTree[] = [
                 subMenu: [],
             },
             {
+                key: 'settings.branches',
+                path: '/settings/branches',
+                title: 'Branches',
+                translateKey: 'nav.settings.branches',
+                icon: 'settingsBranches',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: ['organization:read'],
+                subMenu: [],
+            },
+            {
                 key: 'settings.companyConfig',
                 path: '/settings/company-config',
                 title: 'Company Configuration',

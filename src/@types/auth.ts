@@ -142,3 +142,13 @@ export type UpdateUserRoleRequest = {
 export type ResetUserPasswordRequest = {
     newPassword: string
 }
+
+/** Sucursales a las que puede entrar un usuario en la empresa; vacío: todas */
+export type UserBranchAccess = {
+    userId: number
+    branchIds: number[]
+}
+
+export type UpdateUserBranchesRequest = {
+    branchIds: number[]
+}

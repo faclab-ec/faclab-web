@@ -9,7 +9,8 @@ import { useOpenShift } from '../hooks/usePOS'
 import { useSession } from '@/stores/useAuthStore'
 import { InvoicingReadinessAlert } from '@features/invoicing'
 import { shiftOpenSchema, type ShiftOpenFormValues } from '../model/schemas'
-import { notifyPosError } from '../lib/notifyPosError'
+import { notifyError } from '@shared/ui/notify'
+import { POS_ERROR_MESSAGES } from '../model/errors'
 import { useTerminal } from './useTerminal'
 
 const ShiftOpenDialog = () => {
@@ -41,7 +42,9 @@ const ShiftOpenDialog = () => {
                 notes: data.notes || undefined,
             })
         } catch (error: unknown) {
-            notifyPosError(error, 'No se pudo abrir el turno')
+            notifyError(error, 'No se pudo abrir el turno', {
+                messages: POS_ERROR_MESSAGES,
+            })
         }
     }
 

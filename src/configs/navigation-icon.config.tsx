@@ -50,6 +50,7 @@ const navigationIcon: NavigationIcons = {
     posAdminReports: <HiOutlineChartBar />,
     inventoryAlerts: <HiOutlineBell />,
     settingsUsers: <HiOutlineUsers />,
+    settingsBranches: <HiOutlineLocationMarker />,
     settingsCompanyConfig: <HiOutlineOfficeBuilding />,
     settingsCertificates: <HiOutlineLockClosed />,
 }
