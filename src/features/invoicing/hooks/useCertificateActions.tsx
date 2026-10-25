@@ -3,6 +3,7 @@ import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { notifySuccess, notifyError } from '@shared/ui/notify'
 import type { Certificate } from '../model/types'
+import { INVOICING_ERROR_MESSAGES } from '../model/errors'
 import {
     certificateUploadSchema,
     type CertificateUploadFormValues,
@@ -59,7 +60,9 @@ export function useCertificateActions() {
             )
             closeUploadForm()
         } catch (error: unknown) {
-            notifyError(error, 'Error al subir el certificado')
+            notifyError(error, 'Error al subir el certificado', {
+                messages: INVOICING_ERROR_MESSAGES,
+            })
         }
     }
 
@@ -77,7 +80,9 @@ export function useCertificateActions() {
             )
             closeDelete()
         } catch (error: unknown) {
-            notifyError(error, 'Error al eliminar el certificado')
+            notifyError(error, 'Error al eliminar el certificado', {
+                messages: INVOICING_ERROR_MESSAGES,
+            })
         }
     }
 

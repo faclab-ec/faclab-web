@@ -27,7 +27,7 @@ const SCREENS = [
     { path: '/suppliers', heading: 'Proveedores' },
     { path: '/purchase-orders', heading: 'Órdenes de Compra' },
     { path: '/settings/users', heading: 'Usuarios' },
-    { path: '/settings/company-config', heading: 'Configuración Fiscal' },
+    { path: '/settings/company-config', heading: 'Perfil fiscal' },
     { path: '/settings/certificates', heading: 'Certificados Digitales' },
 ]
 

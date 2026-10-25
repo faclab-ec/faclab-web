@@ -341,6 +341,16 @@ const navigationConfig: NavigationTree[] = [
                 authority: ['user:manage'],
                 subMenu: [],
             },
+            {
+                key: 'settings.sequences',
+                path: '/settings/sequences',
+                title: 'Invoice Sequences',
+                translateKey: 'nav.settings.sequences',
+                icon: 'settingsSequences',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: ['user:manage'],
+                subMenu: [],
+            },
         ],
     },
 ]

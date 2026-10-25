@@ -41,6 +41,15 @@ const CertificatesTable = ({
             ),
         },
         {
+            header: 'RUC',
+            accessorKey: 'taxIds',
+            cell: (props) => (
+                <span className="font-mono text-sm">
+                    {props.row.original.taxIds.join(', ') || '-'}
+                </span>
+            ),
+        },
+        {
             header: 'Sujeto',
             accessorKey: 'subject',
             cell: (props) => (
@@ -99,7 +108,7 @@ const CertificatesTable = ({
                         disabled={inUse}
                         title={
                             inUse
-                                ? 'En uso: selecciona otro certificado en la Configuración Fiscal antes de eliminarlo'
+                                ? 'En uso: selecciona otro certificado en el Perfil fiscal antes de eliminarlo'
                                 : undefined
                         }
                         onClick={() => onDelete(props.row.original)}

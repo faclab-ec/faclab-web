@@ -54,7 +54,7 @@ test.describe('Estado de la facturación', () => {
             'Pide a un administrador que la complete.'
         )
         await expect(
-            banner.getByRole('button', { name: 'Configuración fiscal' })
+            banner.getByRole('button', { name: 'Perfil fiscal' })
         ).toHaveCount(0)
     })
 

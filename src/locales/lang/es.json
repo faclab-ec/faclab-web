@@ -77,8 +77,9 @@
             "title": "Configuración",
             "users": "Usuarios",
             "branches": "Sucursales",
-            "companyConfig": "Configuración Fiscal",
-            "certificates": "Certificados Digitales"
+            "companyConfig": "Perfil fiscal",
+            "certificates": "Certificados Digitales",
+            "sequences": "Secuenciales"
         }
     }
 }

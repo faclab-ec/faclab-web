@@ -14,4 +14,10 @@ export const invoicingRoutes: Routes = [
         component: lazy(() => import('./pages/CertificatesPage')),
         authority: ['user:manage'],
     },
+    {
+        key: 'settings.sequences',
+        path: '/settings/sequences',
+        component: lazy(() => import('./pages/SequencesPage')),
+        authority: ['user:manage'],
+    },
 ]

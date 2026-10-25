@@ -1,6 +1,7 @@
 import { BiHome, BiPackage } from 'react-icons/bi'
 import {
     HiOutlineBell,
+    HiOutlineHashtag,
     HiOutlineCash,
     HiOutlineChartBar,
     HiOutlineClipboardCheck,
@@ -53,6 +54,7 @@ const navigationIcon: NavigationIcons = {
     settingsBranches: <HiOutlineLocationMarker />,
     settingsCompanyConfig: <HiOutlineOfficeBuilding />,
     settingsCertificates: <HiOutlineLockClosed />,
+    settingsSequences: <HiOutlineHashtag />,
 }
 
 export default navigationIcon

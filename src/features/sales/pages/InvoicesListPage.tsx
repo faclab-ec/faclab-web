@@ -170,7 +170,7 @@ const InvoicesListPage = () => {
                 title="Facturas"
                 description={
                     attention
-                        ? 'Facturas pendientes o cuyo último intento falló. Las que esperan la configuración fiscal se emiten solas cuando se completa.'
+                        ? 'Facturas pendientes o cuyo último intento falló. Las que esperan el perfil fiscal o el certificado se emiten solas cuando se completan.'
                         : 'Facturas electrónicas emitidas al SRI'
                 }
                 actions={

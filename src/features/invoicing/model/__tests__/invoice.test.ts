@@ -53,7 +53,7 @@ describe('issues', () => {
 
     it('labels known codes in Spanish and leaves unknown ones as they are', () => {
         expect(issueLabel('CONFIG_MISSING')).toBe(
-            'Falta la configuración fiscal de la empresa'
+            'Falta el perfil fiscal de la empresa'
         )
         expect(issueLabel('SOMETHING_NEW')).toBe('SOMETHING_NEW')
     })

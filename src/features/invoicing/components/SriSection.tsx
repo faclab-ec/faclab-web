@@ -1,16 +1,28 @@
 import type { Control, FieldErrors, UseFormRegister } from 'react-hook-form'
 import Input from '@/components/ui/Input'
 import { FormItem } from '@/components/ui/Form'
-import { makeNumberRegister } from '@/components/ui/Form/utils'
 import {
     ControlledSelect,
     ControlledSwitcher,
 } from '@/components/ui/Form/controlled'
 import type { CompanyConfigFormValues } from '../model/schemas'
+import {
+    RIMPE_REGIMES,
+    RIMPE_REGIME_LABELS,
+    type RimpeRegime,
+} from '../model/types'
 
 const environmentOptions: { value: 1 | 2; label: string }[] = [
-    { value: 1, label: '1 - Pruebas (Testing)' },
-    { value: 2, label: '2 - Producción' },
+    { value: 1, label: 'Pruebas' },
+    { value: 2, label: 'Producción' },
+]
+
+const rimpeOptions: { value: RimpeRegime | null; label: string }[] = [
+    { value: null, label: 'No está en el RIMPE' },
+    ...RIMPE_REGIMES.map((regime) => ({
+        value: regime,
+        label: RIMPE_REGIME_LABELS[regime],
+    })),
 ]
 
 interface SriSectionProps {
@@ -26,45 +38,15 @@ const SriSection = ({
     control,
     isSubmitting,
 }: SriSectionProps) => {
-    const numberRegister = makeNumberRegister(register)
-
     return (
         <section>
             <h5 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-wide">
-                Configuración SRI
+                SRI
             </h5>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <FormItem
                     asterisk
-                    label="Código Establecimiento"
-                    invalid={!!errors.branchCode}
-                    errorMessage={errors.branchCode?.message}
-                >
-                    <Input
-                        placeholder="001"
-                        maxLength={3}
-                        disabled={isSubmitting}
-                        invalid={!!errors.branchCode}
-                        {...register('branchCode')}
-                    />
-                </FormItem>
-                <FormItem
-                    asterisk
-                    label="Punto de Emisión"
-                    invalid={!!errors.salePointCode}
-                    errorMessage={errors.salePointCode?.message}
-                >
-                    <Input
-                        placeholder="001"
-                        maxLength={3}
-                        disabled={isSubmitting}
-                        invalid={!!errors.salePointCode}
-                        {...register('salePointCode')}
-                    />
-                </FormItem>
-                <FormItem
-                    asterisk
-                    label="Ambiente"
+                    label="Ambiente del SRI"
                     invalid={!!errors.environment}
                     errorMessage={errors.environment?.message}
                 >
@@ -76,19 +58,12 @@ const SriSection = ({
                         placeholder="Seleccione el ambiente"
                     />
                 </FormItem>
-                <FormItem
-                    label="Secuencia de Factura"
-                    invalid={!!errors.invoiceSequence}
-                    errorMessage={errors.invoiceSequence?.message}
-                >
-                    <Input
-                        type="number"
-                        placeholder="1"
-                        disabled={isSubmitting}
-                        invalid={!!errors.invoiceSequence}
-                        {...numberRegister('invoiceSequence', {
-                            integer: true,
-                        })}
+                <FormItem label="Régimen RIMPE">
+                    <ControlledSelect
+                        name="rimpeRegime"
+                        control={control}
+                        options={rimpeOptions}
+                        isDisabled={isSubmitting}
                     />
                 </FormItem>
                 <FormItem

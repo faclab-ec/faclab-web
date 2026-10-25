@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import type { FieldErrors, UseFormRegister } from 'react-hook-form'
 import Input from '@/components/ui/Input'
 import { FormItem } from '@/components/ui/Form'
@@ -21,7 +22,7 @@ const AddressSection = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormItem
                 asterisk
-                label="Dirección Matriz"
+                label="Dirección matriz"
                 invalid={!!errors.mainAddress}
                 errorMessage={errors.mainAddress?.message}
             >
@@ -32,19 +33,16 @@ const AddressSection = ({
                     {...register('mainAddress')}
                 />
             </FormItem>
-            <FormItem
-                asterisk
-                label="Dirección Sucursal"
-                invalid={!!errors.branchAddress}
-                errorMessage={errors.branchAddress?.message}
-            >
-                <Input
-                    placeholder="Av. Secundaria 456, Quito"
-                    disabled={isSubmitting}
-                    invalid={!!errors.branchAddress}
-                    {...register('branchAddress')}
-                />
-            </FormItem>
+            <p className="text-sm text-gray-500 dark:text-gray-400 md:pt-8">
+                La dirección de cada establecimiento se edita en{' '}
+                <Link
+                    className="text-primary-600 hover:underline dark:text-primary-400"
+                    to="/settings/branches"
+                >
+                    Sucursales
+                </Link>
+                : va en las facturas que emite.
+            </p>
         </div>
     </section>
 )

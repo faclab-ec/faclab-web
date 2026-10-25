@@ -144,3 +144,36 @@ export function useUpdateCompanyConfig() {
             queryClient.invalidateQueries({ queryKey: INVOICING_KEY }),
     })
 }
+
+export function useSequences() {
+    return useQuery({
+        queryKey: [...INVOICING_KEY, 'sequences'],
+        queryFn: async () => (await api.getSequences()).data,
+    })
+}
+
+export function useSetNextSequence() {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: async ({
+            establishment,
+            emissionPoint,
+            nextSequence,
+        }: {
+            establishment: string
+            emissionPoint: string
+            nextSequence: number
+        }) =>
+            (
+                await api.setNextSequence(
+                    establishment,
+                    emissionPoint,
+                    nextSequence
+                )
+            ).data,
+        onSuccess: () =>
+            queryClient.invalidateQueries({
+                queryKey: [...INVOICING_KEY, 'sequences'],
+            }),
+    })
+}
