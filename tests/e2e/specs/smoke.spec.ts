@@ -1,6 +1,7 @@
 import { test, expect } from '../support/test'
 import { mockEmptyBackend } from '../fixtures/backend'
 import { POS, ok } from '../support/mockApi'
+import { posTerminal } from '../fixtures/pos'
 
 // Cada pantalla del menú, con el título que debe mostrar.
 const SCREENS = [
@@ -29,6 +30,8 @@ const SCREENS = [
     { path: '/settings/users', heading: 'Usuarios' },
     { path: '/settings/company-config', heading: 'Perfil fiscal' },
     { path: '/settings/certificates', heading: 'Certificados Digitales' },
+    { path: '/settings/sequences', heading: 'Secuenciales' },
+    { path: '/settings/branches', heading: 'Sucursales' },
 ]
 
 test.describe('Arranque', () => {
@@ -80,6 +83,7 @@ test.describe('Pantallas principales', () => {
         page,
         api,
     }) => {
+        api.get(`${POS}/terminals`, () => ok([posTerminal()]))
         api.get(`${POS}/shifts/active`, () => ok(null))
 
         await page.goto('/pos')

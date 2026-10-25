@@ -1,6 +1,7 @@
 import { test, expect } from '../support/test'
 import { mockEmptyBackend } from '../fixtures/backend'
 import { mockSuppliers } from '../fixtures/suppliers'
+import { posTerminal } from '../fixtures/pos'
 import {
     ADMIN,
     AUTH,
@@ -162,6 +163,7 @@ test.describe('Inicio de sesión', () => {
 
     test('un cajero entra directo al punto de venta', async ({ page, api }) => {
         acceptLogin(api, { role: ROLE.CASHIER, username: 'caja1' })
+        api.get(`${POS}/terminals`, () => ok([posTerminal()]))
         api.get(`${POS}/shifts/active`, () => ok(null))
 
         await page.goto('/sign-in')

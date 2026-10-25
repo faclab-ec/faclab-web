@@ -134,7 +134,9 @@ const BranchAccessForm = ({
                         key={branch.id}
                         checked={all || selected.has(branch.id)}
                         disabled={all}
-                        onChange={(checked) => toggle(branch.id, checked)}
+                        // El estado interno del Checkbox no sigue a `checked`
+                        // controlado: manda el del evento
+                        onChange={(_, e) => toggle(branch.id, e.target.checked)}
                     >
                         {branch.establishmentCode} · {branch.name}
                         {!branch.isActive && ' (inactiva)'}

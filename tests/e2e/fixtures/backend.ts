@@ -26,6 +26,9 @@ const EMPTY_ADMIN_LISTS = [
     'suppliers',
     'purchase-orders',
     'users',
+    'branches',
+    'emission-points',
+    'pos-terminals',
     'alerts/low-stock',
     'alerts/out-of-stock',
     'alerts/reorder-point',
@@ -47,9 +50,12 @@ export const mockEmptyBackend = (api: MockApi): void => {
     api.get(`${POS}/shifts`, ({ query }) => paginated([], query))
     api.get(`${POS}/refunds`, ({ query }) => paginated([], query))
     api.get(`${POS}/reports/daily`, () => ok(emptyDailyReport()))
+    // Sucursal sin cajas: el POS lo dice en vez de pedir el turno
+    api.get(`${POS}/terminals`, () => ok([]))
 
     api.get(`${INVOICING}/invoices`, () => ok([]))
     api.get(`${INVOICING}/certificates`, () => ok([]))
+    api.get(`${INVOICING}/sequences`, () => ok([]))
     // faclab-invoicing responde 404 mientras la empresa no esté configurada
     api.get(`${INVOICING}/company-config`, () =>
         apiError(404, 'NOT_FOUND', 'Company config not found')

@@ -27,6 +27,8 @@ export interface SessionOptions {
     tenants?: TenantOption[]
     /** Sucursales a las que puede entrar; por defecto solo la matriz */
     branches?: BranchSummary[]
+    /** Caja que este navegador ya tenía vinculada (`fc.workplace`) */
+    terminal?: { branchId: number; terminalId: number }
 }
 
 export const TENANT: TenantSummary = {
@@ -110,13 +112,27 @@ export const signInAs = async (
     const session = buildSession(options)
     mockSessionEndpoints(api, session)
 
-    await page.addInitScript(() => {
+    const workplace = options.terminal
+        ? JSON.stringify({
+              state: {
+                  branchByTenant: {},
+                  terminalByBranch: {
+                      [`${session.tenant.id}:${options.terminal.branchId}`]:
+                          options.terminal.terminalId,
+                  },
+              },
+              version: 1,
+          })
+        : null
+
+    await page.addInitScript((workplace) => {
         // Una sola vez por pestaña: si la prueba cierra sesión y recarga, la
         // sesión no debe reaparecer.
         if (window.sessionStorage.getItem('e2e.seeded')) return
         window.sessionStorage.setItem('e2e.seeded', '1')
         window.localStorage.setItem('fc.hasSession', '1')
-    })
+        if (workplace) window.localStorage.setItem('fc.workplace', workplace)
+    }, workplace)
 
     return session
 }
