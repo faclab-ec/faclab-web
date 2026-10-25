@@ -18,6 +18,10 @@ const PAGINATION = { total: 1, limit: 10, offset: 0 }
 
 const SALE = {
     id: 1,
+    number: 'V-001-000001',
+    branchId: 1,
+    emissionPointId: 1,
+    terminalId: 1,
     customerId: 10,
     customerName: 'Ana Pérez',
     status: 'CONFIRMED' as const,

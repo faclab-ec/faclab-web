@@ -142,7 +142,10 @@ describe('useSwitchTenant', () => {
     beforeEach(() => {
         useAuthStore
             .getState()
-            .signIn({ accessToken: 'at-a', expiresIn: 900 }, sessionIn(TENANT_A))
+            .signIn(
+                { accessToken: 'at-a', expiresIn: 900 },
+                sessionIn(TENANT_A)
+            )
     })
 
     it('drops what was loaded and enters the other company', async () => {

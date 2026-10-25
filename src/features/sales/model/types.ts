@@ -49,6 +49,11 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
 
 export interface Sale {
     id: number
+    /** Número de la sucursal (`V-001-000123`); null en borradores y ventas anteriores */
+    number: string | null
+    branchId: number | null
+    emissionPointId: number | null
+    terminalId: number | null
     customerId: number | null
     customerName: string | null
     status: SaleStatus

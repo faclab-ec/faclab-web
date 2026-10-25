@@ -5,6 +5,7 @@ import {
     useQueryClient,
 } from '@tanstack/react-query'
 import * as api from '../api/client'
+import { useActiveBranch, useBoundTerminalId } from '@/stores'
 import type {
     OpenShiftInput,
     CloseShiftInput,
@@ -25,9 +26,30 @@ import type {
 
 // === QUERIES ===
 
-export function useActiveShift() {
+/** Cajas activas de una sucursal; se vuelven a pedir al abrir el POS. */
+export function usePosTerminals(branchId: number | null) {
     return useQuery({
-        queryKey: ['pos', 'activeShift'],
+        queryKey: ['pos', 'terminals', branchId],
+        queryFn: async () => {
+            const response = await api.getTerminals()
+            return response.data
+        },
+        enabled: branchId !== null,
+        staleTime: 0,
+    })
+}
+
+/** Sucursal y caja en las que corre el POS: parte de las claves que dependen de ellas */
+const usePlacementKey = () => {
+    const branch = useActiveBranch()
+    const terminalId = useBoundTerminalId()
+    return [branch?.id ?? null, terminalId] as const
+}
+
+export function useActiveShift() {
+    const placement = usePlacementKey()
+    return useQuery({
+        queryKey: ['pos', 'activeShift', ...placement],
         queryFn: async () => {
             const response = await api.getActiveShift()
             return response.data
@@ -57,8 +79,9 @@ export function usePOSSearchProducts(term: string) {
 }
 
 export function useParkedSales() {
+    const placement = usePlacementKey()
     return useQuery({
-        queryKey: ['pos', 'parkedSales'],
+        queryKey: ['pos', 'parkedSales', ...placement],
         queryFn: async () => {
             const response = await api.getParkedSales()
             return response.data

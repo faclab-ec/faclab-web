@@ -57,7 +57,7 @@ const SaleDetailPage = () => {
         <div className="flex flex-col gap-4">
             <PageHeader
                 className="!mb-1"
-                title={`Venta #${sale.id}`}
+                title={`Venta ${sale.number ?? `#${sale.id}`}`}
                 badge={
                     <>
                         <StatusBadge tone={SALE_STATUS_TONES[sale.status]}>

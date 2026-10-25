@@ -32,9 +32,16 @@ import type {
     POSProduct,
     POSCustomer,
     QuickCustomerInput,
+    PosTerminal,
 } from '../model/types'
 
 const HOST = appConfig.posApiHost
+
+// === TERMINALS ===
+
+/** Cajas activas de la sucursal del encabezado `X-Branch-Id` */
+export const getTerminals = () =>
+    httpClient.get<ListResponse<PosTerminal>>(`${HOST}/terminals`)
 
 // === SHIFTS ===
 

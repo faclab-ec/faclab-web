@@ -2,7 +2,7 @@ import { useState } from 'react'
 import Dialog from '@/components/ui/Dialog'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
-import { notifyError } from '@shared/ui/notify'
+import { notifyPosError } from '../lib/notifyPosError'
 import { usePOSStore, isPriceOverridden } from '../store/usePOSStore'
 import { useCartTotals } from '../hooks/useCartTotals'
 import { useQuickSale } from '../hooks/usePOS'
@@ -95,7 +95,7 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
             resetForm()
             onComplete(sale.id)
         } catch (error: unknown) {
-            notifyError(error, 'Error al procesar la venta')
+            notifyPosError(error, 'Error al procesar la venta')
         }
     }
 

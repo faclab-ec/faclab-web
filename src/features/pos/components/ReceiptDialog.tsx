@@ -5,6 +5,7 @@ import { useReceipt } from '../hooks/usePOS'
 import { HiOutlineCheckCircle } from 'react-icons/hi'
 import { InvoiceReceiptNote } from '@features/invoicing'
 import { formatCurrency } from '@shared/lib/format'
+import { saleLabel } from '../lib/saleLabel'
 
 interface ReceiptDialogProps {
     isOpen: boolean
@@ -45,7 +46,27 @@ const ReceiptDialog = ({ isOpen, saleId, onClose }: ReceiptDialogProps) => {
             {receipt && (
                 <div className="space-y-4 text-sm">
                     <div className="text-center text-gray-500 dark:text-gray-400">
-                        <p>Venta #{receipt.saleId}</p>
+                        <p className="font-semibold text-gray-900 dark:text-gray-100">
+                            Venta{' '}
+                            {saleLabel({
+                                id: receipt.saleId,
+                                number: receipt.number,
+                            })}
+                        </p>
+                        {receipt.branch && (
+                            <p>
+                                {receipt.branch.establishmentCode}{' '}
+                                {receipt.branch.name}
+                                {receipt.branch.address &&
+                                    ` — ${receipt.branch.address}`}
+                            </p>
+                        )}
+                        {receipt.terminal && (
+                            <p>
+                                Caja {receipt.terminal.name} (
+                                {receipt.terminal.code})
+                            </p>
+                        )}
                         <p>{receipt.cashier}</p>
                         {receipt.customer && (
                             <p>
