@@ -7,6 +7,7 @@ import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { FormItem } from '@/components/ui/Form'
 import { makeNumberRegister } from '@/components/ui/Form/utils'
 import { useAddCashMovement } from '../hooks/usePOS'
+import { POS_ERROR_MESSAGES } from '../model/errors'
 import { useShift } from './useShift'
 import {
     cashMovementSchema,
@@ -55,7 +56,9 @@ const CashMovementDialog = ({ isOpen, onClose }: CashMovementDialogProps) => {
             reset()
             onClose()
         } catch (error: unknown) {
-            notifyError(error, 'Error al registrar movimiento')
+            notifyError(error, 'Error al registrar movimiento', {
+                messages: POS_ERROR_MESSAGES,
+            })
         }
     }
 

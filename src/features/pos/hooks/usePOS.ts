@@ -5,6 +5,7 @@ import {
     useQueryClient,
 } from '@tanstack/react-query'
 import * as api from '../api/client'
+import { useIdempotencyKey } from '@shared/hooks/useIdempotencyKey'
 import { useActiveBranch, useBoundTerminalId } from '@/stores'
 import type {
     OpenShiftInput,
@@ -240,25 +241,34 @@ export function useCloseShift() {
     })
 }
 
+// Las mutaciones que crean documentos o mueven dinero envían la clave de la
+// operación (`useIdempotencyKey`): la misma en cada intento hasta que sale bien
+
 export function useQuickSale() {
     const queryClient = useQueryClient()
+    const operation = useIdempotencyKey()
     return useMutation({
         mutationFn: async (data: QuickSaleInput) => {
-            const response = await api.quickSale(data)
+            const response = await api.quickSale(data, operation.current())
             return response.data
         },
         onSuccess: () => {
+            operation.reset()
             queryClient.invalidateQueries({ queryKey: ['pos', 'products'] })
         },
+        onError: operation.resetIfUsed,
     })
 }
 
 export function useCreateSale() {
+    const operation = useIdempotencyKey()
     return useMutation({
         mutationFn: async (data: CreateSaleInput) => {
-            const response = await api.createSale(data)
+            const response = await api.createSale(data, operation.current())
             return response.data
         },
+        onSuccess: operation.reset,
+        onError: operation.resetIfUsed,
     })
 }
 
@@ -342,14 +352,17 @@ export function useOverrideItemPrice() {
 
 export function useConfirmSale() {
     const queryClient = useQueryClient()
+    const operation = useIdempotencyKey()
     return useMutation({
         mutationFn: async (saleId: number) => {
-            const response = await api.confirmSale(saleId)
+            const response = await api.confirmSale(saleId, operation.current())
             return response.data
         },
         onSuccess: () => {
+            operation.reset()
             queryClient.invalidateQueries({ queryKey: ['pos', 'products'] })
         },
+        onError: operation.resetIfUsed,
     })
 }
 
@@ -412,6 +425,7 @@ export function useCancelSale() {
 }
 
 export function useAddPayment() {
+    const operation = useIdempotencyKey()
     return useMutation({
         mutationFn: async ({
             saleId,
@@ -420,23 +434,33 @@ export function useAddPayment() {
             saleId: number
             data: PaymentInput
         }) => {
-            const response = await api.addPayment(saleId, data)
+            const response = await api.addPayment(
+                saleId,
+                data,
+                operation.current()
+            )
             return response.data
         },
+        onSuccess: operation.reset,
+        onError: operation.resetIfUsed,
     })
 }
 
 export function useCreateRefund() {
+    const operation = useIdempotencyKey()
     return useMutation({
         mutationFn: async (data: CreateRefundInput) => {
-            const response = await api.createRefund(data)
+            const response = await api.createRefund(data, operation.current())
             return response.data
         },
+        onSuccess: operation.reset,
+        onError: operation.resetIfUsed,
     })
 }
 
 export function useProcessRefund() {
     const queryClient = useQueryClient()
+    const operation = useIdempotencyKey()
     return useMutation({
         mutationFn: async ({
             refundId,
@@ -445,12 +469,18 @@ export function useProcessRefund() {
             refundId: number
             data: ProcessRefundInput
         }) => {
-            const response = await api.processRefund(refundId, data)
+            const response = await api.processRefund(
+                refundId,
+                data,
+                operation.current()
+            )
             return response.data
         },
         onSuccess: () => {
+            operation.reset()
             queryClient.invalidateQueries({ queryKey: ['pos', 'products'] })
         },
+        onError: operation.resetIfUsed,
     })
 }
 
@@ -469,6 +499,7 @@ export function useCancelRefund() {
 
 export function useAddCashMovement() {
     const queryClient = useQueryClient()
+    const operation = useIdempotencyKey()
     return useMutation({
         mutationFn: async ({
             shiftId,
@@ -477,10 +508,16 @@ export function useAddCashMovement() {
             shiftId: number
             data: CashMovementInput
         }) => {
-            const response = await api.addCashMovement(shiftId, data)
+            const response = await api.addCashMovement(
+                shiftId,
+                data,
+                operation.current()
+            )
             return response.data
         },
+        onError: operation.resetIfUsed,
         onSuccess: (_, variables) => {
+            operation.reset()
             queryClient.invalidateQueries({
                 queryKey: ['pos', 'cashSummary', variables.shiftId],
             })
