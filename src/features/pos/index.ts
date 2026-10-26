@@ -1,6 +1,7 @@
 export { posRoutes } from './routes'
 
 export type {
+    PosTerminal,
     Shift,
     POSSale,
     POSSaleItem,
@@ -47,6 +48,7 @@ export {
 } from './model/schemas'
 
 export {
+    usePosTerminals,
     useActiveShift,
     usePOSProducts,
     usePOSSearchProducts,

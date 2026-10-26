@@ -1,6 +1,7 @@
 import type {
     POSProduct,
     POSSale,
+    PosTerminal,
     QuickSaleInput,
     Receipt,
     Shift,
@@ -15,9 +16,29 @@ import {
 } from '../support/mockApi'
 import { categories } from './catalog'
 
+/** Caja de la matriz (sucursal 1 de la sesión por defecto) */
+export const posTerminal = (
+    overrides: Partial<PosTerminal> = {}
+): PosTerminal => ({
+    id: 11,
+    branchId: 1,
+    emissionPointId: 1,
+    defaultLocationId: 1,
+    code: 'CAJA-01',
+    name: 'Caja 1',
+    isActive: true,
+    ...overrides,
+})
+
+export const SALE_NUMBER = 'V-001-000123'
+
 export const openShift = (overrides: Partial<Shift> = {}): Shift => ({
     id: 42,
     cashierName: 'Ana',
+    terminalId: 11,
+    branchId: 1,
+    openedByUserId: 1,
+    closedBy: null,
     openedAt: '2026-01-15T13:00:00.000Z',
     closedAt: null,
     openingBalance: 50,
@@ -69,6 +90,13 @@ const SALE_ID = 901
 
 const receiptFor = (input: QuickSaleInput, total: number): Receipt => ({
     saleId: SALE_ID,
+    number: SALE_NUMBER,
+    branch: {
+        establishmentCode: '001',
+        name: 'Matriz',
+        address: 'Av. Loja 1-23',
+    },
+    terminal: { code: 'CAJA-01', name: 'Caja 1' },
     saleDate: '2026-01-15T15:00:00.000Z',
     status: 'CONFIRMED',
     cashier: 'Ana',
@@ -105,12 +133,18 @@ const receiptFor = (input: QuickSaleInput, total: number): Receipt => ({
 })
 
 /**
- * Punto de venta con un turno abierto. La venta rápida devuelve la venta y
- * deja listo su recibo, calculado con lo que envió la app.
+ * Punto de venta con un turno abierto en la única caja de la matriz (la app
+ * la vincula sola). La venta rápida devuelve la venta y deja listo su recibo,
+ * calculado con lo que envió la app.
  */
-export const mockPOS = (api: MockApi, shift: Shift | null = openShift()) => {
+export const mockPOS = (
+    api: MockApi,
+    shift: Shift | null = openShift(),
+    terminals: PosTerminal[] = [posTerminal()]
+) => {
     let receipt: Receipt | null = null
 
+    api.get(`${POS}/terminals`, () => ok(terminals))
     api.get(`${POS}/shifts/active`, () => ok(shift))
     api.get(`${POS}/products`, () => ok(posProducts()))
     api.get(`${POS}/products/search`, ({ query }) => {
@@ -148,6 +182,10 @@ export const mockPOS = (api: MockApi, shift: Shift | null = openShift()) => {
         receipt = receiptFor(input, total)
         const sale: POSSale = {
             id: SALE_ID,
+            number: SALE_NUMBER,
+            branchId: 1,
+            emissionPointId: 1,
+            terminalId: 11,
             customerId: input.customerId ?? null,
             isFinalConsumer: !input.customerId,
             shiftId: shift?.id ?? 0,

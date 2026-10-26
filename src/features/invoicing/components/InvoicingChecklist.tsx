@@ -19,15 +19,27 @@ const ICONS: Record<CheckState, ReactElement> = {
 
 function readinessChecks(status: InvoicingStatus): Check[] {
     const has = (code: string) => status.issues.some((i) => i.code === code)
-    const configError = ['CONFIG_MISSING', 'CONFIG_INVALID'].find(has)
+    const configError = [
+        'CONFIG_MISSING',
+        'CONFIG_INVALID',
+        'ISSUER_RUC_MISMATCH',
+    ].find(has)
     const certificateError = [
         'CERTIFICATE_NOT_SELECTED',
         'CERTIFICATE_NOT_FOUND',
         'CERTIFICATE_EXPIRED',
         'CERTIFICATE_UNREADABLE',
+        'CERTIFICATE_RUC_MISMATCH',
     ].find(has)
 
-    const certificateCheck: Check = certificateError
+    // El certificado se valida contra el RUC del perfil: primero el perfil
+    const certificateCheck: Check = has('CONFIG_MISSING')
+        ? {
+              label: 'Certificado de firma',
+              state: 'error',
+              detail: 'Después de guardar el perfil: subirlo y seleccionarlo',
+          }
+        : certificateError
         ? {
               label: 'Certificado de firma',
               state: 'error',
@@ -50,31 +62,37 @@ function readinessChecks(status: InvoicingStatus): Check[] {
     return [
         configError
             ? {
-                  label: 'Configuración fiscal',
+                  label: 'Perfil fiscal',
                   state: 'error',
                   detail: issueLabel(configError),
               }
             : {
-                  label: 'Configuración fiscal',
+                  label: 'Perfil fiscal',
                   state: 'ok',
-                  detail: 'Completa',
+                  detail: 'Completo',
               },
         certificateCheck,
-        {
-            label: 'Ambiente del SRI',
-            state:
-                status.environment === 2
-                    ? 'ok'
-                    : status.environment === 1
-                    ? 'warning'
-                    : 'error',
-            detail:
-                status.environment === 2
-                    ? 'Producción'
-                    : status.environment === 1
-                    ? 'Pruebas: las facturas no tienen validez tributaria'
-                    : 'Sin configurar',
-        },
+        has('ENVIRONMENT_NOT_ALLOWED')
+            ? {
+                  label: 'Ambiente del SRI',
+                  state: 'error',
+                  detail: issueLabel('ENVIRONMENT_NOT_ALLOWED'),
+              }
+            : {
+                  label: 'Ambiente del SRI',
+                  state:
+                      status.environment === 2
+                          ? 'ok'
+                          : status.environment === 1
+                          ? 'warning'
+                          : 'error',
+                  detail:
+                      status.environment === 2
+                          ? 'Producción'
+                          : status.environment === 1
+                          ? 'Pruebas: las facturas no tienen validez tributaria'
+                          : 'Sin configurar',
+              },
     ]
 }
 

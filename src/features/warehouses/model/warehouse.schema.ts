@@ -5,6 +5,11 @@ const optionalEmail = z
     .optional()
 
 export const warehouseSchema = z.object({
+    // Al editar no cambia: el backend fija la sucursal al crear la bodega
+    branchId: z
+        .number({ error: 'Sucursal requerida' })
+        .int()
+        .positive('Sucursal requerida'),
     name: z
         .string()
         .min(1, 'Nombre requerido')

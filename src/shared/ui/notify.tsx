@@ -1,7 +1,10 @@
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import type { NotificationPlacement } from '@/components/ui/@types/placement'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import {
+    getErrorMessage,
+    type ErrorMessages,
+} from '@shared/lib/getErrorMessage'
 
 const DEFAULT_PLACEMENT: NotificationPlacement = 'top-center'
 
@@ -51,11 +54,11 @@ export function notifyWarning(
 export function notifyError(
     error: unknown,
     fallback: string,
-    options?: NotifyOptions
+    options?: NotifyOptions & { messages?: ErrorMessages }
 ): void {
     toast.push(
         <Notification title="Error" type="danger">
-            {getErrorMessage(error, fallback)}
+            {getErrorMessage(error, fallback, options?.messages)}
         </Notification>,
         { placement: options?.placement ?? DEFAULT_PLACEMENT }
     )

@@ -1,6 +1,7 @@
 import { chromium, type FullConfig } from '@playwright/test'
 import { mockEmptyBackend } from '../fixtures/backend'
-import { MockApi, POS, ok } from './mockApi'
+import { ADMIN, MockApi, POS, ok } from './mockApi'
+import { buildBranch } from '../fixtures/organization'
 import { signInAs } from './session'
 
 // Una pantalla por chunk perezoso de la app.
@@ -30,6 +31,9 @@ const WARM_UP_PATHS = [
     '/settings/users',
     '/settings/company-config',
     '/settings/certificates',
+    '/settings/sequences',
+    '/settings/branches',
+    '/settings/branches/1',
     '/pos',
     '/change-password',
     '/access-denied',
@@ -56,6 +60,7 @@ export default async function globalSetup(config: FullConfig): Promise<void> {
         const api = await MockApi.attach(page)
         mockEmptyBackend(api)
         api.get(`${POS}/shifts/active`, () => ok(null))
+        api.get(`${ADMIN}/branches/:id`, () => ok(buildBranch()))
         await signInAs(page, api)
 
         for (const path of WARM_UP_PATHS) {

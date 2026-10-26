@@ -3,6 +3,7 @@ import Dialog from '@/components/ui/Dialog'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import { notifyError } from '@shared/ui/notify'
+import { POS_ERROR_MESSAGES } from '../model/errors'
 import { usePOSStore, isPriceOverridden } from '../store/usePOSStore'
 import { useCartTotals } from '../hooks/useCartTotals'
 import { useQuickSale } from '../hooks/usePOS'
@@ -95,7 +96,9 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
             resetForm()
             onComplete(sale.id)
         } catch (error: unknown) {
-            notifyError(error, 'Error al procesar la venta')
+            notifyError(error, 'Error al procesar la venta', {
+                messages: POS_ERROR_MESSAGES,
+            })
         }
     }
 

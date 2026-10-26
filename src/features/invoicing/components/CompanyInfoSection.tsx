@@ -16,7 +16,7 @@ const CompanyInfoSection = ({
 }: CompanyInfoSectionProps) => (
     <section>
         <h5 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-wide">
-            Datos de la Empresa
+            Datos de la empresa
         </h5>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormItem
@@ -25,10 +25,10 @@ const CompanyInfoSection = ({
                 invalid={!!errors.taxId}
                 errorMessage={errors.taxId?.message}
             >
+                {/* El de la empresa: las ventas llegan a facturación con él */}
                 <Input
-                    placeholder="1792141001001"
-                    maxLength={13}
-                    disabled={isSubmitting}
+                    readOnly
+                    title="El RUC de la empresa; no se cambia aquí"
                     invalid={!!errors.taxId}
                     {...register('taxId')}
                 />

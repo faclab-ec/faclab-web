@@ -93,7 +93,7 @@ const InvoicingReadinessAlert = ({
                                     navigate('/settings/company-config')
                                 }
                             >
-                                Configuración fiscal
+                                Perfil fiscal
                             </Button>
                             <Button
                                 size="xs"

@@ -10,11 +10,14 @@ import { useSession } from '@/stores/useAuthStore'
 import { InvoicingReadinessAlert } from '@features/invoicing'
 import { shiftOpenSchema, type ShiftOpenFormValues } from '../model/schemas'
 import { notifyError } from '@shared/ui/notify'
+import { POS_ERROR_MESSAGES } from '../model/errors'
+import { useTerminal } from './useTerminal'
 
 const ShiftOpenDialog = () => {
     const navigate = useNavigate()
     const session = useSession()
     const openShift = useOpenShift()
+    const { branch, terminal, canChange, change } = useTerminal()
     // El backend firma el turno con el usuario autenticado
     const cashierName = session?.fullName || session?.username
 
@@ -39,7 +42,9 @@ const ShiftOpenDialog = () => {
                 notes: data.notes || undefined,
             })
         } catch (error: unknown) {
-            notifyError(error, 'No se pudo abrir el turno')
+            notifyError(error, 'No se pudo abrir el turno', {
+                messages: POS_ERROR_MESSAGES,
+            })
         }
     }
 
@@ -55,14 +60,35 @@ const ShiftOpenDialog = () => {
 
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <FormContainer>
-                        {cashierName && (
-                            <p className="mb-6 text-gray-500 dark:text-gray-400">
-                                Cajero:{' '}
+                        <dl className="mb-6 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-gray-500 dark:text-gray-400">
+                            <dt>Sucursal:</dt>
+                            <dd className="font-semibold text-gray-900 dark:text-gray-100">
+                                {branch.establishmentCode} · {branch.name}
+                            </dd>
+                            <dt>Caja:</dt>
+                            <dd className="flex items-center gap-2">
                                 <span className="font-semibold text-gray-900 dark:text-gray-100">
-                                    {cashierName}
+                                    {terminal.name} ({terminal.code})
                                 </span>
-                            </p>
-                        )}
+                                {canChange && (
+                                    <button
+                                        type="button"
+                                        className="text-sm text-primary-600 hover:underline dark:text-primary-400"
+                                        onClick={change}
+                                    >
+                                        Cambiar
+                                    </button>
+                                )}
+                            </dd>
+                            {cashierName && (
+                                <>
+                                    <dt>Cajero:</dt>
+                                    <dd className="font-semibold text-gray-900 dark:text-gray-100">
+                                        {cashierName}
+                                    </dd>
+                                </>
+                            )}
+                        </dl>
 
                         <FormItem
                             asterisk

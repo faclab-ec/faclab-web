@@ -8,3 +8,10 @@ export {
 } from './useAuthStore'
 export { useThemeStore } from './useThemeStore'
 export { useBaseStore } from './useBaseStore'
+export {
+    useWorkplaceStore,
+    useActiveBranch,
+    useBoundTerminalId,
+    activeBranch,
+    currentPlacement,
+} from './useWorkplaceStore'

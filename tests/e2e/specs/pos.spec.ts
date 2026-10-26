@@ -1,5 +1,6 @@
 import { test, expect } from '../support/test'
-import { mockPOS } from '../fixtures/pos'
+import { SALE_NUMBER, mockPOS, openShift, posTerminal } from '../fixtures/pos'
+import { MAIN_BRANCH, SECOND_BRANCH } from '../support/session'
 import { POS, apiError, ok } from '../support/mockApi'
 import { ROLE } from '@/constants/roles.constant'
 import type { Page } from '@playwright/test'
@@ -26,8 +27,12 @@ test.describe('Punto de venta', () => {
         await expect(
             page.getByRole('heading', { name: 'Abrir turno' })
         ).toBeVisible()
-        // El cajero es el usuario de la sesión; no se puede escribir otro
-        await expect(page.getByText('Cajero: caja1')).toBeVisible()
+        // El cajero es el usuario de la sesión; no se puede escribir otro.
+        // La única caja de la sucursal se vinculó sola
+        const form = page.getByRole('main')
+        await expect(form.getByText('caja1', { exact: true })).toBeVisible()
+        await expect(form.getByText('001 · Matriz')).toBeVisible()
+        await expect(form.getByText('Caja 1 (CAJA-01)')).toBeVisible()
         await expect(page.getByLabel('Nombre del cajero')).toHaveCount(0)
         const balance = page.getByLabel('Saldo inicial')
         await balance.fill('-5')
@@ -44,7 +49,7 @@ test.describe('Punto de venta', () => {
             ok(
                 opened
                     ? {
-                          id: 7,
+                          ...openShift({ id: 7 }),
                           cashierName: 'Luis',
                           openedAt: '2026-01-15T13:00:00.000Z',
                           closedAt: null,
@@ -70,10 +75,12 @@ test.describe('Punto de venta', () => {
         await expect(
             page.getByRole('heading', { name: 'Hola, Luis' })
         ).toBeVisible()
-        // El backend toma el cajero del token: el cuerpo no lo lleva
-        expect(api.callsTo('POST', `${POS}/shifts/open`)[0].body).toEqual({
-            openingBalance: 80,
-        })
+        // El backend toma el cajero del token: el cuerpo no lo lleva. La
+        // sucursal y la caja van en los encabezados
+        const [open] = api.callsTo('POST', `${POS}/shifts/open`)
+        expect(open.body).toEqual({ openingBalance: 80 })
+        expect(open.headers['x-branch-id']).toBe('1')
+        expect(open.headers['x-terminal-id']).toBe('11')
     })
 
     test('con el carrito vacío no se puede cobrar', async ({ page, api }) => {
@@ -165,10 +172,15 @@ test.describe('Punto de venta', () => {
         await payment.getByRole('button', { name: 'Completar venta' }).click()
 
         const receipt = page.getByRole('dialog', { name: 'Venta completada' })
-        await expect(receipt).toContainText('Venta #901')
+        await expect(receipt).toContainText(`Venta ${SALE_NUMBER}`)
+        await expect(receipt).toContainText('Caja Caja 1 (CAJA-01)')
         await expect(receipt).toContainText('2x Tablero MDF 15mm')
 
-        const sale = api.callsTo('POST', `${POS}/sales/quick`)[0].body as {
+        const [quickSale] = api.callsTo('POST', `${POS}/sales/quick`)
+        // La venta sale de la caja vinculada: su punto de emisión y su stock
+        expect(quickSale.headers['x-branch-id']).toBe('1')
+        expect(quickSale.headers['x-terminal-id']).toBe('11')
+        const sale = quickSale.body as {
             items: unknown[]
             payments: { paymentMethod: string; amount: number }[]
         }
@@ -206,5 +218,123 @@ test.describe('Punto de venta', () => {
         await expect(page.getByText('Stock insuficiente')).toBeVisible()
         await expect(page.getByRole('dialog', { name: 'Cobrar' })).toBeVisible()
         await expect(panel.getByText('Tablero MDF 15mm')).toBeVisible()
+    })
+})
+
+test.describe('Caja del navegador', () => {
+    const CAJA_2 = posTerminal({ id: 12, code: 'CAJA-02', name: 'Caja 2' })
+
+    test('vincula el navegador a la caja elegida y la recuerda', async ({
+        page,
+        api,
+        signIn,
+    }) => {
+        await signIn({ role: ROLE.CASHIER, username: 'caja1' })
+        mockPOS(api, null, [posTerminal(), CAJA_2])
+        await page.goto('/pos')
+
+        await expect(
+            page.getByRole('heading', { name: 'Elige la caja' })
+        ).toBeVisible()
+        // Una sola sucursal: se muestra, no se elige
+        await expect(
+            page.getByRole('main').getByLabel('Sucursal', { exact: true })
+        ).toHaveCount(0)
+        await page
+            .getByRole('list', { name: 'Cajas' })
+            .getByRole('button', { name: /Caja 2/ })
+            .click()
+
+        await expect(
+            page.getByRole('heading', { name: 'Abrir turno' })
+        ).toBeVisible()
+        await expect(page.getByText('Caja 2 (CAJA-02)')).toBeVisible()
+        const [active] = api.callsTo('GET', `${POS}/shifts/active`)
+        expect(active.headers['x-terminal-id']).toBe('12')
+
+        // Al volver a abrir el POS la caja sigue vinculada
+        await page.reload()
+        await expect(page.getByText('Caja 2 (CAJA-02)')).toBeVisible()
+        await expect(
+            page.getByRole('heading', { name: 'Elige la caja' })
+        ).toHaveCount(0)
+    })
+
+    test('una caja vinculada que se desactivó pide elegir otra', async ({
+        page,
+        api,
+        signIn,
+    }) => {
+        await signIn({
+            role: ROLE.CASHIER,
+            username: 'caja1',
+            terminal: { branchId: 1, terminalId: 99 },
+        })
+        mockPOS(api, null, [posTerminal(), CAJA_2])
+        await page.goto('/pos')
+
+        await expect(page.getByText('Caja no disponible')).toBeVisible()
+        await expect(
+            page.getByRole('heading', { name: 'Elige la caja' })
+        ).toBeVisible()
+        // No pidió el turno de una caja que el backend ya no tiene activa
+        expect(api.callsTo('GET', `${POS}/shifts/active`)).toHaveLength(0)
+    })
+
+    test('con varias sucursales elige primero la sucursal', async ({
+        page,
+        api,
+        signIn,
+    }) => {
+        await signIn({
+            role: ROLE.CASHIER,
+            username: 'caja1',
+            branches: [MAIN_BRANCH, SECOND_BRANCH],
+        })
+        mockPOS(api, null, [posTerminal(), CAJA_2])
+        api.get(`${POS}/terminals`, ({ headers }) =>
+            ok(
+                headers['x-branch-id'] === '2'
+                    ? [
+                          posTerminal({
+                              id: 21,
+                              branchId: 2,
+                              code: 'NORTE-01',
+                              name: 'Caja Norte',
+                          }),
+                      ]
+                    : [posTerminal(), CAJA_2]
+            )
+        )
+        await page.goto('/pos')
+
+        // El selector del POS, no el del encabezado que queda detrás. Sin
+        // búsqueda (pantalla táctil): se abre con el teclado
+        await page
+            .getByRole('main')
+            .getByLabel('Sucursal', { exact: true })
+            .focus()
+        await page.keyboard.press('ArrowDown')
+        await page.getByRole('option', { name: '002 · Sucursal Norte' }).click()
+
+        // La única caja de esa sucursal se vincula sola
+        await expect(page.getByText('Caja Norte (NORTE-01)')).toBeVisible()
+        const [active] = api.callsTo('GET', `${POS}/shifts/active`)
+        expect(active.headers['x-branch-id']).toBe('2')
+        expect(active.headers['x-terminal-id']).toBe('21')
+    })
+
+    test('una sucursal sin cajas activas lo dice', async ({
+        page,
+        api,
+        signIn,
+    }) => {
+        await signIn({ role: ROLE.CASHIER, username: 'caja1' })
+        mockPOS(api, null, [])
+        await page.goto('/pos')
+
+        await expect(
+            page.getByText('La sucursal no tiene cajas activas')
+        ).toBeVisible()
     })
 })

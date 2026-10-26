@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '@/components/ui/Button'
 import { useShift } from './useShift'
+import { useTerminal } from './useTerminal'
 import {
     HiOutlineCash,
+    HiOutlineDesktopComputer,
     HiOutlineLockClosed,
     HiOutlineHome,
     HiOutlineReceiptRefund,
@@ -27,6 +29,7 @@ const POSHeader = ({
 }: POSHeaderProps) => {
     const navigate = useNavigate()
     const shift = useShift()
+    const { branch, terminal, canChange, change } = useTerminal()
     const [currentTime, setCurrentTime] = useState(new Date())
     const canRefund = useCan('refund:approve')
     const isCashier = useHasRole(ROLE.CASHIER)
@@ -66,6 +69,22 @@ const POSHeader = ({
                 <StatusBadge tone="success" className="shrink-0">
                     Turno #{shift.id}
                 </StatusBadge>
+                <span
+                    className="hidden shrink-0 items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300 lg:flex"
+                    title={`Sucursal ${branch.establishmentCode} ${branch.name}, caja ${terminal.code}`}
+                >
+                    <HiOutlineDesktopComputer className="text-lg text-gray-400" />
+                    {branch.establishmentCode} {branch.name} · {terminal.code}
+                    {canChange && (
+                        <button
+                            type="button"
+                            className="text-primary-600 hover:underline dark:text-primary-400"
+                            onClick={change}
+                        >
+                            Cambiar caja
+                        </button>
+                    )}
+                </span>
                 <InvoicingStatusChip />
             </div>
 

@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import Header from '@/components/template/Header'
 import UserDropdown from '@/components/template/UserDropdown'
+import BranchSelector from '@/components/template/BranchSelector'
 import SideNavToggle from '@/components/template/SideNavToggle'
 import ThemeModeToggle from '@/components/template/ThemeModeToggle'
 import MobileNav from '@/components/template/MobileNav'
@@ -36,6 +37,7 @@ const HeaderActionsEnd = () => {
                     POS
                 </Button>
             )}
+            <BranchSelector />
             <ThemeModeToggle />
             <UserDropdown />
         </>

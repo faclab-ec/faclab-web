@@ -13,7 +13,7 @@ const InvoiceReceiptNote = () => {
         return (
             <p className="print:hidden text-xs text-center rounded-md p-2 bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
                 Factura electrónica pendiente: se emitirá cuando se complete la
-                configuración fiscal
+                configuración de facturación
             </p>
         )
     }

@@ -3,6 +3,8 @@
  *
  * - `tokens`: otra pestaña renovó o abrió la sesión; esta adopta el access
  *   token en vez de pedir su propio refresh.
+ * - `tenant`: otra pestaña cambió de empresa; esta adopta el token nuevo y
+ *   descarta todo lo que tenía cargado de la empresa anterior.
  * - `logout`: la sesión terminó en otra pestaña; esta también la cierra.
  *
  * Una pestaña no recibe sus propios mensajes. Sin `BroadcastChannel` (navegador
@@ -10,6 +12,7 @@
  */
 export type AuthMessage =
     | { type: 'tokens'; accessToken: string; expiresIn: number }
+    | { type: 'tenant'; accessToken: string; expiresIn: number }
     | { type: 'logout' }
 
 const CHANNEL_NAME = 'faclab-auth'

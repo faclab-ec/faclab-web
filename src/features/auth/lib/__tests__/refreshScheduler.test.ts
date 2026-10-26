@@ -68,6 +68,12 @@ describe('refreshScheduler', () => {
             accessToken: 'new-at',
             expiresIn: 300,
             tokenType: 'Bearer' as const,
+            tenant: {
+                id: 't-1',
+                ruc: '0190000000001',
+                legalName: 'Empresa',
+                tradeName: null,
+            },
         }
         mockRefreshSession.mockResolvedValueOnce(newTokens)
 

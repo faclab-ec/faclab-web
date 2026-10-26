@@ -3,15 +3,21 @@ import PageHeader from '@/components/shared/PageHeader'
 import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
 import { HiOutlineUpload } from 'react-icons/hi'
+import { useNavigate } from 'react-router-dom'
+import Alert from '@/components/ui/Alert'
+import { isApiError } from '@/utils/errors/ApiError'
 import { useCertificates, useCompanyConfig } from '../hooks/useInvoicing'
 import { useCertificateActions } from '../hooks/useCertificateActions'
 import CertificatesTable from '../components/CertificatesTable'
 import UploadCertificateDialog from '../components/UploadCertificateDialog'
 
 const CertificatesPage = () => {
+    const navigate = useNavigate()
     const { data: certificates = [], isLoading } = useCertificates()
-    const { data: config } = useCompanyConfig()
+    const { data: config, error: configError } = useCompanyConfig()
     const actions = useCertificateActions()
+    // El certificado se valida contra el RUC del perfil: sin perfil no se sube
+    const withoutProfile = isApiError(configError) && configError.status === 404
 
     return (
         <>
@@ -23,12 +29,29 @@ const CertificatesPage = () => {
                         variant="solid"
                         size="sm"
                         icon={<HiOutlineUpload />}
+                        disabled={withoutProfile}
                         onClick={actions.openUpload}
                     >
                         Subir Certificado
                     </Button>
                 }
             />
+            {withoutProfile && (
+                <Alert showIcon className="mb-4" type="warning">
+                    <div className="flex flex-wrap items-center gap-3">
+                        <span>
+                            Primero guarda el perfil fiscal de la empresa: cada
+                            certificado se valida contra su RUC.
+                        </span>
+                        <Button
+                            size="xs"
+                            onClick={() => navigate('/settings/company-config')}
+                        >
+                            Perfil fiscal
+                        </Button>
+                    </div>
+                </Alert>
+            )}
             <Card>
                 <CertificatesTable
                     certificates={certificates}
@@ -37,9 +60,9 @@ const CertificatesPage = () => {
                     onDelete={actions.openDelete}
                 />
                 <p className="text-xs text-gray-500 mt-3">
-                    Después de subir un certificado, selecciónalo en la
-                    Configuración Fiscal. El certificado en uso no se puede
-                    eliminar.
+                    Después de subir un certificado, selecciónalo en el Perfil
+                    fiscal. Solo sirven los del RUC de la empresa, y el
+                    certificado en uso no se puede eliminar.
                 </p>
             </Card>
 

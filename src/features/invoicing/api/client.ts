@@ -8,6 +8,7 @@ import type {
     Invoice,
     InvoiceQueryParams,
     InvoicingStatus,
+    SriSequence,
 } from '../model/types'
 
 const HOST = appConfig.invoicingApiHost
@@ -27,8 +28,10 @@ export const getCertificates = () =>
 
 export const uploadCertificate = (file: File, password: string) => {
     const formData = new FormData()
-    formData.append('file', file)
+    // Antes que el archivo: faclab-invoicing lee los campos que llegaron
+    // hasta el archivo
     formData.append('password', password)
+    formData.append('file', file)
     return httpClient.post<DataResponse<Certificate>>(
         `${HOST}/api/certificates`,
         formData,
@@ -46,6 +49,23 @@ export const updateCompanyConfig = (data: CompanyConfigInput) =>
     httpClient.put<DataResponse<CompanyConfig>>(
         `${HOST}/api/company-config`,
         data
+    )
+
+// Un contador por establecimiento y punto de emisión que ya emitió o se
+// fijó; el que no aparece empieza en 1
+export const getSequences = () =>
+    httpClient.get<DataResponse<SriSequence[]>>(`${HOST}/api/sequences`)
+
+// Dónde continúa la numeración (p. ej. la de un sistema anterior); nunca
+// retrocede
+export const setNextSequence = (
+    establishment: string,
+    emissionPoint: string,
+    nextSequence: number
+) =>
+    httpClient.put<DataResponse<SriSequence>>(
+        `${HOST}/api/sequences/${establishment}/${emissionPoint}`,
+        { nextSequence }
     )
 
 // Whether the issuer can invoice (config, certificate) and unfinished counts

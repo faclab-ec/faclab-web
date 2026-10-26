@@ -90,3 +90,19 @@ export const useResetUserPassword = () => {
         onSuccess: () => qc.invalidateQueries({ queryKey: USERS_KEY }),
     })
 }
+
+export const useUserBranches = (id: number) =>
+    useQuery({
+        queryKey: [...USERS_KEY, id, 'branches'],
+        queryFn: async () => (await api.getUserBranches(id)).data,
+    })
+
+export const useUpdateUserBranches = () => {
+    const qc = useQueryClient()
+    return useMutation({
+        mutationFn: ({ id, branchIds }: { id: number; branchIds: number[] }) =>
+            api.updateUserBranches(id, { branchIds }).then((r) => r.data),
+        onSuccess: (_access, { id }) =>
+            qc.invalidateQueries({ queryKey: [...USERS_KEY, id, 'branches'] }),
+    })
+}

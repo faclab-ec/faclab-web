@@ -1,10 +1,17 @@
 import axios from 'axios'
 import { isApiError } from '@/utils/errors/ApiError'
 
-export function getErrorMessage(error: unknown, fallback: string): string {
+/** Textos propios por código de error, para lo que el backend dice en inglés */
+export type ErrorMessages = Partial<Record<string, string>>
+
+export function getErrorMessage(
+    error: unknown,
+    fallback: string,
+    messages?: ErrorMessages
+): string {
     // httpClient rechaza siempre con ApiError (primer error del envelope)
     if (isApiError(error)) {
-        return error.message || fallback
+        return messages?.[error.code] || error.message || fallback
     }
     if (axios.isAxiosError(error)) {
         const data = error.response?.data

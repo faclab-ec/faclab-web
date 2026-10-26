@@ -9,17 +9,18 @@ Frontend administrativo de **Faclab**, un sistema de gestión comercial para pym
 | Catálogo | `products`, `categories`, `unitsOfMeasure` |
 | Inventario | `warehouses`, `locations`, `stock`, `movements`, `lots`, `serialNumbers`, `adjustments`, `transfers`, `alerts` |
 | Compras | `suppliers` (contactos y productos por proveedor), `purchases` (órdenes, envío, recepción) |
-| Ventas | `customers`, `sales`, `pos` (turnos de caja, movimientos de efectivo, ventas en espera, pagos, devoluciones) |
-| Facturación | `invoicing` (certificados `.p12`, configuración de la empresa: establecimiento, punto de emisión, secuencial, ambiente; estado de la facturación con avisos en el layout, el POS y el inicio; facturas pendientes o con error y reintentos) |
+| Ventas | `customers`, `sales`, `pos` (caja vinculada al navegador, turnos por caja, movimientos de efectivo, ventas en espera, pagos, devoluciones, recibo con el número de la sucursal) |
+| Facturación | `invoicing` (perfil fiscal de la empresa: RUC, ambiente SRI, RIMPE; certificados `.p12` del RUC de la empresa; secuenciales por establecimiento y punto de emisión; estado de la facturación con avisos en el layout, el POS y el inicio; facturas pendientes o con error y reintentos) |
 | Análisis | `reports` (valoración, rotación, movimientos, resumen por bodega) |
-| Administración | `auth` (login, cambio de contraseña), `admin-users` (usuarios y roles) |
+| Organización | `organization` (sucursales o establecimientos SRI, puntos de emisión y cajas) |
+| Administración | `auth` (login con elección de empresa, cambio de empresa, cambio de contraseña), `admin-users` (usuarios, roles y sucursales permitidas) |
 
 ### Backends
 
 | Servicio | Host por defecto | Uso |
 |---|---|---|
-| `faclab-core` | `http://localhost:3000` (`/api/auth`, `/api/admin`, `/api/pos`) | Autenticación, usuarios, inventario, compras, ventas y POS |
-| `faclab-invoicing` | `http://localhost:3173` | Certificados, configuración SRI y comprobantes electrónicos |
+| `faclab-core` | `http://localhost:3000` (`/api/auth`, `/api/admin`, `/api/pos`) | Autenticación y empresas, usuarios, sucursales y cajas, inventario, compras, ventas y POS |
+| `faclab-invoicing` | `http://localhost:3173` | Perfil fiscal, certificados, secuenciales y comprobantes electrónicos de la empresa del token |
 
 ## Stack
 
@@ -115,7 +116,7 @@ src/
 │   │   ├── schemas/# primitivas Zod compartidas (optionalEmail, taxTypeSchema)
 │   │   └── ...     # format, getErrorMessage, dateToIsoStartOfDay, react-query
 │   └── ui/         # notify (toasts)
-├── stores/         # Zustand global: auth, theme, base
+├── stores/         # Zustand global: auth, workplace (sucursal y caja), theme, base
 ├── components/     # ui/ (kit), layouts/ (AppLayout, AuthLayout), template/, route/, shared/
 ├── configs/        # app, routes, navigation, theme, zod
 ├── constants/      # permisos, roles, códigos de IVA, etc.
@@ -154,7 +155,8 @@ features/<nombre>/
 
 - **Servidor → React Query.** Cada feature tiene sus hooks en `hooks/`. Defaults en `src/shared/lib/react-query.ts`: `staleTime` de 5 min, `retry: 1`, sin refetch al enfocar la ventana.
 - **Cliente → Zustand.**
-  - `useAuthStore`: tokens y sesión.
+  - `useAuthStore`: tokens y sesión (con la empresa, las empresas del usuario y sus sucursales, de `/me`).
+  - `useWorkplaceStore`: la sucursal elegida por empresa y la caja vinculada por sucursal, en `localStorage` (`fc.workplace`; no es secreto y sobrevive al cierre de sesión). Nunca se usa sin validar: la sucursal contra las de la sesión (si ya no está, la matriz o la primera) y la caja contra las activas de `GET /api/pos/terminals` al abrir el POS.
   - `useThemeStore`: modo claro/oscuro y menú colapsado (lo único del tema que el usuario cambia).
   - `useBaseStore`: clave de la ruta actual.
   - El POS tiene su propio store (`features/pos/store/usePOSStore.ts`).
@@ -180,13 +182,17 @@ queryFn: async () => {
 }
 ```
 
-**Errores.** Todo error se rechaza como `ApiError` (`src/utils/errors/ApiError.ts`), con `code`, `message`, `status` y `errors[]`. En la UI se muestran con `notifyError(error, 'Mensaje por defecto')` de `@shared/ui/notify`.
+**Errores.** Todo error se rechaza como `ApiError` (`src/utils/errors/ApiError.ts`), con `code`, `message`, `status` y `errors[]`. En la UI se muestran con `notifyError(error, 'Mensaje por defecto')` de `@shared/ui/notify`; los backends responden en inglés, así que un feature pasa sus textos por código con `{ messages: X_ERROR_MESSAGES }`.
+
+**Sucursal y caja.** El interceptor agrega `X-Branch-Id` (la sucursal activa) a toda llamada a `/api/admin` y `/api/pos`, y `X-Terminal-Id` (la caja vinculada) a las de `/api/pos`. Nunca a `/api/auth` (`/me` rechazaría una sucursal vieja) ni a faclab-invoicing, que filtra por la empresa del token. Si el core responde `BRANCH_ACCESS_DENIED`, renueva el token (trae los accesos nuevos) y reintenta una vez.
 
 ### Autenticación
 
 - JWT con access y refresh token. **El access token vive solo en memoria** (`useAuthStore`) y **el refresh token en la cookie HttpOnly `faclab_refresh`** que pone faclab-core (`SameSite=Strict`, `Path=/api/auth`); JavaScript nunca lo ve. En `localStorage` solo queda la marca no secreta `fc.hasSession`.
 - Login, refresh y logout van con `withCredentials: true` para que el navegador guarde y envíe la cookie. El resto de llamadas no lleva credenciales (faclab-invoicing no las acepta por CORS). El origen del frontend tiene que estar en `CORS_ORIGINS` de faclab-core.
-- **Al abrir o recargar la app**, `AuthBootstrap` (`useRestoreSession`) pide un access token con la cookie si existe la marca de sesión, y luego hidrata rol y permisos con `GET /api/auth/me`.
+- **Al abrir o recargar la app**, `AuthBootstrap` (`useRestoreSession`) pide un access token con la cookie si existe la marca de sesión, y luego hidrata rol, permisos, empresa y sucursales con `GET /api/auth/me`.
+- **Empresas:** un usuario con varias empresas recibe en el login un token de selección (solo en memoria, dura pocos minutos) y elige la empresa en un segundo paso (`POST /api/auth/select-tenant`). Desde el menú de usuario cambia de empresa sin cerrar sesión: el backend cierra la sesión anterior, la app descarta la caché de React Query (ninguna clave incluye la empresa) y avisa a las otras pestañas (mensaje `tenant` de `authChannel`).
+- **Sucursal:** el selector del encabezado ofrece solo las sucursales activas a las que el usuario puede entrar; con una sola la muestra sin opciones.
 - **Refresh proactivo:** `features/auth/lib/refreshScheduler.ts` renueva el token 60 s antes de que venza.
 - **Refresh reactivo:** si una petición responde `TOKEN_EXPIRED`, `httpClient` renueva el token y reintenta una vez. Las renovaciones concurrentes se deduplican en `refreshOnce`, porque el backend rota el refresh token y revoca la sesión si ve uno ya usado (`TOKEN_REUSED`).
 - **Varias pestañas:** `authChannel` (`BroadcastChannel`) comparte el access token nuevo y el cierre de sesión entre pestañas; cerrar sesión en una la cierra en todas.
@@ -203,6 +209,7 @@ queryFn: async () => {
 - Cada ruta declara `authority: ['permiso']` y `AuthorityGuard` redirige a `/access-denied` si falta.
 - En componentes: `useCan(PERMISSION.X)` y `useHasRole(ROLE.ADMIN)` de `@/stores/useAuthStore`.
 - Al iniciar sesión, el cajero entra directo a `/pos`.
+- Sucursales, puntos de emisión y cajas: `organization:read` para verlas, `organization:write` (solo Administrador) para cambiarlas. El perfil fiscal, los certificados y los secuenciales piden `user:manage`.
 
 ### Formularios
 
@@ -278,12 +285,13 @@ Playwright levanta su propio servidor de desarrollo en `http://127.0.0.1:5199` (
 
 ```
 tests/e2e/
-├── specs/         # Una suite por área: smoke, auth, navigation, suppliers, products,
-│                  # invoicing, pos, responsive, visual
+├── specs/         # Una suite por área: smoke, auth, tenancy (empresas y sucursales),
+│                  # navigation, suppliers, products, organization, invoicing, pos,
+│                  # responsive, visual
 ├── fixtures/      # Datos de prueba tipados con los tipos de cada feature
 └── support/
     ├── mockApi.ts     # API simulada: ok(), paginated(), apiError()
-    ├── session.ts     # Sesión iniciada por rol y permisos
+    ├── session.ts     # Sesión iniciada por rol, permisos, empresas, sucursales y caja recordada
     ├── test.ts        # `test` con los fixtures `api` y `signIn`
     └── globalSetup.ts # Calentamiento del servidor de desarrollo
 ```

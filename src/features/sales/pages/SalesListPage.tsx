@@ -66,10 +66,12 @@ const SalesListPage = () => {
 
     const columns: ColumnDef<Sale>[] = [
         {
-            header: 'ID',
-            accessorKey: 'id',
+            header: 'Número',
+            accessorKey: 'number',
             cell: (props) => (
-                <span className="font-medium">#{props.row.original.id}</span>
+                <span className="font-medium">
+                    {props.row.original.number ?? `#${props.row.original.id}`}
+                </span>
             ),
         },
         {

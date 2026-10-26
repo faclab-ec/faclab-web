@@ -37,6 +37,9 @@ export const PERMISSION = {
     REPORT_POS_READ: 'report:pos:read',
 
     USER_MANAGE: 'user:manage',
+
+    ORGANIZATION_READ: 'organization:read',
+    ORGANIZATION_WRITE: 'organization:write',
 } as const
 
 export type Permission = (typeof PERMISSION)[keyof typeof PERMISSION]
@@ -78,6 +81,7 @@ export const ROLE_PERMISSIONS: Record<RoleCode, Permission[]> = {
         PERMISSION.REFUND_APPROVE,
         PERMISSION.REPORT_INVENTORY_READ,
         PERMISSION.REPORT_POS_READ,
+        PERMISSION.ORGANIZATION_READ,
     ],
     [ROLE.OPERATOR]: [
         PERMISSION.PRODUCT_READ,
@@ -101,6 +105,7 @@ export const ROLE_PERMISSIONS: Record<RoleCode, Permission[]> = {
         PERMISSION.SUPPLIER_READ,
         PERMISSION.SUPPLIER_WRITE,
         PERMISSION.REPORT_INVENTORY_READ,
+        PERMISSION.ORGANIZATION_READ,
     ],
     [ROLE.VIEWER]: [
         PERMISSION.PRODUCT_READ,
@@ -111,6 +116,7 @@ export const ROLE_PERMISSIONS: Record<RoleCode, Permission[]> = {
         PERMISSION.CUSTOMER_READ,
         PERMISSION.SUPPLIER_READ,
         PERMISSION.REPORT_INVENTORY_READ,
+        PERMISSION.ORGANIZATION_READ,
     ],
     [ROLE.CASHIER]: [
         PERMISSION.PRODUCT_READ,

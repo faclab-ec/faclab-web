@@ -93,10 +93,19 @@ export const REFUND_STATUS_TONES: Record<RefundStatus, StatusTone> = {
     CANCELLED: 'danger',
 }
 
+// === TERMINALS ===
+// Una caja es de organización: el POS solo lee las de su sucursal
+export type { PosTerminal } from '@features/organization'
+
 // === SHIFTS ===
 export interface Shift {
     id: number
     cashierName: string
+    /** Null solo en turnos anteriores a las cajas por terminal */
+    terminalId: number | null
+    branchId: number | null
+    openedByUserId: number | null
+    closedBy: string | null
     openedAt: string
     closedAt: string | null
     openingBalance: number
@@ -109,6 +118,8 @@ export interface Shift {
 
 export interface ShiftListParams {
     status?: ShiftStatus
+    branchId?: number
+    terminalId?: number
     limit?: number
     offset?: number
 }
@@ -126,6 +137,11 @@ export interface CloseShiftInput {
 // === SALES ===
 export interface POSSale {
     id: number
+    /** Número de la sucursal (`V-001-000123`), asignado al confirmar */
+    number: string | null
+    branchId: number | null
+    emissionPointId: number | null
+    terminalId: number | null
     customerId: number | null
     isFinalConsumer: boolean
     shiftId: number
@@ -233,6 +249,10 @@ export interface PaymentInput {
 // === REFUNDS ===
 export interface Refund {
     id: number
+    /** Número de la sucursal (`D-001-000045`), asignado al procesar */
+    number: string | null
+    branchId: number | null
+    terminalId: number | null
     originalSaleId: number
     shiftId: number
     refundDate: string | null
@@ -322,10 +342,18 @@ export interface ReceiptItem {
 
 export interface Receipt {
     saleId: number
+    /** Null en ventas anteriores a la numeración por sucursal */
+    number: string | null
+    branch: {
+        establishmentCode: string
+        name: string
+        address: string | null
+    } | null
+    terminal: { code: string; name: string } | null
     saleDate: string
     status: string
     cashier: string
-    customer: { name: string; taxId: string } | null
+    customer: { name: string; taxId: string; address?: string | null } | null
     isFinalConsumer: boolean
     items: ReceiptItem[]
     taxBreakdown: {

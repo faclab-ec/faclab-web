@@ -13,9 +13,12 @@ import { FormModal, DeleteConfirmDialog } from '@/components/shared'
 import { WarehouseForm } from '../components/WarehouseForm'
 import type { Warehouse } from '../model/types'
 import type { WarehouseFormValues } from '../model/warehouse.schema'
+import { branchLabel } from '../model/branch'
+import { useSession } from '@/stores'
 import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
 
 const WarehousesListPage = () => {
+    const session = useSession()
     const crud = useCrudOperations<Warehouse>()
     const offset = (crud.pageIndex - 1) * crud.pageSize
 
@@ -37,10 +40,9 @@ const WarehousesListPage = () => {
     const handleFormSubmit = async (formData: WarehouseFormValues) => {
         try {
             if (crud.isEditOpen && crud.selectedItem) {
-                await update.mutateAsync({
-                    id: crud.selectedItem.id,
-                    data: formData,
-                })
+                // La sucursal no cambia por PUT
+                const { branchId: _branchId, ...data } = formData
+                await update.mutateAsync({ id: crud.selectedItem.id, data })
                 notifySuccess(
                     'Bodega actualizada',
                     'La bodega se actualizó correctamente'
@@ -93,6 +95,18 @@ const WarehousesListPage = () => {
             cell: (props) => (
                 <span className="font-mono text-sm px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">
                     {props.row.original.code}
+                </span>
+            ),
+        },
+        {
+            header: 'Sucursal',
+            accessorKey: 'branchId',
+            cell: (props) => (
+                <span className="text-sm">
+                    {branchLabel(
+                        session?.branches ?? [],
+                        props.row.original.branchId
+                    )}
                 </span>
             ),
         },

@@ -14,6 +14,7 @@ import { useAdminUserActions } from '../hooks/useAdminUserActions'
 import CreateUserModal from '../components/CreateUserModal'
 import ResetPasswordModal from '../components/ResetPasswordModal'
 import EditNameModal from '../components/EditNameModal'
+import BranchAccessModal from '../components/BranchAccessModal'
 import UsersTable from '../components/UsersTable'
 
 const roleFilterOptions = ALL_ROLES.map((role) => ({
@@ -112,6 +113,7 @@ const UsersPage = () => {
                     onRoleChange={actions.handleRoleChange}
                     onReset={actions.openReset}
                     onEditName={actions.openEditName}
+                    onBranches={actions.openBranches}
                     onDeactivate={actions.openDeactivate}
                     onActivate={actions.handleActivate}
                 />
@@ -124,6 +126,14 @@ const UsersPage = () => {
                     open={actions.nameDialog.open}
                     user={actions.nameDialog.user}
                     onClose={actions.closeEditName}
+                />
+            )}
+
+            {actions.branchesDialog.user && (
+                <BranchAccessModal
+                    open={actions.branchesDialog.open}
+                    user={actions.branchesDialog.user}
+                    onClose={actions.closeBranches}
                 />
             )}
 

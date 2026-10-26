@@ -4,6 +4,8 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Spinner from '@/components/ui/Spinner'
 import { notifySuccess, notifyWarning, notifyError } from '@shared/ui/notify'
+import { POS_ERROR_MESSAGES } from '../model/errors'
+import { saleLabel } from '../lib/saleLabel'
 import { roundMoney } from '@shared/lib/money'
 import { useCreateRefund, useProcessRefund } from '../hooks/usePOS'
 import { getSale, getSaleItems, getProduct } from '../api/client'
@@ -136,7 +138,9 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
             setRefundTotal(refund.total)
             setStep('payment')
         } catch (error: unknown) {
-            notifyError(error, 'Error al crear la devolución')
+            notifyError(error, 'Error al crear la devolución', {
+                messages: POS_ERROR_MESSAGES,
+            })
         }
     }
 
@@ -158,7 +162,9 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
             notifySuccess('Devolución procesada correctamente')
             handleClose()
         } catch (error: unknown) {
-            notifyError(error, 'Error al procesar la devolución')
+            notifyError(error, 'Error al procesar la devolución', {
+                messages: POS_ERROR_MESSAGES,
+            })
         }
     }
 
@@ -215,7 +221,9 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
             {step === 'select' && sale && (
                 <div className="space-y-4">
                     <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
-                        <p className="text-sm font-medium">Venta #{sale.id}</p>
+                        <p className="text-sm font-medium">
+                            Venta {saleLabel(sale)}
+                        </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
                             Total: {formatCurrency(sale.total)}
                         </p>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import classNames from 'classnames'
 import { notifySuccess, notifyError } from '@shared/ui/notify'
+import { POS_ERROR_MESSAGES } from '../model/errors'
 import { usePOSStore } from '../store/usePOSStore'
 import {
     useCreateSale,
@@ -89,7 +90,9 @@ const POSLayout = () => {
             clearCart()
             notifySuccess('Venta retenida')
         } catch (error: unknown) {
-            notifyError(error, 'Error al retener la venta')
+            notifyError(error, 'Error al retener la venta', {
+                messages: POS_ERROR_MESSAGES,
+            })
         }
     }
 

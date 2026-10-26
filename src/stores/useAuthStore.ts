@@ -22,6 +22,12 @@ interface AuthState {
 
     setTokens: (payload: SetTokensPayload) => void
     setSession: (session: Session | null) => void
+    /**
+     * Tokens y sesión de una empresa en una sola escritura: al cambiar de
+     * empresa la UI nunca ve el token nuevo con la sesión (y las sucursales)
+     * de la anterior.
+     */
+    signIn: (payload: SetTokensPayload, session: Session) => void
     clear: () => void
 }
 
@@ -39,6 +45,15 @@ export const useAuthStore = create<AuthState>((set) => ({
     },
 
     setSession: (session) => set({ session }),
+
+    signIn: ({ accessToken, expiresIn }, session) => {
+        sessionHint.mark()
+        set({
+            accessToken,
+            accessExpiresAt: Date.now() + expiresIn * 1000,
+            session,
+        })
+    },
 
     clear: () => {
         sessionHint.clear()

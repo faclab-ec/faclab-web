@@ -22,6 +22,7 @@ import { transfersRoutes } from '@features/transfers'
 import { adminUsersRoutes } from '@features/admin-users'
 import { invoicingRoutes } from '@features/invoicing'
 import { posAdminRoutes } from '@features/posAdmin'
+import { organizationRoutes } from '@features/organization'
 
 export const publicRoutes: Routes = [...authRoute]
 
@@ -52,6 +53,7 @@ export const protectedRoutes: Routes = [
     ...posRoutes,
     ...posAdminRoutes,
     ...adminUsersRoutes,
+    ...organizationRoutes,
     ...invoicingRoutes,
     {
         key: 'changePassword',
