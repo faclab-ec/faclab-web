@@ -406,3 +406,140 @@ describe('httpClient: sucursal y caja', () => {
         })
     })
 })
+
+describe('httpClient: operaciones idempotentes', () => {
+    const KEY = '6f1c2a8e-3b4d-4e5f-8a9b-0c1d2e3f4a5b'
+    const withKey = { headers: { 'Idempotency-Key': KEY } }
+
+    /**
+     * Adapter que falla con `failures` (un timeout sin respuesta o una
+     * respuesta de error) y después responde 201. Guarda la clave de cada
+     * intento.
+     */
+    const flaky = (...failures: ('timeout' | Reply)[]) => {
+        const keys: (string | undefined)[] = []
+        const adapter = vi.fn(async (config: InternalAxiosRequestConfig) => {
+            keys.push(config.headers.get('Idempotency-Key') as string)
+            const failure = failures.shift()
+            if (failure === 'timeout') {
+                throw new AxiosError(
+                    'timeout of 60000ms exceeded',
+                    AxiosError.ECONNABORTED,
+                    config
+                )
+            }
+            const reply = failure ?? { status: 201, data: { data: 'venta' } }
+            const response = {
+                data: reply.data,
+                status: reply.status,
+                statusText: '',
+                headers: {},
+                config,
+            } as AxiosResponse
+            if (reply.status >= 400) {
+                throw new AxiosError(
+                    'Request failed',
+                    AxiosError.ERR_BAD_REQUEST,
+                    config,
+                    {},
+                    response
+                )
+            }
+            return response
+        })
+        return { adapter, keys }
+    }
+
+    beforeEach(() => {
+        vi.useFakeTimers()
+        useAuthStore.getState().setTokens({ accessToken: 'at', expiresIn: 900 })
+    })
+
+    afterEach(() => {
+        vi.useRealTimers()
+        useAuthStore.getState().clear()
+    })
+
+    const settle = async <T>(promise: Promise<T>) => {
+        const outcome = promise.then(
+            (value) => ({ value }),
+            (error: unknown) => ({ error })
+        )
+        await vi.runAllTimersAsync()
+        return outcome
+    }
+
+    it('reintenta tras un timeout con la misma clave', async () => {
+        const { adapter, keys } = flaky('timeout')
+
+        const outcome = await settle(
+            httpClient.post('/sales/quick', {}, { ...withKey, adapter })
+        )
+
+        expect(outcome).toEqual({ value: { data: 'venta' } })
+        expect(keys).toEqual([KEY, KEY])
+    })
+
+    it('reintenta mientras otra solicitud con la clave sigue en curso', async () => {
+        const { adapter, keys } = flaky({
+            status: 409,
+            data: errorBody('IDEMPOTENCY_IN_PROGRESS'),
+        })
+
+        const outcome = await settle(
+            httpClient.post('/sales/quick', {}, { ...withKey, adapter })
+        )
+
+        expect(outcome).toEqual({ value: { data: 'venta' } })
+        expect(keys).toEqual([KEY, KEY])
+    })
+
+    it('reintenta si el proxy no llegó al core', async () => {
+        const { adapter, keys } = flaky({ status: 502 }, { status: 503 })
+
+        const outcome = await settle(
+            httpClient.post('/sales/quick', {}, { ...withKey, adapter })
+        )
+
+        expect(outcome).toEqual({ value: { data: 'venta' } })
+        expect(keys).toEqual([KEY, KEY, KEY])
+    })
+
+    it('se rinde después de los reintentos', async () => {
+        const { adapter, keys } = flaky('timeout', 'timeout', 'timeout')
+
+        const outcome = await settle(
+            httpClient.post('/sales/quick', {}, { ...withKey, adapter })
+        )
+
+        expect(keys).toEqual([KEY, KEY, KEY])
+        const { error } = outcome as { error: ApiError }
+        expect(isApiError(error) && error.code).toBe('ECONNABORTED')
+    })
+
+    it('no reintenta un error definitivo', async () => {
+        const { adapter, keys } = flaky({
+            status: 422,
+            data: errorBody('IDEMPOTENCY_KEY_REUSED'),
+        })
+
+        const outcome = await settle(
+            httpClient.post('/sales/quick', {}, { ...withKey, adapter })
+        )
+
+        expect(keys).toEqual([KEY])
+        const { error } = outcome as { error: ApiError }
+        expect(error.code).toBe('IDEMPOTENCY_KEY_REUSED')
+    })
+
+    it('no reintenta una solicitud sin clave', async () => {
+        const { adapter, keys } = flaky('timeout')
+
+        const outcome = await settle(
+            httpClient.post('/shifts/open', {}, { adapter })
+        )
+
+        expect(keys).toEqual([undefined])
+        expect('error' in outcome).toBe(true)
+    })
+})

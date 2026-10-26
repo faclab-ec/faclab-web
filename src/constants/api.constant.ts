@@ -4,3 +4,8 @@ export const REQUEST_HEADER_AUTH_KEY = 'Authorization'
 export const BRANCH_HEADER = 'X-Branch-Id'
 /** Caja (terminal POS) de la operación, de la sucursal de `BRANCH_HEADER` */
 export const TERMINAL_HEADER = 'X-Terminal-Id'
+/**
+ * Clave de una operación que no se debe repetir (cobrar, devolver, mover caja):
+ * faclab-core la ejecuta una sola vez y responde lo mismo a cada reintento
+ */
+export const IDEMPOTENCY_HEADER = 'Idempotency-Key'

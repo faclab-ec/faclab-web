@@ -30,6 +30,12 @@ export const POS_ERROR_MESSAGES: ErrorMessages = {
     BRANCH_REQUIRED: 'Elige la sucursal.',
     REFUND_OUTSIDE_BRANCH:
         'La venta es de otra sucursal: la devolución se hace en esa sucursal.',
+    // Un intento anterior de esta operación sí se registró (la red falló
+    // antes de la respuesta) y este trae otros datos
+    IDEMPOTENCY_KEY_REUSED:
+        'La operación anterior sí se registró. Revisa las ventas y movimientos del turno antes de repetirla.',
+    IDEMPOTENCY_IN_PROGRESS:
+        'La operación anterior todavía se está procesando. Espera unos segundos y vuelve a intentar.',
 }
 
 export const posErrorMessage = (error: unknown, fallback: string): string =>

@@ -1,4 +1,5 @@
 import appConfig from '@/configs/app.config'
+import { IDEMPOTENCY_HEADER } from '@/constants/api.constant'
 import { httpClient } from '@shared/lib/http/httpClient'
 import type { DataResponse, PaginatedResponse } from '@/@types/api'
 import type {
@@ -37,6 +38,12 @@ import type {
 
 const HOST = appConfig.posApiHost
 
+/**
+ * Las operaciones que crean documentos o mueven dinero llevan la clave de la
+ * operación (`useIdempotencyKey`): la misma en cada reintento
+ */
+const idempotent = (key: string) => ({ headers: { [IDEMPOTENCY_HEADER]: key } })
+
 // === TERMINALS ===
 
 /** Cajas activas de la sucursal del encabezado `X-Branch-Id` */
@@ -63,10 +70,15 @@ export const getShift = (id: number) =>
 export const getShifts = (params?: ShiftListParams) =>
     httpClient.get<PaginatedResponse<Shift>>(`${HOST}/shifts`, { params })
 
-export const addCashMovement = (shiftId: number, data: CashMovementInput) =>
+export const addCashMovement = (
+    shiftId: number,
+    data: CashMovementInput,
+    idempotencyKey: string
+) =>
     httpClient.post<DataResponse<CashMovement>>(
         `${HOST}/shifts/${shiftId}/cash-movements`,
-        data
+        data,
+        idempotent(idempotencyKey)
     )
 
 export const getCashMovements = (shiftId: number) =>
@@ -76,11 +88,19 @@ export const getCashMovements = (shiftId: number) =>
 
 // === SALES ===
 
-export const createSale = (data: CreateSaleInput) =>
-    httpClient.post<DataResponse<POSSale>>(`${HOST}/sales`, data)
+export const createSale = (data: CreateSaleInput, idempotencyKey: string) =>
+    httpClient.post<DataResponse<POSSale>>(
+        `${HOST}/sales`,
+        data,
+        idempotent(idempotencyKey)
+    )
 
-export const quickSale = (data: QuickSaleInput) =>
-    httpClient.post<DataResponse<POSSale>>(`${HOST}/sales/quick`, data)
+export const quickSale = (data: QuickSaleInput, idempotencyKey: string) =>
+    httpClient.post<DataResponse<POSSale>>(
+        `${HOST}/sales/quick`,
+        data,
+        idempotent(idempotencyKey)
+    )
 
 export const getSale = (id: number) =>
     httpClient.get<DataResponse<POSSale>>(`${HOST}/sales/${id}`)
@@ -107,10 +127,11 @@ export const updateSaleItem = (
 export const deleteSaleItem = (saleId: number, itemId: number) =>
     httpClient.delete<void>(`${HOST}/sales/${saleId}/items/${itemId}`)
 
-export const confirmSale = (saleId: number) =>
+export const confirmSale = (saleId: number, idempotencyKey: string) =>
     httpClient.post<DataResponse<POSSale>>(
         `${HOST}/sales/${saleId}/confirm`,
-        undefined
+        undefined,
+        idempotent(idempotencyKey)
     )
 
 export const cancelSale = (saleId: number, reason?: string) =>
@@ -140,10 +161,15 @@ export const applySaleDiscount = (saleId: number, data: SaleDiscountInput) =>
         data
     )
 
-export const addPayment = (saleId: number, data: PaymentInput) =>
+export const addPayment = (
+    saleId: number,
+    data: PaymentInput,
+    idempotencyKey: string
+) =>
     httpClient.post<DataResponse<POSPayment>>(
         `${HOST}/sales/${saleId}/payments`,
-        data
+        data,
+        idempotent(idempotencyKey)
     )
 
 export const getSalePayments = (saleId: number) =>
@@ -164,13 +190,22 @@ export const getReceipt = (saleId: number) =>
 
 // === REFUNDS ===
 
-export const createRefund = (data: CreateRefundInput) =>
-    httpClient.post<DataResponse<Refund>>(`${HOST}/refunds`, data)
+export const createRefund = (data: CreateRefundInput, idempotencyKey: string) =>
+    httpClient.post<DataResponse<Refund>>(
+        `${HOST}/refunds`,
+        data,
+        idempotent(idempotencyKey)
+    )
 
-export const processRefund = (refundId: number, data: ProcessRefundInput) =>
+export const processRefund = (
+    refundId: number,
+    data: ProcessRefundInput,
+    idempotencyKey: string
+) =>
     httpClient.post<DataResponse<Refund>>(
         `${HOST}/refunds/${refundId}/process`,
-        data
+        data,
+        idempotent(idempotencyKey)
     )
 
 export const cancelRefund = (refundId: number) =>

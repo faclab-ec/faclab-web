@@ -7,17 +7,21 @@ import type {
 import appConfig from '@/configs/app.config'
 import {
     BRANCH_HEADER,
+    IDEMPOTENCY_HEADER,
     REQUEST_HEADER_AUTH_KEY,
     TERMINAL_HEADER,
     TOKEN_TYPE,
 } from '@/constants/api.constant'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { currentPlacement } from '@/stores/useWorkplaceStore'
-import { fromAxiosError } from '@/utils/errors/ApiError'
+import { fromAxiosError, type ApiError } from '@/utils/errors/ApiError'
 import { navigateTo } from '@shared/lib/auth/navigationRef'
 import { forceSignOut, refreshSession } from '@shared/lib/auth/session'
 
-type RetriableConfig = InternalAxiosRequestConfig & { _retried?: boolean }
+type RetriableConfig = InternalAxiosRequestConfig & {
+    _retried?: boolean
+    _idempotentRetries?: number
+}
 
 const CHANGE_PASSWORD_PATH = '/change-password'
 
@@ -43,6 +47,39 @@ const setPlacementHeaders = (config: InternalAxiosRequestConfig): void => {
         config.headers.set(TERMINAL_HEADER, String(terminalId))
     }
 }
+
+/** Espera antes de cada reintento de una operación idempotente */
+export const IDEMPOTENT_RETRY_DELAYS_MS = [1000, 3000]
+// El proxy no llegó al core o el core no estaba disponible
+const RETRIABLE_STATUSES = new Set([502, 503, 504])
+
+/**
+ * Una operación con `Idempotency-Key` se puede repetir sin duplicarla: el core
+ * la ejecuta una vez y responde lo mismo a cada reintento con la clave. Se
+ * reintenta cuando no hubo respuesta definitiva: timeout o red caída (pudo o
+ * no llegar), otra solicitud con la clave todavía en curso, o el proxy sin
+ * core. Siempre con la misma config, así que con la misma clave.
+ */
+const shouldRetryIdempotent = (
+    error: AxiosError,
+    apiError: ApiError,
+    config: RetriableConfig
+): boolean => {
+    if (!config.headers?.has(IDEMPOTENCY_HEADER) || axios.isCancel(error)) {
+        return false
+    }
+    if ((config._idempotentRetries ?? 0) >= IDEMPOTENT_RETRY_DELAYS_MS.length) {
+        return false
+    }
+    return (
+        !error.response ||
+        apiError.code === 'IDEMPOTENCY_IN_PROGRESS' ||
+        RETRIABLE_STATUSES.has(error.response.status)
+    )
+}
+
+const wait = (ms: number) =>
+    new Promise<void>((resolve) => setTimeout(resolve, ms))
 
 const instance = axios.create({
     timeout: 60000,
@@ -73,6 +110,16 @@ instance.interceptors.response.use(
     async (error: AxiosError) => {
         const apiError = fromAxiosError(error)
         const originalConfig = error.config as RetriableConfig | undefined
+
+        if (
+            originalConfig &&
+            shouldRetryIdempotent(error, apiError, originalConfig)
+        ) {
+            const attempt = originalConfig._idempotentRetries ?? 0
+            originalConfig._idempotentRetries = attempt + 1
+            await wait(IDEMPOTENT_RETRY_DELAYS_MS[attempt])
+            return instance.request(originalConfig)
+        }
 
         switch (apiError.code) {
             case 'TOKEN_EXPIRED': {
