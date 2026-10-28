@@ -26,6 +26,7 @@ const EMPTY_ADMIN_LISTS = [
     'suppliers',
     'purchase-orders',
     'users',
+    'audit-log',
     'branches',
     'emission-points',
     'pos-terminals',

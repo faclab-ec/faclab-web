@@ -28,6 +28,7 @@ const SCREENS = [
     { path: '/suppliers', heading: 'Proveedores' },
     { path: '/purchase-orders', heading: 'Órdenes de Compra' },
     { path: '/settings/users', heading: 'Usuarios' },
+    { path: '/settings/audit-log', heading: 'Bitácora de auditoría' },
     { path: '/settings/company-config', heading: 'Perfil fiscal' },
     { path: '/settings/certificates', heading: 'Certificados Digitales' },
     { path: '/settings/sequences', heading: 'Secuenciales' },

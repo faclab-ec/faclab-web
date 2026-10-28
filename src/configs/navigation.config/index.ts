@@ -312,6 +312,16 @@ const navigationConfig: NavigationTree[] = [
                 subMenu: [],
             },
             {
+                key: 'settings.auditLog',
+                path: '/settings/audit-log',
+                title: 'Audit Log',
+                translateKey: 'nav.settings.auditLog',
+                icon: 'settingsAuditLog',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: ['audit:read'],
+                subMenu: [],
+            },
+            {
                 key: 'settings.branches',
                 path: '/settings/branches',
                 title: 'Branches',

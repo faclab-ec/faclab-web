@@ -20,6 +20,10 @@ import {
     ADJUSTMENT_STATUS_LABELS,
 } from '@features/adjustments/model/types'
 import { ALERT_TYPE_LABELS } from '@features/alerts/model/types'
+import {
+    AUDIT_ACTION_LABELS,
+    AUDIT_SOURCE_LABELS,
+} from '@features/audit-log/model/types'
 import { LOCATION_TYPES } from '@features/locations/model/types'
 import { MOVEMENT_TYPES } from '@features/movements/model/types'
 import {
@@ -83,6 +87,8 @@ const FRONT_ENUMS: [string, string, readonly string[]][] = [
     ['TransferStatus', 'TRANSFER_STATUS_LABELS', keys(TRANSFER_STATUS_LABELS)],
     ['SerialStatus', 'SERIAL_STATUS_LABELS', keys(SERIAL_STATUS_LABELS)],
     ['AlertType', 'ALERT_TYPE_LABELS', keys(ALERT_TYPE_LABELS)],
+    ['AuditAction', 'AUDIT_ACTION_LABELS', keys(AUDIT_ACTION_LABELS)],
+    ['TenantSource', 'AUDIT_SOURCE_LABELS', keys(AUDIT_SOURCE_LABELS)],
 ]
 
 /** Valores del backend que el front puede ignorar, con el motivo */

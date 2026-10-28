@@ -37,6 +37,7 @@ export const PERMISSION = {
     REPORT_POS_READ: 'report:pos:read',
 
     USER_MANAGE: 'user:manage',
+    AUDIT_READ: 'audit:read',
 
     ORGANIZATION_READ: 'organization:read',
     ORGANIZATION_WRITE: 'organization:write',
