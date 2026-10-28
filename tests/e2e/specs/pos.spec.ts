@@ -189,11 +189,63 @@ test.describe('Punto de venta', () => {
         ])
         expect(sale.payments).toHaveLength(1)
         expect(sale.payments[0].paymentMethod).toBe('CASH')
-        // 2 × 12,50 más IVA: el total lo calcula la app igual que faclab-core
-        expect(sale.payments[0].amount).toBeGreaterThanOrEqual(25)
+        // 2 × 12,50 más IVA: sin monto escrito, el cliente entrega el total, que
+        // la app calcula igual que faclab-core
+        expect(sale.payments[0].amount).toBe(28.75)
 
         await receipt.getByRole('button', { name: 'Cerrar' }).first().click()
         await expect(panel.getByText('Carrito vacío')).toBeVisible()
+    })
+
+    test('en efectivo envía lo entregado y el recibo muestra el vuelto', async ({
+        page,
+        api,
+    }) => {
+        mockPOS(api)
+        await page.goto('/pos')
+        await product(page, 'Tablero MDF 15mm').click()
+        await product(page, 'Tablero MDF 15mm').click()
+        const panel = order(page)
+        await panel.getByText('Consumidor final').click()
+        await panel.getByRole('button', { name: 'Cobrar' }).click()
+
+        const payment = page.getByRole('dialog', { name: 'Cobrar' })
+        await payment.getByLabel('Monto recibido').fill('30')
+        await expect(payment).toContainText('Cambio')
+        await expect(payment).toContainText('1,25')
+        await payment.getByRole('button', { name: 'Completar venta' }).click()
+
+        const receipt = page.getByRole('dialog', { name: 'Venta completada' })
+        await expect(receipt).toContainText('Cambio: $1,25')
+        const [quickSale] = api.callsTo('POST', `${POS}/sales/quick`)
+        const sale = quickSale.body as {
+            payments: { paymentMethod: string; amount: number }[]
+        }
+        // Lo que entrega el cliente: faclab-core aplica 28,75 y guarda el vuelto
+        expect(sale.payments).toEqual([{ amount: 30, paymentMethod: 'CASH' }])
+    })
+
+    test('con tarjeta no deja cobrar más de lo que falta', async ({
+        page,
+        api,
+    }) => {
+        mockPOS(api)
+        await page.goto('/pos')
+        await product(page, 'Tablero MDF 15mm').click()
+        const panel = order(page)
+        await panel.getByText('Consumidor final').click()
+        await panel.getByRole('button', { name: 'Cobrar' }).click()
+
+        const payment = page.getByRole('dialog', { name: 'Cobrar' })
+        await payment.getByRole('button', { name: 'Tarjeta crédito' }).click()
+        await payment.getByLabel('Monto recibido').fill('20')
+
+        await expect(payment).toContainText(
+            'Solo el efectivo puede superar lo que falta por cobrar.'
+        )
+        await expect(
+            payment.getByRole('button', { name: 'Completar venta' })
+        ).toBeDisabled()
     })
 
     test('si la venta falla avisa y conserva la orden', async ({
