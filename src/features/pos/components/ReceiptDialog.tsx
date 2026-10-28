@@ -117,13 +117,14 @@ const ReceiptDialog = ({ isOpen, saleId, onClose }: ReceiptDialogProps) => {
                     </div>
 
                     <div className="border-t border-gray-200 dark:border-gray-700 pt-2 space-y-1">
+                        {/* What the customer handed over; the change below */}
                         {receipt.payments.map((p, i) => (
                             <div
                                 key={i}
                                 className="flex justify-between text-gray-500 dark:text-gray-400"
                             >
                                 <span>{p.method}</span>
-                                <span>{formatCurrency(p.amount)}</span>
+                                <span>{formatCurrency(p.amountTendered)}</span>
                             </div>
                         ))}
                     </div>

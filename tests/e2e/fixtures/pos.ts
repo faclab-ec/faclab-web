@@ -88,6 +88,35 @@ export const posProducts = (): POSProduct[] => [
 
 const SALE_ID = 901
 
+const cents = (value: number) => Math.round(value * 100) / 100
+
+/** Total de la venta como lo calcula faclab-core: los productos llevan IVA 15% */
+const totalOf = (input: QuickSaleInput) => {
+    const subtotal = cents(
+        input.items.reduce(
+            (sum, item) => sum + (item.unitPrice ?? 0) * item.quantity,
+            0
+        )
+    )
+    return cents(subtotal + cents(subtotal * 0.15))
+}
+
+/** Los pagos aplicados como en faclab-core: el resto del efectivo es vuelto */
+const appliedPayments = (input: QuickSaleInput, total: number) => {
+    let owed = total
+    return input.payments.map((payment) => {
+        const amount = Math.min(payment.amount, owed)
+        owed = cents(owed - amount)
+        return {
+            method: payment.paymentMethod,
+            amount,
+            amountTendered: payment.amount,
+            change: cents(payment.amount - amount),
+            reference: payment.reference ?? null,
+        }
+    })
+}
+
 const receiptFor = (input: QuickSaleInput, total: number): Receipt => ({
     saleId: SALE_ID,
     number: SALE_NUMBER,
@@ -123,13 +152,11 @@ const receiptFor = (input: QuickSaleInput, total: number): Receipt => ({
     discountValue: 0,
     tax: 0,
     total,
-    payments: input.payments.map((payment) => ({
-        method: payment.paymentMethod,
-        amount: payment.amount,
-        reference: payment.reference ?? null,
-    })),
+    payments: appliedPayments(input, total),
     totalPaid: total,
-    change: 0,
+    change: cents(
+        appliedPayments(input, total).reduce((sum, p) => sum + p.change, 0)
+    ),
 })
 
 /**
@@ -175,10 +202,7 @@ export const mockPOS = (
 
     api.post(`${POS}/sales/quick`, ({ body }) => {
         const input = body as QuickSaleInput
-        const total = input.payments.reduce(
-            (sum, payment) => sum + payment.amount,
-            0
-        )
+        const total = totalOf(input)
         receipt = receiptFor(input, total)
         const sale: POSSale = {
             id: SALE_ID,

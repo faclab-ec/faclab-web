@@ -30,6 +30,10 @@ export const POS_ERROR_MESSAGES: ErrorMessages = {
     BRANCH_REQUIRED: 'Elige la sucursal.',
     REFUND_OUTSIDE_BRANCH:
         'La venta es de otra sucursal: la devolución se hace en esa sucursal.',
+    INSUFFICIENT_PAYMENT: 'Los pagos no cubren el total de la venta.',
+    PAYMENT_EXCEEDS_BALANCE:
+        'Solo el pago en efectivo puede superar lo que falta por cobrar.',
+    SALE_NOT_PAYABLE: 'La venta está cancelada o facturada: no recibe pagos.',
     // Un intento anterior de esta operación sí se registró (la red falló
     // antes de la respuesta) y este trae otros datos
     IDEMPOTENCY_KEY_REUSED:

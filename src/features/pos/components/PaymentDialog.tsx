@@ -7,6 +7,7 @@ import { POS_ERROR_MESSAGES } from '../model/errors'
 import { usePOSStore, isPriceOverridden } from '../store/usePOSStore'
 import { useCartTotals } from '../hooks/useCartTotals'
 import { useQuickSale } from '../hooks/usePOS'
+import { applyPayments } from '../model/payments'
 import {
     POS_PAYMENT_METHOD_LABELS,
     POS_PAYMENT_METHODS,
@@ -35,17 +36,21 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
     const [reference, setReference] = useState('')
     const [payments, setPayments] = useState<QuickSalePaymentInput[]>([])
 
-    const currentAmount = amount === '' ? total : Number(amount)
-    const totalPayments =
-        payments.reduce((sum, p) => sum + p.amount, 0) + currentAmount
-    const change =
-        selectedMethod === 'CASH' && totalPayments > total
-            ? totalPayments - total
-            : 0
-    const canComplete = totalPayments >= total
+    // Dividing the payment, the input is for the next one and only the added
+    // payments are sent; otherwise the input is the only payment
+    const splitting = payments.length > 0
+    const added = applyPayments(total, payments)
+    const currentAmount = amount === '' ? added.owed : Number(amount)
+    const current = { amount: currentAmount, paymentMethod: selectedMethod }
+    const sent = applyPayments(total, splitting ? payments : [current])
+    const change = sent.change
+    const canComplete = sent.covered && !sent.exceeds
+    // Like faclab-core: only cash can exceed what is still owed
+    const currentExceeds = applyPayments(total, [...payments, current]).exceeds
+    const canAddPayment = currentAmount > 0 && !currentExceeds
 
     const handleAddPayment = () => {
-        if (currentAmount <= 0) return
+        if (!canAddPayment) return
         setPayments([
             ...payments,
             {
@@ -63,17 +68,17 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
     }
 
     const handleComplete = async () => {
-        const finalPayments: QuickSalePaymentInput[] =
-            payments.length > 0
-                ? payments
-                : [
-                      {
-                          amount:
-                              selectedMethod === 'CASH' ? total : currentAmount,
-                          paymentMethod: selectedMethod,
-                          reference: reference || undefined,
-                      },
-                  ]
+        // What the customer hands over: faclab-core applies what the sale owes
+        // and keeps the rest of a cash payment as the change
+        const finalPayments: QuickSalePaymentInput[] = splitting
+            ? payments
+            : [
+                  {
+                      amount: currentAmount,
+                      paymentMethod: selectedMethod,
+                      reference: reference || undefined,
+                  },
+              ]
 
         try {
             const sale = await quickSale.mutateAsync({
@@ -155,7 +160,7 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
                 step="any"
                 aria-label="Monto recibido"
                 value={amount}
-                placeholder={total.toFixed(2)}
+                placeholder={added.owed.toFixed(2)}
                 prefix="$"
                 onChange={(e) => setAmount(e.target.value)}
             />
@@ -170,7 +175,13 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
                 />
             )}
 
-            {selectedMethod === 'CASH' && change > 0 && (
+            {currentExceeds && currentAmount > 0 && (
+                <p className="text-sm text-red-500 mt-2">
+                    Solo el efectivo puede superar lo que falta por cobrar.
+                </p>
+            )}
+
+            {change > 0 && (
                 <div className="bg-emerald-50 dark:bg-emerald-500/10 p-3 rounded-lg mt-4 text-center">
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                         Cambio
@@ -207,7 +218,7 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
                     <Button
                         size="sm"
                         variant="twoTone"
-                        disabled={currentAmount <= 0}
+                        disabled={!canAddPayment}
                         onClick={handleAddPayment}
                     >
                         Agregar pago parcial

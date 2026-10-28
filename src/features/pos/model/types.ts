@@ -178,7 +178,12 @@ export interface POSSaleItem {
 export interface POSPayment {
     id: number
     saleId: number
+    /** Lo aplicado a la venta: lo entregado menos el vuelto */
     amount: number
+    /** Lo que entregó el cliente */
+    amountTendered: number
+    /** Solo en efectivo */
+    change: number
     paymentMethod: POSPaymentMethod
     paymentDate: string
     reference: string | null
@@ -211,6 +216,7 @@ export interface QuickSaleItemInput {
 }
 
 export interface QuickSalePaymentInput {
+    /** Lo que entrega el cliente: faclab-core aplica lo que falta y el resto en efectivo es vuelto */
     amount: number
     paymentMethod: POSPaymentMethod
     reference?: string
@@ -240,6 +246,7 @@ export interface PriceOverrideInput {
 }
 
 export interface PaymentInput {
+    /** Lo que entrega el cliente, como en QuickSalePaymentInput */
     amount: number
     paymentMethod: POSPaymentMethod
     reference?: string
@@ -370,10 +377,16 @@ export interface Receipt {
     total: number
     payments: {
         method: string
+        /** Lo aplicado a la venta */
         amount: number
+        /** Lo que entregó el cliente */
+        amountTendered: number
+        change: number
         reference: string | null
     }[]
+    /** Lo aplicado por los pagos: el total de una venta confirmada */
     totalPaid: number
+    /** El vuelto que guardó faclab-core al cobrar */
     change: number
 }
 
