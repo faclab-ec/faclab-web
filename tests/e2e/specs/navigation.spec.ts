@@ -107,6 +107,9 @@ test.describe('Permisos', () => {
         const nav = mainNav(page)
         await expect(nav.getByRole('link', { name: 'Productos' })).toBeVisible()
         await expect(nav.getByRole('link', { name: 'Usuarios' })).toHaveCount(0)
+        await expect(
+            nav.getByRole('link', { name: 'Bitácora de auditoría' })
+        ).toHaveCount(0)
         await expect(nav.getByRole('link', { name: 'Ajustes' })).toHaveCount(0)
         await expect(page.getByRole('button', { name: 'POS' })).toHaveCount(0)
     })

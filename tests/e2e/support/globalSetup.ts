@@ -29,6 +29,7 @@ const WARM_UP_PATHS = [
     '/suppliers',
     '/purchase-orders',
     '/settings/users',
+    '/settings/audit-log',
     '/settings/company-config',
     '/settings/certificates',
     '/settings/sequences',

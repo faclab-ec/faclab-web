@@ -31,6 +31,7 @@ const ROLE_PERMISSIONS: Record<number, string[]> = {
         'report:inventory:read',
         'report:pos:read',
         'user:manage',
+        'audit:read',
     ],
     2: [
         'product:read',

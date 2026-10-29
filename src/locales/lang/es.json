@@ -76,6 +76,7 @@
         "settings": {
             "title": "Configuración",
             "users": "Usuarios",
+            "auditLog": "Bitácora de auditoría",
             "branches": "Sucursales",
             "companyConfig": "Perfil fiscal",
             "certificates": "Certificados Digitales",
