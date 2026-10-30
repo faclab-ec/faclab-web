@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { optionalEmail } from '@shared/lib/schemas/common'
 import { RIMPE_REGIMES } from './types'
 
 export const companyConfigSchema = z.object({
@@ -32,6 +33,8 @@ export const companyConfigSchema = z.object({
         .string()
         .max(32, 'Máximo 32 caracteres')
         .optional(),
+    // Reply-To de los correos con sus facturas
+    email: optionalEmail,
 })
 
 export type CompanyConfigFormValues = z.infer<typeof companyConfigSchema>
