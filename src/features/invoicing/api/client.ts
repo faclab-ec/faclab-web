@@ -6,6 +6,7 @@ import type {
     CompanyConfig,
     CompanyConfigInput,
     Invoice,
+    InvoiceDelivery,
     InvoiceQueryParams,
     InvoicingStatus,
     SriSequence,
@@ -101,3 +102,40 @@ export const retryInvoices = () =>
     httpClient.post<DataResponse<{ queued: number }>>(
         `${HOST}/api/invoices/retry`
     )
+
+// The authorized invoice's documents, as files
+export const downloadRide = (id: string) =>
+    httpClient.getBlob(`${HOST}/api/invoices/${id}/ride`)
+
+export const downloadAuthorizedXml = (id: string) =>
+    httpClient.getBlob(`${HOST}/api/invoices/${id}/authorized-xml`)
+
+// Sends it again to the buyer's email of the sale (no other address); while
+// one is pending, faclab-invoicing answers that one
+export const resendInvoiceEmail = (id: string) =>
+    httpClient.post<DataResponse<InvoiceDelivery>>(
+        `${HOST}/api/invoices/${id}/email`
+    )
+
+// Its send log, latest first
+export const getInvoiceDeliveries = (id: string) =>
+    httpClient.get<DataResponse<InvoiceDelivery[]>>(
+        `${HOST}/api/invoices/${id}/emails`
+    )
+
+// The logo of the company's RIDEs
+export const getIssuerLogo = () =>
+    httpClient.getBlob(`${HOST}/api/company-config/logo`)
+
+export const uploadIssuerLogo = (file: File) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    return httpClient.put<DataResponse<CompanyConfig>>(
+        `${HOST}/api/company-config/logo`,
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' } }
+    )
+}
+
+export const deleteIssuerLogo = () =>
+    httpClient.delete(`${HOST}/api/company-config/logo`)

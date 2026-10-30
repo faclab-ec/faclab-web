@@ -37,6 +37,9 @@ const PENDING: Invoice = {
     accessCode: null,
     status: 'pending',
     signatureId: null,
+    authorizationNumber: null,
+    authorizedAt: null,
+    buyerEmail: null,
     statusHistory: [{ name: 'pending', statusDate: '2026-10-09T10:00:00Z' }],
     issue: {
         code: 'CONFIG_MISSING',

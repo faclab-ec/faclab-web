@@ -12,4 +12,14 @@ export const INVOICING_ERROR_MESSAGES: ErrorMessages = {
         'El certificado está en uso: selecciona otro en el Perfil fiscal antes de eliminarlo.',
     SEQUENCE_CANNOT_GO_BACK:
         'Ya se emitió una factura con ese número o uno mayor: el secuencial no retrocede.',
+    INVOICE_NOT_AUTHORIZED: 'La factura todavía no está autorizada por el SRI.',
+    EMAIL_DISABLED:
+        'El envío de facturas por correo está desactivado en este servidor.',
+    BUYER_EMAIL_MISSING:
+        'El comprador de la venta no tiene un correo válido: no hay a dónde enviarla.',
+    LOGO_INVALID:
+        'El logo debe ser una imagen PNG o JPEG de hasta 2000 × 2000 píxeles.',
+    LOGO_TOO_LARGE: 'El logo pesa más de 300 KB.',
+    STORAGE_UNAVAILABLE:
+        'El almacenamiento de documentos no responde: intenta de nuevo en unos minutos.',
 }

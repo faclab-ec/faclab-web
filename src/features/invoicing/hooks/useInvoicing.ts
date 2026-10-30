@@ -145,6 +145,67 @@ export function useUpdateCompanyConfig() {
     })
 }
 
+const deliveriesKey = (invoiceId: string) =>
+    [...INVOICES_KEY, invoiceId, 'deliveries'] as const
+
+/** The send log of an invoice; refreshed while a send is pending */
+export function useInvoiceDeliveries(invoiceId: string, enabled = true) {
+    return useQuery({
+        queryKey: deliveriesKey(invoiceId),
+        queryFn: async () => (await api.getInvoiceDeliveries(invoiceId)).data,
+        enabled,
+        refetchInterval: (query) =>
+            query.state.data?.some((delivery) => delivery.status === 'pending')
+                ? 5_000
+                : false,
+    })
+}
+
+export function useResendInvoiceEmail() {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: async (invoiceId: string) =>
+            (await api.resendInvoiceEmail(invoiceId)).data,
+        onSettled: (_data, _error, invoiceId) =>
+            queryClient.invalidateQueries({
+                queryKey: deliveriesKey(invoiceId),
+            }),
+    })
+}
+
+const LOGO_KEY = [...INVOICING_KEY, 'company-config', 'logo'] as const
+
+/** The logo of the company's RIDEs, when it has one */
+export function useIssuerLogo(enabled: boolean) {
+    return useQuery({
+        queryKey: LOGO_KEY,
+        queryFn: () => api.getIssuerLogo(),
+        enabled,
+        staleTime: Infinity,
+    })
+}
+
+export function useUploadIssuerLogo() {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: async (file: File) =>
+            (await api.uploadIssuerLogo(file)).data,
+        onSuccess: () =>
+            queryClient.invalidateQueries({ queryKey: INVOICING_KEY }),
+    })
+}
+
+export function useDeleteIssuerLogo() {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: () => api.deleteIssuerLogo(),
+        onSuccess: () => {
+            queryClient.removeQueries({ queryKey: LOGO_KEY })
+            return queryClient.invalidateQueries({ queryKey: INVOICING_KEY })
+        },
+    })
+}
+
 export function useSequences() {
     return useQuery({
         queryKey: [...INVOICING_KEY, 'sequences'],

@@ -32,7 +32,7 @@ export const invoicingNotReady = (): InvoicingStatus =>
     })
 
 // 49 dígitos: el número SRI (001-002-000000123) va en las posiciones 24-39
-const ACCESS_CODE = '1501202601179214100100120010020000001231234567811'
+export const ACCESS_CODE = '1501202601179214100100120010020000001231234567811'
 
 export const buildInvoice = (overrides: Partial<Invoice> = {}): Invoice => ({
     id: 'inv-1',
@@ -40,6 +40,9 @@ export const buildInvoice = (overrides: Partial<Invoice> = {}): Invoice => ({
     accessCode: ACCESS_CODE,
     status: 'authorized',
     signatureId: 'sig-1',
+    authorizationNumber: ACCESS_CODE,
+    authorizedAt: '2026-01-15T14:00:05.000Z',
+    buyerEmail: 'compras@andinas.ec',
     statusHistory: [
         { name: 'created', statusDate: '2026-01-15T14:00:00.000Z' },
         { name: 'authorized', statusDate: '2026-01-15T14:00:05.000Z' },
@@ -60,6 +63,8 @@ export const stuckInvoice = (): Invoice =>
         accessCode: null,
         status: 'pending',
         signatureId: null,
+        authorizationNumber: null,
+        authorizedAt: null,
         statusHistory: [],
         issue: {
             code: 'SRI_UNAVAILABLE',
