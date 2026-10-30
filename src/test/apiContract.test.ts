@@ -36,8 +36,11 @@ import {
 } from '@features/pos/model/types'
 import { PURCHASE_ORDER_STATUS_LABELS } from '@features/purchases/model/types'
 import {
+    DISCREPANCY_KIND_LABELS,
+    DISCREPANCY_STATUS_LABELS,
     PAYMENT_METHODS,
     PAYMENT_STATUS_LABELS,
+    SALE_INVOICE_STATUSES,
     SALE_STATUS_LABELS,
 } from '@features/sales/model/types'
 import { SERIAL_STATUS_LABELS } from '@features/serialNumbers/model/types'
@@ -88,6 +91,17 @@ const FRONT_ENUMS: [string, string, readonly string[]][] = [
     ['SerialStatus', 'SERIAL_STATUS_LABELS', keys(SERIAL_STATUS_LABELS)],
     ['AlertType', 'ALERT_TYPE_LABELS', keys(ALERT_TYPE_LABELS)],
     ['AuditAction', 'AUDIT_ACTION_LABELS', keys(AUDIT_ACTION_LABELS)],
+    ['InvoiceStatus', 'SALE_INVOICE_STATUSES', SALE_INVOICE_STATUSES],
+    [
+        'DiscrepancyKind',
+        'DISCREPANCY_KIND_LABELS',
+        keys(DISCREPANCY_KIND_LABELS),
+    ],
+    [
+        'DiscrepancyStatus',
+        'DISCREPANCY_STATUS_LABELS',
+        keys(DISCREPANCY_STATUS_LABELS),
+    ],
     ['TenantSource', 'AUDIT_SOURCE_LABELS', keys(AUDIT_SOURCE_LABELS)],
 ]
 

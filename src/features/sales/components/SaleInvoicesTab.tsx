@@ -17,7 +17,7 @@ import {
     type Invoice,
 } from '@features/invoicing'
 import { useRequestInvoice } from '../hooks/useSales'
-import type { SaleStatus } from '../model/types'
+import type { SaleInvoiceStatus, SaleStatus } from '../model/types'
 import InvoicePreviewDialog from './InvoicePreviewDialog'
 import EmptyState from '@/components/shared/EmptyState'
 
@@ -26,9 +26,14 @@ const { Tr, Th, Td, THead, TBody } = Table
 interface SaleInvoicesTabProps {
     saleId: number
     saleStatus: SaleStatus
+    invoiceStatus?: SaleInvoiceStatus | null
 }
 
-const SaleInvoicesTab = ({ saleId, saleStatus }: SaleInvoicesTabProps) => {
+const SaleInvoicesTab = ({
+    saleId,
+    saleStatus,
+    invoiceStatus,
+}: SaleInvoicesTabProps) => {
     const {
         data: invoices = [],
         isLoading,
@@ -41,8 +46,16 @@ const SaleInvoicesTab = ({ saleId, saleStatus }: SaleInvoicesTabProps) => {
 
     // A new invoice only makes sense when there is none, or all were rejected
     const hasActiveInvoice = invoices.some((i) => i.status !== 'rejected')
+    // Invoicing authorized it but the sale never heard: the resend repeats the
+    // result
+    const resultLost =
+        invoiceStatus === 'PENDING' &&
+        invoices.some((i) => i.status === 'authorized')
     const canRequest =
-        canWrite && saleStatus === 'CONFIRMED' && !hasActiveInvoice && !isError
+        canWrite &&
+        saleStatus === 'CONFIRMED' &&
+        (!hasActiveInvoice || resultLost) &&
+        !isError
 
     const handleRequest = async () => {
         try {
@@ -78,7 +91,9 @@ const SaleInvoicesTab = ({ saleId, saleStatus }: SaleInvoicesTabProps) => {
             {canRequest && (
                 <div className="flex flex-wrap items-center justify-between gap-4 mb-4 p-3 rounded-lg bg-amber-50 text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
                     <p className="text-sm">
-                        {invoices.length === 0
+                        {resultLost
+                            ? 'El SRI autorizó la factura, pero la venta no recibió el resultado. Reenvíala para que facturación lo informe de nuevo.'
+                            : invoices.length === 0
                             ? 'Esta venta no tiene factura. Si no aparece en unos minutos, reenvíala a facturación.'
                             : 'El SRI rechazó la factura. Corrige los datos (por ejemplo, los del cliente) y reenvía la venta para emitir una nueva.'}
                     </p>

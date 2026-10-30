@@ -5,7 +5,7 @@ import {
     keepPreviousData,
 } from '@tanstack/react-query'
 import * as api from '../api/client'
-import type { SaleQueryParams } from '../model/types'
+import type { DiscrepancyQueryParams, SaleQueryParams } from '../model/types'
 
 const SALES_KEY = ['sales'] as const
 
@@ -56,8 +56,32 @@ export const useRequestInvoice = () => {
             const body = await api.requestInvoice(saleId)
             return body.data
         },
-        // faclab-invoicing picks it up from Kafka in a moment
-        onSuccess: () =>
-            queryClient.invalidateQueries({ queryKey: ['invoicing'] }),
+        // faclab-invoicing picks it up from Kafka in a moment; the sale is
+        // pending again and leaves the discrepancies
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['invoicing'] })
+            queryClient.invalidateQueries({ queryKey: SALES_KEY })
+        },
+    })
+}
+
+export const useInvoiceDiscrepancies = (params?: DiscrepancyQueryParams) =>
+    useQuery({
+        queryKey: [...SALES_KEY, 'discrepancies', params],
+        queryFn: async () => {
+            const body = await api.getInvoiceDiscrepancies(params)
+            return { items: body.data, pagination: body.meta.pagination }
+        },
+        placeholderData: keepPreviousData,
+    })
+
+export const useReviewDiscrepancy = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: async ({ id, note }: { id: number; note?: string }) => {
+            const body = await api.reviewInvoiceDiscrepancy(id, note)
+            return body.data
+        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: SALES_KEY }),
     })
 }

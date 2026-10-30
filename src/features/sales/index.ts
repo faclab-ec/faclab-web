@@ -6,6 +6,10 @@ export type {
     PaymentStatus,
     PaymentMethod,
     SaleQueryParams,
+    SaleInvoiceStatus,
+    InvoiceDiscrepancy,
+    DiscrepancyKind,
+    DiscrepancyStatus,
 } from './model/types'
 
 export {
@@ -14,6 +18,10 @@ export {
     PAYMENT_STATUS_LABELS,
     PAYMENT_STATUS_TONES,
     PAYMENT_METHOD_LABELS,
+    SALE_INVOICE_STATUS_LABELS,
+    SALE_INVOICE_STATUS_TONES,
+    DISCREPANCY_KIND_LABELS,
+    DISCREPANCY_STATUS_LABELS,
 } from './model/types'
 
 export {
@@ -22,6 +30,8 @@ export {
     useSaleItems,
     useSalePayments,
     useRequestInvoice,
+    useInvoiceDiscrepancies,
+    useReviewDiscrepancy,
 } from './hooks/useSales'
 
 export { salesRoutes } from './routes'

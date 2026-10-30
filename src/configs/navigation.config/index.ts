@@ -209,6 +209,16 @@ const navigationConfig: NavigationTree[] = [
                 subMenu: [],
             },
             {
+                key: 'sales.attention',
+                path: '/sales/attention',
+                title: 'Attention',
+                translateKey: 'nav.sales.attention',
+                icon: 'salesAttention',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: ['sale:read'],
+                subMenu: [],
+            },
+            {
                 key: 'sales.invoices',
                 path: '/invoices',
                 title: 'Invoices',

@@ -60,6 +60,7 @@
             "title": "Ventas",
             "customers": "Clientes",
             "sales": "Ventas",
+            "attention": "Requieren atención",
             "invoices": "Facturas"
         },
         "posAdmin": {

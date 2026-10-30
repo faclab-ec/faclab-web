@@ -13,7 +13,10 @@ import {
     SALE_STATUS_TONES,
     PAYMENT_STATUS_LABELS,
     PAYMENT_STATUS_TONES,
+    SALE_INVOICE_STATUS_LABELS,
+    SALE_INVOICE_STATUS_TONES,
     type Sale,
+    type SaleInvoiceStatus,
     type SaleQueryParams,
     type SaleStatus,
 } from '../model/types'
@@ -29,6 +32,14 @@ const statusOptions = [
     })),
 ]
 
+const invoiceStatusOptions = [
+    { value: '', label: 'Todas' },
+    ...Object.entries(SALE_INVOICE_STATUS_LABELS).map(([value, label]) => ({
+        value,
+        label,
+    })),
+]
+
 const SalesListPage = () => {
     const navigate = useNavigate()
     // Links can open the list filtered, e.g. ?status=CONFIRMED (not invoiced yet)
@@ -37,6 +48,9 @@ const SalesListPage = () => {
     const [statusFilter, setStatusFilter] = useState<string>(
         searchParams.get('status') ?? ''
     )
+    const [invoiceFilter, setInvoiceFilter] = useState<string>(
+        searchParams.get('invoiceStatus') ?? ''
+    )
     const [customerFilter, setCustomerFilter] = useState<number | null>(null)
     const [pageIndex, setPageIndex] = useState(1)
     const [pageSize, setPageSize] = useState(10)
@@ -44,6 +58,9 @@ const SalesListPage = () => {
 
     const queryParams: SaleQueryParams = {
         status: statusFilter ? (statusFilter as SaleStatus) : undefined,
+        invoiceStatus: invoiceFilter
+            ? (invoiceFilter as SaleInvoiceStatus)
+            : undefined,
         customerId: customerFilter ?? undefined,
         limit: pageSize,
         offset,
@@ -60,6 +77,7 @@ const SalesListPage = () => {
 
     const handleReset = () => {
         setStatusFilter('')
+        setInvoiceFilter('')
         setCustomerFilter(null)
         setPageIndex(1)
     }
@@ -100,6 +118,21 @@ const SalesListPage = () => {
                 return (
                     <StatusBadge tone={PAYMENT_STATUS_TONES[ps]}>
                         {PAYMENT_STATUS_LABELS[ps]}
+                    </StatusBadge>
+                )
+            },
+        },
+        {
+            header: 'Factura',
+            accessorKey: 'invoiceStatus',
+            cell: (props) => {
+                const invoiceStatus = props.row.original.invoiceStatus
+                if (!invoiceStatus) return '-'
+                return (
+                    <StatusBadge
+                        tone={SALE_INVOICE_STATUS_TONES[invoiceStatus]}
+                    >
+                        {SALE_INVOICE_STATUS_LABELS[invoiceStatus]}
                     </StatusBadge>
                 )
             },
@@ -158,7 +191,7 @@ const SalesListPage = () => {
                 description="Consulta el historial de ventas"
             />
             <Card className="mb-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <LabeledField label="Estado">
                         <Select
                             placeholder="Filtrar por estado"
@@ -168,6 +201,19 @@ const SalesListPage = () => {
                             )}
                             onChange={(option) => {
                                 setStatusFilter(option?.value || '')
+                                setPageIndex(1)
+                            }}
+                        />
+                    </LabeledField>
+                    <LabeledField label="Factura">
+                        <Select
+                            placeholder="Filtrar por factura"
+                            options={invoiceStatusOptions}
+                            value={invoiceStatusOptions.find(
+                                (o) => o.value === invoiceFilter
+                            )}
+                            onChange={(option) => {
+                                setInvoiceFilter(option?.value || '')
                                 setPageIndex(1)
                             }}
                         />

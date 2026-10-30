@@ -15,6 +15,12 @@ export const salesRoutes: Routes = [
         authority: ['sale:read'],
     },
     {
+        key: 'sales.attention',
+        path: '/sales/attention',
+        component: lazy(() => import('./pages/SalesAttentionPage')),
+        authority: ['sale:read'],
+    },
+    {
         key: 'sales.saleDetail',
         path: '/sales/:id',
         component: lazy(() => import('./pages/SaleDetailPage')),

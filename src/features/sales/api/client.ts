@@ -1,7 +1,14 @@
 import appConfig from '@/configs/app.config'
 import { httpClient } from '@shared/lib/http/httpClient'
 import type { PaginatedResponse, DataResponse } from '@/@types/api'
-import type { Sale, SaleItem, SaleQueryParams, Payment } from '../model/types'
+import type {
+    DiscrepancyQueryParams,
+    InvoiceDiscrepancy,
+    Payment,
+    Sale,
+    SaleItem,
+    SaleQueryParams,
+} from '../model/types'
 
 const INVENTORY_HOST = appConfig.inventoryApiHost
 
@@ -20,6 +27,8 @@ export async function getSales(params?: SaleQueryParams) {
     if (params?.customerId !== undefined)
         queryParams.append('customerId', params.customerId.toString())
     if (params?.status) queryParams.append('status', params.status)
+    if (params?.invoiceStatus)
+        queryParams.append('invoiceStatus', params.invoiceStatus)
     if (params?.limit !== undefined)
         queryParams.append('limit', params.limit.toString())
     if (params?.offset !== undefined)
@@ -42,8 +51,32 @@ export const getSalePayments = (saleId: number) =>
     )
 
 // Sends a CONFIRMED sale to faclab-invoicing again (its invoice never arrived
-// or the SRI rejected it); ignored there while it has a non-rejected invoice
+// or the SRI rejected it); ignored there while it has an invoice in progress,
+// and an authorized one is reported to core again
 export const requestInvoice = (saleId: number) =>
     httpClient.post<DataResponse<Sale>>(
         `${INVENTORY_HOST}/sales/${saleId}/request-invoice`
+    )
+
+// Open ones unless `status` says otherwise, oldest first
+export async function getInvoiceDiscrepancies(params?: DiscrepancyQueryParams) {
+    const queryParams = new URLSearchParams()
+    if (params?.status) queryParams.append('status', params.status)
+    if (params?.kind) queryParams.append('kind', params.kind)
+    if (params?.limit !== undefined)
+        queryParams.append('limit', params.limit.toString())
+    if (params?.offset !== undefined)
+        queryParams.append('offset', params.offset.toString())
+
+    const qs = queryParams.toString()
+    const path = `${INVENTORY_HOST}/invoice-discrepancies`
+    return httpClient.get<PaginatedResponse<InvoiceDiscrepancy>>(
+        qs ? `${path}?${qs}` : path
+    )
+}
+
+export const reviewInvoiceDiscrepancy = (id: number, note?: string) =>
+    httpClient.post<DataResponse<InvoiceDiscrepancy>>(
+        `${INVENTORY_HOST}/invoice-discrepancies/${id}/review`,
+        { note: note || null }
     )
