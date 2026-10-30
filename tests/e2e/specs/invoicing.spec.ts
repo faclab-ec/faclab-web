@@ -1,16 +1,27 @@
 import { test, expect } from '../support/test'
 import { mockEmptyBackend } from '../fixtures/backend'
 import {
+    ACCESS_CODE,
     buildInvoice,
     invoicingNotReady,
     invoicingReady,
     stuckInvoice,
 } from '../fixtures/invoicing'
 import { dashboard } from '../fixtures/dashboard'
-import { ADMIN, INVOICING, apiError, ok } from '../support/mockApi'
+import {
+    ADMIN,
+    INVOICING,
+    apiError,
+    file,
+    noContent,
+    ok,
+} from '../support/mockApi'
 import { buildEmissionPoint, mockOrganization } from '../fixtures/organization'
 import { TENANT } from '../support/session'
-import type { CompanyConfig } from '@/features/invoicing/model/types'
+import type {
+    CompanyConfig,
+    InvoiceDelivery,
+} from '@/features/invoicing/model/types'
 import { ROLE } from '@/constants/roles.constant'
 
 test.describe('Estado de la facturación', () => {
@@ -157,6 +168,133 @@ test.describe('Facturas', () => {
         ).toBe('inv-2')
     })
 
+    test('descarga el RIDE y el XML de una factura autorizada', async ({
+        page,
+        api,
+        signIn,
+    }) => {
+        mockEmptyBackend(api)
+        await signIn()
+        api.get(`${INVOICING}/invoices`, () =>
+            ok([buildInvoice(), stuckInvoice()])
+        )
+        api.get(`${INVOICING}/invoices/:id/ride`, () =>
+            file('%PDF-1.3 RIDE', 'application/pdf')
+        )
+        api.get(`${INVOICING}/invoices/:id/authorized-xml`, () =>
+            file('<autorizacion/>', 'application/xml')
+        )
+
+        await page.goto('/invoices')
+        const authorized = page
+            .getByRole('row')
+            .filter({ hasText: '001-002-000000123' })
+
+        const [ride] = await Promise.all([
+            page.waitForEvent('download'),
+            authorized.getByRole('button', { name: 'Descargar RIDE' }).click(),
+        ])
+        expect(ride.suggestedFilename()).toBe(`${ACCESS_CODE}.pdf`)
+        const [xml] = await Promise.all([
+            page.waitForEvent('download'),
+            authorized.getByRole('button', { name: 'Descargar XML' }).click(),
+        ])
+        expect(xml.suggestedFilename()).toBe(`${ACCESS_CODE}.xml`)
+        // Una factura sin autorizar no tiene documentos
+        const stuck = page.getByRole('row').filter({ hasText: '#502' })
+        await expect(
+            stuck.getByRole('button', { name: 'Descargar RIDE' })
+        ).toHaveCount(0)
+    })
+
+    test('reenvía la factura al comprador y muestra el registro de envío', async ({
+        page,
+        api,
+        signIn,
+    }) => {
+        mockEmptyBackend(api)
+        await signIn()
+        const sent: InvoiceDelivery = {
+            id: 'd-1',
+            invoiceId: 'inv-1',
+            kind: 'authorization',
+            recipient: 'compras@andinas.ec',
+            status: 'sent',
+            attempts: 0,
+            nextAttemptAt: null,
+            lastError: null,
+            smtpResponse: '250 OK',
+            sentAt: '2026-01-15T14:00:10.000Z',
+            requestedBy: null,
+            createdAt: '2026-01-15T14:00:05.000Z',
+            updatedAt: '2026-01-15T14:00:10.000Z',
+        }
+        let deliveries = [sent]
+        api.get(`${INVOICING}/invoices`, () => ok([buildInvoice()]))
+        api.get(`${INVOICING}/invoices/:id/emails`, () => ok(deliveries))
+        api.post(`${INVOICING}/invoices/:id/email`, () => {
+            const resend: InvoiceDelivery = {
+                ...sent,
+                id: 'd-2',
+                kind: 'resend',
+                status: 'pending',
+                smtpResponse: null,
+                sentAt: null,
+                requestedBy: 'admin',
+            }
+            deliveries = [resend, sent]
+            return ok(resend, 202)
+        })
+
+        await page.goto('/invoices')
+        await page.getByRole('button', { name: 'Ver detalle' }).click()
+        const dialog = page.getByRole('dialog')
+        await expect(dialog.getByText('Enviado')).toBeVisible()
+        await expect(dialog.getByText('Al autorizarse')).toBeVisible()
+
+        await dialog
+            .getByRole('button', { name: 'Reenviar por correo' })
+            .click()
+        await expect(
+            page.getByText('Se enviarán el RIDE y el XML autorizado a')
+        ).toBeVisible()
+        await page
+            .getByRole('button', { name: 'Reenviar', exact: true })
+            .click()
+
+        await expect(page.getByText('Envío en curso')).toBeVisible()
+        await expect(dialog.getByText('Por enviar')).toBeVisible()
+        await expect(dialog.getByText('Reenvío, por admin')).toBeVisible()
+        expect(
+            api.callsTo('POST', `${INVOICING}/invoices/:id/email`)[0].params.id
+        ).toBe('inv-1')
+    })
+
+    test('explica por qué no se pudo reenviar', async ({
+        page,
+        api,
+        signIn,
+    }) => {
+        mockEmptyBackend(api)
+        await signIn()
+        api.get(`${INVOICING}/invoices`, () => ok([buildInvoice()]))
+        api.post(`${INVOICING}/invoices/:id/email`, () =>
+            apiError(409, 'EMAIL_DISABLED', 'Sending invoices by email is off')
+        )
+
+        await page.goto('/invoices')
+        await page.getByRole('button', { name: 'Reenviar por correo' }).click()
+        await page
+            .getByRole('button', { name: 'Reenviar', exact: true })
+            .click()
+
+        await expect(
+            page.getByText(
+                'El envío de facturas por correo está desactivado en este servidor.'
+            )
+        ).toBeVisible()
+    })
+
     test('avisa si el servicio de facturación no responde', async ({
         page,
         api,
@@ -202,6 +340,8 @@ test.describe('Perfil fiscal', () => {
                 ...(body as object),
                 specialTaxpayerResolution: null,
                 withholdingAgentResolution: null,
+                email: null,
+                hasLogo: false,
                 updatedAt: '2026-01-15T15:00:00.000Z',
             } as CompanyConfig
             return ok(saved)
@@ -238,6 +378,87 @@ test.describe('Perfil fiscal', () => {
             rimpeRegime: 'EMPRENDEDOR',
             signingCertId: null,
         })
+    })
+
+    test('guarda el correo de respuesta y sube y quita el logo del RIDE', async ({
+        page,
+        api,
+        signIn,
+    }) => {
+        mockEmptyBackend(api)
+        await signIn()
+        // Un PNG de 1 × 1
+        const png = Buffer.from(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+            'base64'
+        )
+        let config: CompanyConfig = {
+            taxId: TENANT.ruc,
+            name: TENANT.legalName,
+            tradeName: 'El Tornillo',
+            mainAddress: 'Av. Loja 1-23, Cuenca',
+            specialTaxpayerResolution: null,
+            withholdingAgentResolution: null,
+            rimpeRegime: null,
+            accountingRequired: false,
+            environment: 1,
+            emissionType: 1,
+            signingCertId: null,
+            email: null,
+            hasLogo: false,
+            updatedAt: '2026-01-15T15:00:00.000Z',
+        }
+        api.get(`${INVOICING}/company-config`, () => ok(config))
+        api.put(`${INVOICING}/company-config`, ({ body }) => {
+            config = { ...config, ...(body as Partial<CompanyConfig>) }
+            return ok(config)
+        })
+        api.put(`${INVOICING}/company-config/logo`, () => {
+            config = { ...config, hasLogo: true }
+            return ok(config)
+        })
+        api.get(`${INVOICING}/company-config/logo`, () =>
+            file(png, 'image/png')
+        )
+        api.delete(`${INVOICING}/company-config/logo`, () => {
+            config = { ...config, hasLogo: false }
+            return noContent()
+        })
+
+        await page.goto('/settings/company-config')
+        await page
+            .getByLabel('Correo de respuesta')
+            .fill('ventas@eltornillo.ec')
+        await page.getByRole('button', { name: 'Guardar perfil' }).click()
+        await expect(page.getByText('Perfil fiscal guardado')).toBeVisible()
+        expect(
+            api.callsTo('PUT', `${INVOICING}/company-config`)[0].body
+        ).toMatchObject({ email: 'ventas@eltornillo.ec' })
+
+        await expect(page.getByText('Sin logo', { exact: true })).toBeVisible()
+        await page.getByLabel('Archivo del logo').setInputFiles({
+            name: 'logo.png',
+            mimeType: 'image/png',
+            buffer: png,
+        })
+        await expect(page.getByText('Logo guardado')).toBeVisible()
+        await expect(
+            page.getByRole('img', { name: 'Logo del RIDE' })
+        ).toBeVisible()
+        expect(
+            api.callsTo('PUT', `${INVOICING}/company-config/logo`)
+        ).toHaveLength(1)
+
+        await page.getByRole('button', { name: 'Quitar' }).click()
+        await page
+            .getByRole('dialog')
+            .getByRole('button', { name: 'Quitar' })
+            .click()
+        await expect(page.getByText('Logo quitado')).toBeVisible()
+        await expect(page.getByText('Sin logo', { exact: true })).toBeVisible()
+        expect(
+            api.callsTo('DELETE', `${INVOICING}/company-config/logo`)
+        ).toHaveLength(1)
     })
 
     test('sin perfil no deja subir certificados', async ({

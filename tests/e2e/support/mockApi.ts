@@ -28,6 +28,8 @@ export interface MockResponse {
     body?: unknown
     /** P. ej. `set-cookie`, para simular la cookie del refresh token. */
     headers?: Record<string, string>
+    /** Un archivo (PDF, XML, imagen) tal cual, en vez del envelope JSON. */
+    file?: { content: Buffer | string; contentType: string }
 }
 
 export type Handler = (
@@ -61,6 +63,12 @@ export const ok = <T>(data: T, status = 200): MockResponse => ({
 export const created = <T>(data: T): MockResponse => ok(data, 201)
 
 export const noContent = (): MockResponse => ({ status: 204 })
+
+/** Un archivo, como las descargas de faclab-invoicing (RIDE, XML, logo). */
+export const file = (
+    content: Buffer | string,
+    contentType: string
+): MockResponse => ({ status: 200, file: { content, contentType } })
 
 /** Lista paginada a partir de `limit` y `offset` de la consulta. */
 export const paginated = <T>(
@@ -218,6 +226,15 @@ export class MockApi {
     }
 
     private async fulfill(route: Route, response: MockResponse): Promise<void> {
+        if (response.file) {
+            await route.fulfill({
+                status: response.status,
+                headers: response.headers,
+                contentType: response.file.contentType,
+                body: response.file.content,
+            })
+            return
+        }
         if (response.body === undefined) {
             await route.fulfill({
                 status: response.status,
