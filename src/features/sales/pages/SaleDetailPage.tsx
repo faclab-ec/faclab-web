@@ -10,6 +10,8 @@ import {
     SALE_STATUS_TONES,
     PAYMENT_STATUS_LABELS,
     PAYMENT_STATUS_TONES,
+    SALE_INVOICE_STATUS_LABELS,
+    SALE_INVOICE_STATUS_TONES,
 } from '../model/types'
 import SaleInfoCard from '../components/SaleInfoCard'
 import SaleItemsTab from '../components/SaleItemsTab'
@@ -68,6 +70,17 @@ const SaleDetailPage = () => {
                         >
                             {PAYMENT_STATUS_LABELS[sale.paymentStatus]}
                         </StatusBadge>
+                        {sale.invoiceStatus && (
+                            <StatusBadge
+                                tone={
+                                    SALE_INVOICE_STATUS_TONES[
+                                        sale.invoiceStatus
+                                    ]
+                                }
+                            >
+                                {SALE_INVOICE_STATUS_LABELS[sale.invoiceStatus]}
+                            </StatusBadge>
+                        )}
                     </>
                 }
                 onBack={() => navigate('/sales')}
@@ -96,6 +109,7 @@ const SaleDetailPage = () => {
                             <SaleInvoicesTab
                                 saleId={saleId}
                                 saleStatus={sale.status}
+                                invoiceStatus={sale.invoiceStatus}
                             />
                         </TabContent>
                     </div>

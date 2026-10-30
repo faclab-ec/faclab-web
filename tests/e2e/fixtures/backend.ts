@@ -23,6 +23,7 @@ const EMPTY_ADMIN_LISTS = [
     'transfers',
     'customers',
     'sales',
+    'invoice-discrepancies',
     'suppliers',
     'purchase-orders',
     'users',

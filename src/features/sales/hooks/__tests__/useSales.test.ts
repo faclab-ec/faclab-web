@@ -8,6 +8,8 @@ import {
     useSaleItems,
     useSalePayments,
     useRequestInvoice,
+    useInvoiceDiscrepancies,
+    useReviewDiscrepancy,
 } from '../useSales'
 import * as api from '../../api/client'
 
@@ -33,8 +35,35 @@ const SALE = {
     paymentStatus: 'PAID' as const,
     notes: null,
     createdBy: 'admin',
+    invoiceStatus: 'PENDING' as const,
+    invoiceId: null,
+    invoiceRejectionReason: null,
+    invoiceRequestedAt: '2025-01-15T10:00:00Z',
     createdAt: '2025-01-15T10:00:00Z',
     updatedAt: null,
+}
+
+const DISCREPANCY = {
+    id: 3,
+    kind: 'confirmed_without_result' as const,
+    status: 'open' as const,
+    saleId: 1,
+    invoiceId: null,
+    detectedAt: '2025-01-15T11:00:00Z',
+    resolvedAt: null,
+    reviewedAt: null,
+    reviewedByName: null,
+    reviewNote: null,
+    sale: {
+        id: 1,
+        number: 'V-001-000001',
+        status: 'CONFIRMED' as const,
+        total: 100,
+        branchId: 1,
+        saleDate: '2025-01-15T10:00:00Z',
+        invoiceStatus: 'PENDING' as const,
+        invoiceRequestedAt: '2025-01-15T10:00:00Z',
+    },
 }
 
 const SALE_ITEM = {
@@ -170,5 +199,47 @@ describe('useRequestInvoice', () => {
 
         expect(api.requestInvoice).toHaveBeenCalledWith(1)
         expect(result.current.data?.status).toBe('CONFIRMED')
+    })
+})
+
+describe('useInvoiceDiscrepancies', () => {
+    it('returns the discrepancies and their pagination', async () => {
+        vi.mocked(api.getInvoiceDiscrepancies).mockResolvedValue({
+            data: [DISCREPANCY],
+            meta: { ...META, pagination: PAGINATION },
+        })
+        const params = { status: 'open' as const, limit: 20, offset: 0 }
+
+        const { result } = renderHook(() => useInvoiceDiscrepancies(params), {
+            wrapper,
+        })
+
+        await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+        expect(api.getInvoiceDiscrepancies).toHaveBeenCalledWith(params)
+        expect(result.current.data?.items[0].sale?.number).toBe('V-001-000001')
+        expect(result.current.data?.pagination.total).toBe(1)
+    })
+})
+
+describe('useReviewDiscrepancy', () => {
+    it('marks a discrepancy reviewed with its note', async () => {
+        vi.mocked(api.reviewInvoiceDiscrepancy).mockResolvedValue({
+            data: { ...DISCREPANCY, status: 'reviewed' },
+            meta: META,
+        })
+
+        const { result } = renderHook(() => useReviewDiscrepancy(), {
+            wrapper,
+        })
+        result.current.mutate({ id: 3, note: 'El SRI está caído' })
+
+        await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+        expect(api.reviewInvoiceDiscrepancy).toHaveBeenCalledWith(
+            3,
+            'El SRI está caído'
+        )
+        expect(result.current.data?.status).toBe('reviewed')
     })
 })
