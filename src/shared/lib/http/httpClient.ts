@@ -81,6 +81,21 @@ const shouldRetryIdempotent = (
 const wait = (ms: number) =>
     new Promise<void>((resolve) => setTimeout(resolve, ms))
 
+/**
+ * Una descarga (`responseType: 'blob'`) recibe también el error como Blob: se
+ * lee de vuelta como JSON para que su `code` decida igual que en el resto
+ * (renovar la sesión, el mensaje del error).
+ */
+const readBlobError = async (error: AxiosError): Promise<void> => {
+    const data = error.response?.data
+    if (typeof Blob === 'undefined' || !(data instanceof Blob)) return
+    try {
+        error.response!.data = JSON.parse(await data.text())
+    } catch {
+        // No era JSON: queda como llegó
+    }
+}
+
 const instance = axios.create({
     timeout: 60000,
     baseURL: appConfig.apiPrefix,
@@ -108,6 +123,7 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
     (response) => response,
     async (error: AxiosError) => {
+        await readBlobError(error)
         const apiError = fromAxiosError(error)
         const originalConfig = error.config as RetriableConfig | undefined
 
@@ -224,5 +240,17 @@ export const httpClient = {
         config?: Omit<AxiosRequestConfig, 'url' | 'method'>
     ): Promise<T> {
         return request<T>({ ...config, url, method: 'DELETE' })
+    },
+    /** Un archivo (PDF, XML, imagen): sus errores llegan como `ApiError` */
+    getBlob(
+        url: string,
+        config?: Omit<AxiosRequestConfig, 'url' | 'method' | 'responseType'>
+    ): Promise<Blob> {
+        return request<Blob>({
+            ...config,
+            url,
+            method: 'GET',
+            responseType: 'blob',
+        })
     },
 }
