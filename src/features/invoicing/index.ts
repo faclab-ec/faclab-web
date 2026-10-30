@@ -67,3 +67,5 @@ export { default as InvoicingStatusChip } from './components/InvoicingStatusChip
 export { default as InvoiceReceiptNote } from './components/InvoiceReceiptNote'
 export { default as InvoicingSummaryCard } from './components/InvoicingSummaryCard'
 export { default as InvoiceReason } from './components/InvoiceReason'
+export { default as InvoiceDocumentActions } from './components/InvoiceDocumentActions'
+export { default as InvoiceDeliveryLog } from './components/InvoiceDeliveryLog'
