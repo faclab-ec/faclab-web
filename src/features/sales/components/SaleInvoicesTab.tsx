@@ -9,6 +9,7 @@ import { useCan } from '@/stores'
 import {
     INVOICE_STATUS_TONES,
     INVOICE_STATUS_LABELS,
+    InvoiceDocumentActions,
     InvoiceReason,
     invoiceNumber,
     isFinalInvoice,
@@ -149,6 +150,7 @@ const SaleInvoicesTab = ({
                                 </Td>
                                 <Td>{formatDatetime(invoice.updatedAt)}</Td>
                                 <Td>
+                                    <InvoiceDocumentActions invoice={invoice} />
                                     {canWrite && !isFinalInvoice(invoice) && (
                                         <Button
                                             size="sm"

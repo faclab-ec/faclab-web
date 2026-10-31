@@ -59,6 +59,25 @@ const CompanyInfoSection = ({
                     {...register('tradeName')}
                 />
             </FormItem>
+            <FormItem
+                label="Correo de respuesta"
+                extra={
+                    <span className="text-xs text-gray-500">
+                        Si un comprador responde el correo de su factura, le
+                        escribe aquí
+                    </span>
+                }
+                invalid={!!errors.email}
+                errorMessage={errors.email?.message}
+            >
+                <Input
+                    type="email"
+                    placeholder="ventas@empresa.ec"
+                    disabled={isSubmitting}
+                    invalid={!!errors.email}
+                    {...register('email')}
+                />
+            </FormItem>
         </div>
     </section>
 )

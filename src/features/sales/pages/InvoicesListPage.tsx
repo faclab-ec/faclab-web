@@ -15,6 +15,7 @@ import {
     invoiceIssuedAt,
     invoiceNumber,
     isFinalInvoice,
+    InvoiceDocumentActions,
     InvoiceReason,
     useInvoiceRetryAction,
     useInvoices,
@@ -147,6 +148,7 @@ const InvoicesListPage = () => {
                             icon={<HiOutlineEye />}
                             onClick={() => setSelected(invoice)}
                         />
+                        <InvoiceDocumentActions invoice={invoice} />
                         {canRetry && !isFinalInvoice(invoice) && (
                             <Button
                                 size="sm"

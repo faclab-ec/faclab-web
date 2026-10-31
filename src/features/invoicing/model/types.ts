@@ -39,6 +39,10 @@ export interface CompanyConfig {
     environment: 1 | 2
     emissionType: 1
     signingCertId: string | null
+    /** Reply-To de los correos con sus facturas; null sin él */
+    email: string | null
+    /** Si sus RIDE llevan logo (se sube aparte) */
+    hasLogo: boolean
     updatedAt: string
 }
 
@@ -55,6 +59,8 @@ export interface CompanyConfigInput {
     environment: 1 | 2
     emissionType: 1
     signingCertId: string | null
+    // Vacío se omite: así se borra
+    email?: string
 }
 
 /** Contador de facturas de un establecimiento y punto de emisión */
@@ -186,6 +192,11 @@ export interface Invoice {
     accessCode: string | null
     status: InvoiceStatus
     signatureId: string | null
+    // Del SRI, una vez autorizada; null en las autorizadas antes de guardarlo
+    authorizationNumber: string | null
+    authorizedAt: string | null
+    // A dónde va (y se reenvía) la factura: el correo del comprador de la venta
+    buyerEmail: string | null
     statusHistory: InvoiceStatusHistoryEntry[]
     issue: InvoiceIssue | null
     attempts: number
@@ -205,6 +216,66 @@ export interface InvoiceQueryParams {
 
 export const isFinalInvoice = (invoice: Invoice) =>
     invoice.status === 'authorized' || invoice.status === 'rejected'
+
+/** Autorizada con su XML guardado: tiene XML y RIDE para descargar y enviar */
+export const hasDocuments = (invoice: Invoice) =>
+    invoice.status === 'authorized' && invoice.authorizationNumber !== null
+
+// --- Envíos de la factura al comprador (faclab-invoicing) ---
+
+export const DELIVERY_STATUSES = [
+    'pending',
+    'sent',
+    'bounced',
+    'failed',
+    'no_recipient',
+    'disabled',
+] as const
+export type DeliveryStatus = (typeof DELIVERY_STATUSES)[number]
+
+export const DELIVERY_STATUS_LABELS: Record<DeliveryStatus, string> = {
+    pending: 'Por enviar',
+    sent: 'Enviado',
+    bounced: 'Rebotado',
+    failed: 'Falló',
+    no_recipient: 'Sin correo',
+    disabled: 'Envío desactivado',
+}
+
+export const DELIVERY_STATUS_TONES: Record<DeliveryStatus, StatusTone> = {
+    pending: 'warning',
+    sent: 'success',
+    bounced: 'danger',
+    failed: 'danger',
+    no_recipient: 'neutral',
+    disabled: 'neutral',
+}
+
+export const DELIVERY_KINDS = ['authorization', 'resend'] as const
+export type DeliveryKind = (typeof DELIVERY_KINDS)[number]
+
+export const DELIVERY_KIND_LABELS: Record<DeliveryKind, string> = {
+    authorization: 'Al autorizarse',
+    resend: 'Reenvío',
+}
+
+/** Un envío de la factura a su comprador: el registro de envío */
+export interface InvoiceDelivery {
+    id: string
+    invoiceId: string
+    kind: DeliveryKind
+    recipient: string | null
+    status: DeliveryStatus
+    attempts: number
+    nextAttemptAt: string | null
+    // En inglés, del servidor de correo
+    lastError: string | null
+    smtpResponse: string | null
+    sentAt: string | null
+    requestedBy: string | null
+    createdAt: string
+    updatedAt: string
+}
 
 export interface ReadinessIssue {
     code: ReadinessErrorCode | ReadinessWarningCode

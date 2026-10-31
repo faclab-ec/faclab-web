@@ -4,7 +4,10 @@ import { formatDatetime } from '@shared/lib/format'
 import {
     INVOICE_STATUS_LABELS,
     INVOICE_STATUS_TONES,
+    InvoiceDeliveryLog,
+    InvoiceDocumentActions,
     InvoiceReason,
+    hasDocuments,
     type Invoice,
     type InvoiceStatus,
 } from '@features/invoicing'
@@ -65,6 +68,35 @@ const InvoicePreviewDialog = ({
                         </div>
                     )}
                 </div>
+
+                {hasDocuments(invoice) && (
+                    <div className="mb-6">
+                        <div className="grid grid-cols-2 gap-3 mb-4">
+                            <div>
+                                <p className="text-sm text-gray-500">
+                                    Número de Autorización
+                                </p>
+                                <p className="font-mono text-xs break-all mt-1">
+                                    {invoice.authorizationNumber}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-500">
+                                    Autorizada
+                                </p>
+                                <p className="text-sm mt-1">
+                                    {invoice.authorizedAt &&
+                                        formatDatetime(invoice.authorizedAt)}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center justify-between gap-3 mb-3">
+                            <h6>Documentos y envíos</h6>
+                            <InvoiceDocumentActions invoice={invoice} />
+                        </div>
+                        <InvoiceDeliveryLog invoiceId={invoice.id} />
+                    </div>
+                )}
 
                 <h6 className="mb-3">Historial de Estados</h6>
                 {invoice.statusHistory.length === 0 ? (

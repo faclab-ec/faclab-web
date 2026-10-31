@@ -24,6 +24,7 @@ import CompanyInfoSection from '../components/CompanyInfoSection'
 import AddressSection from '../components/AddressSection'
 import SriSection from '../components/SriSection'
 import CertificateSection from '../components/CertificateSection'
+import IssuerLogoSection from '../components/IssuerLogoSection'
 import PageHeader from '@/components/shared/PageHeader'
 
 /** Sin perfil todavía: se parte de los datos de la empresa de la sesión */
@@ -41,6 +42,7 @@ const valuesFromTenant = (
     environment: 1,
     emissionType: 1,
     signingCertId: null,
+    email: '',
 })
 
 const CompanyConfigPage = () => {
@@ -80,6 +82,7 @@ const CompanyConfigPage = () => {
                 environment: config.environment,
                 emissionType: 1,
                 signingCertId: config.signingCertId ?? null,
+                email: config.email ?? '',
             })
         }
     }, [config, tenant, reset])
@@ -100,6 +103,7 @@ const CompanyConfigPage = () => {
                     values.specialTaxpayerResolution || undefined,
                 withholdingAgentResolution:
                     values.withholdingAgentResolution || undefined,
+                email: values.email?.trim() || undefined,
             }
             await updateConfig.mutateAsync(payload)
             const waiting = status?.pendingInvoices ?? 0
@@ -193,6 +197,12 @@ const CompanyConfigPage = () => {
                     </div>
                 </form>
             </Card>
+            {/* Se sube aparte del formulario, y solo con el perfil guardado */}
+            {config && (
+                <Card className="mt-4">
+                    <IssuerLogoSection hasLogo={config.hasLogo} />
+                </Card>
+            )}
         </>
     )
 }

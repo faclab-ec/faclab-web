@@ -543,3 +543,62 @@ describe('httpClient: operaciones idempotentes', () => {
         expect('error' in outcome).toBe(true)
     })
 })
+
+describe('httpClient: descargas', () => {
+    const blobOf = (value: unknown) =>
+        new Blob([JSON.stringify(value)], { type: 'application/json' })
+
+    beforeEach(() => {
+        useAuthStore.getState().setTokens({
+            accessToken: 'old-at',
+            expiresIn: 900,
+        })
+    })
+
+    afterEach(() => {
+        useAuthStore.getState().clear()
+        vi.restoreAllMocks()
+    })
+
+    it('pide el archivo como Blob y lo entrega tal cual', async () => {
+        const pdf = new Blob(['%PDF-1.3'], { type: 'application/pdf' })
+        const { adapter } = makeAdapter({ status: 200, data: pdf })
+
+        const body = await httpClient.getBlob('/ride', { adapter })
+
+        expect(adapter.mock.calls[0][0].responseType).toBe('blob')
+        expect(body).toBe(pdf)
+    })
+
+    it('un TOKEN_EXPIRED en Blob renueva la sesión y reintenta la descarga', async () => {
+        vi.spyOn(axios, 'post').mockResolvedValue({ data: { data: newTokens } })
+        const pdf = new Blob(['%PDF-1.3'])
+        const { adapter, authHeaders } = makeAdapter(
+            { status: 401, data: blobOf(errorBody('TOKEN_EXPIRED')) },
+            { status: 200, data: pdf }
+        )
+
+        const body = await httpClient.getBlob('/ride', { adapter })
+
+        expect(body).toBe(pdf)
+        expect(authHeaders).toEqual(['Bearer old-at', 'Bearer new-at'])
+    })
+
+    it('un error en Blob llega como ApiError con su código y mensaje', async () => {
+        const { adapter } = makeAdapter({
+            status: 404,
+            data: blobOf(errorBody('NOT_FOUND', 'RIDE not found')),
+        })
+
+        const error = await httpClient
+            .getBlob('/ride', { adapter })
+            .catch((e: unknown) => e)
+
+        expect(isApiError(error)).toBe(true)
+        expect(error).toMatchObject({
+            code: 'NOT_FOUND',
+            message: 'RIDE not found',
+            status: 404,
+        })
+    })
+})
