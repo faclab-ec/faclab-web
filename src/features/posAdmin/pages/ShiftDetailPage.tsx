@@ -17,6 +17,7 @@ import {
     useZReport,
 } from '@features/pos'
 import {
+    ClosingCountTable,
     PaymentsByMethodTable,
     ProductsSoldTable,
 } from '../components/ReportBlocks'
@@ -102,6 +103,17 @@ const ShiftDetailPage = () => {
                                     : '-'
                             }
                         />
+                        <Row
+                            label="Cierre Z"
+                            value={
+                                zReport?.closing?.number ??
+                                shift.closingNumber ??
+                                '-'
+                            }
+                        />
+                        {shift.closedBy && (
+                            <Row label="Cerrado por" value={shift.closedBy} />
+                        )}
                         {shift.notes && (
                             <Row label="Notas" value={shift.notes} />
                         )}
@@ -163,9 +175,19 @@ const ShiftDetailPage = () => {
 
             {report ? (
                 <>
-                    <h5>
-                        {isClosed ? 'Reporte Z' : 'Reporte X (turno en curso)'}
-                    </h5>
+                    <div>
+                        <h5>
+                            {isClosed
+                                ? 'Reporte Z'
+                                : 'Reporte X (turno en curso)'}
+                        </h5>
+                        {zReport?.closing && (
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                Guardado al cerrar el turno: no cambia aunque
+                                después se anulen ventas.
+                            </p>
+                        )}
+                    </div>
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                         <StatCard
                             label="Ventas"
@@ -198,6 +220,9 @@ const ShiftDetailPage = () => {
                             />
                         )}
                     </div>
+                    {zReport?.closing && (
+                        <ClosingCountTable closing={zReport.closing} />
+                    )}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <PaymentsByMethodTable rows={report.paymentsByMethod} />
                         <ProductsSoldTable

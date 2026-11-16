@@ -26,6 +26,16 @@ export const POS_ERROR_MESSAGES: ErrorMessages = {
     // Ventas a crédito, abonos y devoluciones de ventas a crédito (S5.5)
     ...RECEIVABLE_ERROR_MESSAGES,
     SHIFT_ALREADY_OPEN: 'Ya hay un turno abierto en esta caja.',
+    // Cierre de caja con arqueo (S5.9)
+    NO_OPEN_SHIFT:
+        'El turno de esta operación ya está cerrado: abre un turno nuevo y repítela.',
+    SHIFT_ALREADY_CLOSED: 'El turno ya está cerrado.',
+    CLOSING_COUNT_MISSING:
+        'Cuenta el efectivo y cada medio de pago que tuvo movimiento en el turno.',
+    CLOSING_COUNT_INVALID:
+        'El crédito no se cuenta al cerrar, y cada medio se cuenta una sola vez.',
+    CLOSING_JUSTIFICATION_REQUIRED:
+        'Una diferencia supera el umbral: escribe su justificación.',
     POS_TERMINAL_INACTIVE: 'La caja está desactivada. Elige otra caja.',
     POS_TERMINAL_OUTSIDE_BRANCH: 'La caja no pertenece a la sucursal elegida.',
     BRANCH_INACTIVE: 'La sucursal está desactivada.',

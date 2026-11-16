@@ -8,6 +8,7 @@ import {
     openShift,
     posTerminal,
 } from '../fixtures/pos'
+import { mockEmptyBackend } from '../fixtures/backend'
 import { MAIN_BRANCH, SECOND_BRANCH } from '../support/session'
 import { POS, apiError, ok } from '../support/mockApi'
 import { ROLE } from '@/constants/roles.constant'
@@ -331,6 +332,94 @@ test.describe('Punto de venta', () => {
             paymentMethod: 'CASH',
             reference: null,
             notes: null,
+        })
+    })
+
+    test('cierra el turno con arqueo y justifica la diferencia (S5.9)', async ({
+        page,
+        api,
+    }) => {
+        mockEmptyBackend(api)
+        mockPOS(api)
+        // Vendió 30 en efectivo y 40 con tarjeta sobre 50 de apertura
+        api.get(`${POS}/shifts/:id/cash-summary`, () =>
+            ok({
+                shiftId: 42,
+                openingBalance: 50,
+                cashSales: 30,
+                cashRefunds: 0,
+                customerPayments: 0,
+                cashIn: 0,
+                cashOut: 0,
+                expectedBalance: 80,
+                byMethod: [
+                    {
+                        paymentMethod: 'CASH',
+                        paymentsTotal: 30,
+                        customerPaymentsTotal: 0,
+                        refundsTotal: 0,
+                        expected: 80,
+                    },
+                    {
+                        paymentMethod: 'CREDIT_CARD',
+                        paymentsTotal: 40,
+                        customerPaymentsTotal: 0,
+                        refundsTotal: 0,
+                        expected: 40,
+                    },
+                ],
+                justificationThreshold: 1,
+            })
+        )
+        api.post(`${POS}/shifts/:id/close`, () =>
+            ok(
+                openShift({
+                    status: 'CLOSED',
+                    closedAt: '2026-01-15T22:00:00.000Z',
+                    closedBy: 'Ana',
+                    closingBalance: 75,
+                    expectedBalance: 80,
+                    discrepancy: -5,
+                    closingNumber: 'Z-001-CAJA-01-000001',
+                })
+            )
+        )
+        await page.goto('/pos')
+
+        await page
+            .getByRole('button', { name: 'Cerrar turno', exact: true })
+            .click()
+        const dialog = page.getByRole('dialog', { name: 'Cerrar turno' })
+        const close = dialog.getByRole('button', {
+            name: 'Cerrar Turno',
+            exact: true,
+        })
+        // Hasta contar cada medio no se puede cerrar
+        await expect(close).toBeDisabled()
+        await dialog.getByLabel('Efectivo contado').fill('75')
+        await dialog.getByLabel('Tarjeta crédito contado').fill('40')
+        await expect(dialog.getByTestId('count-CASH')).toContainText('-5')
+        // Faltan 5 y el umbral es 1: hay que justificarlo
+        const justification = dialog.getByLabel('Justificación de efectivo')
+        await expect(justification).toBeVisible()
+        await expect(close).toBeDisabled()
+        await expect(
+            dialog.getByLabel('Justificación de tarjeta crédito')
+        ).toHaveCount(0)
+        await justification.fill('Billete falso retirado')
+        await close.click()
+
+        await expect(page).toHaveURL(/\/home$/)
+        const [closing] = api.callsTo('POST', `${POS}/shifts/42/close`)
+        expect(closing.body).toEqual({
+            counts: [
+                {
+                    paymentMethod: 'CASH',
+                    counted: 75,
+                    justification: 'Billete falso retirado',
+                },
+                { paymentMethod: 'CREDIT_CARD', counted: 40 },
+            ],
         })
     })
 

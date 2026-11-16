@@ -54,6 +54,7 @@ export const openShift = (overrides: Partial<Shift> = {}): Shift => ({
     discrepancy: null,
     status: 'OPEN',
     notes: null,
+    closingNumber: null,
     ...overrides,
 })
 
@@ -338,6 +339,17 @@ export const mockPOS = (
             cashIn: 0,
             cashOut: 0,
             expectedBalance: shift?.openingBalance ?? 0,
+            // Al cerrar se cuenta el efectivo (S5.9)
+            byMethod: [
+                {
+                    paymentMethod: 'CASH',
+                    paymentsTotal: 0,
+                    customerPaymentsTotal: 0,
+                    refundsTotal: 0,
+                    expected: shift?.openingBalance ?? 0,
+                },
+            ],
+            justificationThreshold: 1,
         })
     )
     api.get(`${ADMIN}/categories`, ({ query }) =>

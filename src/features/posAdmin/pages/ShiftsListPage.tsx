@@ -52,6 +52,15 @@ const ShiftsListPage = () => {
                 <span className="font-medium">#{props.row.original.id}</span>
             ),
         },
+        {
+            header: 'Cierre Z',
+            accessorKey: 'closingNumber',
+            cell: (props) => (
+                <span className="font-mono text-sm">
+                    {props.row.original.closingNumber ?? '-'}
+                </span>
+            ),
+        },
         { header: 'Cajero', accessorKey: 'cashierName' },
         {
             header: 'Apertura',
@@ -124,7 +133,7 @@ const ShiftsListPage = () => {
         <>
             <PageHeader
                 title="Turnos"
-                description="Historial de turnos de caja, del más reciente al más antiguo"
+                description="Historial de turnos de caja y sus cierres Z, del más reciente al más antiguo"
             />
             <Card className="mb-4">
                 <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">

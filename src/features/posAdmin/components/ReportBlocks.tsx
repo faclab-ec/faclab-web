@@ -4,6 +4,7 @@ import { formatCurrency } from '@shared/lib/format'
 import { paymentMethodLabel } from '../lib/labels'
 import EmptyState from '@/components/shared/EmptyState'
 import { formatQuantity } from '@shared/lib/quantity'
+import type { ShiftClosing } from '@features/pos'
 
 const { Tr, Th, Td, THead, TBody } = Table
 
@@ -77,5 +78,47 @@ export const ProductsSoldTable = ({
                 </TBody>
             </Table>
         )}
+    </Card>
+)
+
+const differenceClass = (difference: number) =>
+    difference === 0
+        ? 'text-emerald-600 dark:text-emerald-400'
+        : 'text-red-600 dark:text-red-400'
+
+/** El arqueo guardado en el cierre Z (S5.9), medio por medio */
+export const ClosingCountTable = ({ closing }: { closing: ShiftClosing }) => (
+    <Card>
+        <div className="flex flex-wrap items-baseline justify-between gap-2 mb-4">
+            <h5>Arqueo del cierre {closing.number}</h5>
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+                Justificación sobre{' '}
+                {formatCurrency(closing.justificationThreshold)}
+            </span>
+        </div>
+        <Table>
+            <THead>
+                <Tr>
+                    <Th>Forma de pago</Th>
+                    <Th>Esperado</Th>
+                    <Th>Contado</Th>
+                    <Th>Diferencia</Th>
+                    <Th>Justificación</Th>
+                </Tr>
+            </THead>
+            <TBody>
+                {closing.counts.map((count) => (
+                    <Tr key={count.paymentMethod}>
+                        <Td>{paymentMethodLabel(count.paymentMethod)}</Td>
+                        <Td>{formatCurrency(count.expected)}</Td>
+                        <Td>{formatCurrency(count.counted)}</Td>
+                        <Td className={differenceClass(count.difference)}>
+                            {formatCurrency(count.difference)}
+                        </Td>
+                        <Td>{count.justification ?? '-'}</Td>
+                    </Tr>
+                ))}
+            </TBody>
+        </Table>
     </Card>
 )

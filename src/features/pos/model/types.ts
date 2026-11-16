@@ -126,6 +126,8 @@ export interface Shift {
     discrepancy: number | null
     status: ShiftStatus
     notes: string | null
+    /** Número de su cierre Z (S5.9); null abierto o cerrado antes de S5.9 */
+    closingNumber: string | null
 }
 
 export interface ShiftListParams {
@@ -141,8 +143,20 @@ export interface OpenShiftInput {
     notes?: string
 }
 
+/** Medios que se cuentan al cerrar: todos menos CREDIT, que no entra en caja */
+export type CountablePaymentMethod = Exclude<POSPaymentMethod, 'CREDIT'>
+
+/** Lo que el cajero contó de un medio de pago al cerrar (S5.9) */
+export interface ShiftCountInput {
+    paymentMethod: CountablePaymentMethod
+    counted: number
+    /** Obligatoria si la diferencia supera el umbral */
+    justification?: string
+}
+
 export interface CloseShiftInput {
-    closingBalance: number
+    /** El efectivo y cada medio que el turno movió, menos CREDIT */
+    counts: ShiftCountInput[]
     notes?: string
 }
 
@@ -415,8 +429,8 @@ export interface CashMovementInput {
     reason?: string
 }
 
-export interface CashSummary {
-    shiftId: number
+/** El efectivo de un turno */
+export interface CashTotals {
     openingBalance: number
     cashSales: number
     cashRefunds: number
@@ -425,6 +439,24 @@ export interface CashSummary {
     cashIn: number
     cashOut: number
     expectedBalance: number
+}
+
+/** Lo que un medio de pago debería tener al cerrar (S5.9) */
+export interface MethodExpected {
+    paymentMethod: CountablePaymentMethod
+    paymentsTotal: number
+    customerPaymentsTotal: number
+    refundsTotal: number
+    /** CASH: el saldo esperado; otros: pagos + abonos − devoluciones */
+    expected: number
+}
+
+export interface CashSummary extends CashTotals {
+    shiftId: number
+    /** Qué contar al cerrar: el efectivo siempre y cada medio que se movió */
+    byMethod: MethodExpected[]
+    /** Una diferencia mayor que esto exige justificación */
+    justificationThreshold: number
 }
 
 // === RECEIPT ===
@@ -525,12 +557,36 @@ export interface XReport {
     }[]
 }
 
+/** El arqueo de un medio en el cierre Z */
+export interface ClosingCount {
+    paymentMethod: CountablePaymentMethod
+    expected: number
+    counted: number
+    /** Contado − esperado */
+    difference: number
+    justification: string | null
+}
+
+/** El cierre Z guardado al cerrar el turno (S5.9): no se recalcula */
+export interface ShiftClosing {
+    id: number
+    /** Z-001-CAJA-01-000012: establecimiento, caja y correlativo por caja */
+    number: string
+    closedAt: string
+    closedBy: string | null
+    justificationThreshold: number
+    notes: string | null
+    counts: ClosingCount[]
+}
+
 export interface ZReport extends XReport {
     refundSummary: { count: number; total: number }
-    cashReconciliation: Omit<CashSummary, 'shiftId'> & {
-        closingBalance: number
-        discrepancy: number
+    cashReconciliation: CashTotals & {
+        closingBalance: number | null
+        discrepancy: number | null
     }
+    /** Null en un turno abierto o cerrado antes de S5.9: entonces se calcula */
+    closing: ShiftClosing | null
 }
 
 export interface DailyReport {

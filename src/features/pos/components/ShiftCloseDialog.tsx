@@ -10,6 +10,16 @@ import { useCloseShift, useCashSummary } from '../hooks/usePOS'
 import { useShift } from './useShift'
 import LabeledField from '@/components/shared/LabeledField'
 import { formatCurrency } from '@shared/lib/format'
+import { POS_PAYMENT_METHOD_LABELS } from '../model/types'
+import { POS_ERROR_MESSAGES } from '../model/errors'
+import {
+    countDifference,
+    countIsComplete,
+    countRows,
+    needsJustification,
+    toCloseInput,
+    type CountRow,
+} from '../lib/shiftCount'
 
 interface ShiftCloseDialogProps {
     isOpen: boolean
@@ -41,6 +51,18 @@ const SummaryRow = ({
     </div>
 )
 
+const differenceClass = (difference: number | null) =>
+    difference === null || difference === 0
+        ? 'text-gray-500 dark:text-gray-400'
+        : difference > 0
+        ? 'text-emerald-600'
+        : 'text-red-500'
+
+/**
+ * Cierre del turno con arqueo (S5.9): el cajero cuenta el efectivo y cada medio
+ * de pago que el turno movió; una diferencia mayor que el umbral pide su
+ * justificación. Al cerrar, faclab-core guarda el cierre Z numerado.
+ */
 const ShiftCloseDialog = ({ isOpen, onClose }: ShiftCloseDialogProps) => {
     const navigate = useNavigate()
     const queryClient = useQueryClient()
@@ -48,7 +70,10 @@ const ShiftCloseDialog = ({ isOpen, onClose }: ShiftCloseDialogProps) => {
     const closeShift = useCloseShift()
     const { data: cashSummary, isLoading } = useCashSummary(shift.id)
 
-    const [closingBalance, setClosingBalance] = useState<string>('')
+    // What the cashier typed, by method; the rows come from the summary
+    const [entries, setEntries] = useState<
+        Partial<Record<string, Pick<CountRow, 'counted' | 'justification'>>>
+    >({})
     const [notes, setNotes] = useState('')
 
     useEffect(() => {
@@ -59,31 +84,53 @@ const ShiftCloseDialog = ({ isOpen, onClose }: ShiftCloseDialogProps) => {
         }
     }, [isOpen, shift.id, queryClient])
 
-    const closingNum = Number(closingBalance) || 0
-    const discrepancy = cashSummary
-        ? closingNum - cashSummary.expectedBalance
-        : 0
+    const rows: CountRow[] = cashSummary
+        ? countRows(cashSummary).map((row) => ({
+              ...row,
+              ...entries[row.paymentMethod],
+          }))
+        : []
+    const threshold = cashSummary?.justificationThreshold ?? 0
+    const complete = rows.length > 0 && countIsComplete(rows, threshold)
+
+    const updateRow = (
+        row: CountRow,
+        change: Partial<Pick<CountRow, 'counted' | 'justification'>>
+    ) =>
+        setEntries((current) => ({
+            ...current,
+            [row.paymentMethod]: {
+                counted: row.counted,
+                justification: row.justification,
+                ...change,
+            },
+        }))
 
     const handleClose = async () => {
         try {
-            await closeShift.mutateAsync({
+            const closed = await closeShift.mutateAsync({
                 shiftId: shift.id,
-                data: {
-                    closingBalance: closingNum,
-                    notes: notes || undefined,
-                },
+                data: toCloseInput(rows, notes),
             })
-            notifySuccess('Turno cerrado')
+            notifySuccess(
+                'Turno cerrado',
+                closed.closingNumber
+                    ? `Cierre ${closed.closingNumber}`
+                    : undefined
+            )
             navigate('/home')
         } catch (error: unknown) {
-            notifyError(error, 'Error al cerrar el turno')
+            notifyError(error, 'Error al cerrar el turno', {
+                messages: POS_ERROR_MESSAGES,
+            })
         }
     }
 
     return (
         <Dialog
             isOpen={isOpen}
-            width={500}
+            contentLabel="Cerrar turno"
+            width={640}
             overlayClassName="!z-[60]"
             onClose={onClose}
         >
@@ -129,39 +176,102 @@ const ShiftCloseDialog = ({ isOpen, onClose }: ShiftCloseDialogProps) => {
                     <div className="border-t border-gray-200 dark:border-gray-700 pt-2">
                         <SummaryRow
                             bold
-                            label="Saldo esperado"
+                            label="Efectivo esperado"
                             value={cashSummary.expectedBalance}
                         />
                     </div>
                 </div>
             )}
 
-            <LabeledField label="Saldo real en caja">
-                <Input
-                    type="number"
-                    step="any"
-                    value={closingBalance}
-                    prefix="$"
-                    placeholder="0.00"
-                    onChange={(e) => setClosingBalance(e.target.value)}
-                />
-            </LabeledField>
-
-            {closingBalance !== '' && cashSummary && (
-                <div
-                    className={`mt-2 p-2 rounded text-center text-sm font-medium ${
-                        discrepancy === 0
-                            ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600'
-                            : 'bg-red-50 dark:bg-red-500/10 text-red-600'
-                    }`}
-                >
-                    Discrepancia: {formatCurrency(discrepancy)}
+            {rows.length > 0 && (
+                <div className="mb-4">
+                    <h5 className="mb-1">Arqueo</h5>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                        Cuenta el efectivo y los comprobantes de cada medio. Una
+                        diferencia mayor que {formatCurrency(threshold)}{' '}
+                        necesita justificación.
+                    </p>
+                    <div className="space-y-3">
+                        {rows.map((row) => {
+                            const label =
+                                POS_PAYMENT_METHOD_LABELS[row.paymentMethod]
+                            const difference = countDifference(row)
+                            const justify = needsJustification(row, threshold)
+                            return (
+                                <div
+                                    key={row.paymentMethod}
+                                    data-testid={`count-${row.paymentMethod}`}
+                                    className="rounded border border-gray-200 dark:border-gray-700 p-3"
+                                >
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                                        <div className="text-sm">
+                                            <div className="font-semibold">
+                                                {label}
+                                            </div>
+                                            <div className="text-gray-500 dark:text-gray-400">
+                                                Esperado{' '}
+                                                {formatCurrency(row.expected)}
+                                            </div>
+                                        </div>
+                                        <LabeledField
+                                            label={`${label} contado`}
+                                        >
+                                            <Input
+                                                type="number"
+                                                step="any"
+                                                min={0}
+                                                size="sm"
+                                                prefix="$"
+                                                placeholder="0.00"
+                                                value={row.counted}
+                                                onChange={(e) =>
+                                                    updateRow(row, {
+                                                        counted: e.target.value,
+                                                    })
+                                                }
+                                            />
+                                        </LabeledField>
+                                        <div
+                                            className={`text-sm font-medium sm:text-right ${differenceClass(
+                                                difference
+                                            )}`}
+                                        >
+                                            Diferencia{' '}
+                                            {difference === null
+                                                ? '-'
+                                                : formatCurrency(difference)}
+                                        </div>
+                                    </div>
+                                    {justify && (
+                                        <LabeledField
+                                            label={`Justificación de ${label.toLowerCase()}`}
+                                            className="mt-3"
+                                        >
+                                            <Input
+                                                size="sm"
+                                                maxLength={512}
+                                                placeholder="Por qué no cuadra"
+                                                value={row.justification}
+                                                onChange={(e) =>
+                                                    updateRow(row, {
+                                                        justification:
+                                                            e.target.value,
+                                                    })
+                                                }
+                                            />
+                                        </LabeledField>
+                                    )}
+                                </div>
+                            )
+                        })}
+                    </div>
                 </div>
             )}
 
             <LabeledField label="Notas (opcional)" className="mt-4">
                 <Input
                     value={notes}
+                    maxLength={512}
                     placeholder="Notas opcionales"
                     onChange={(e) => setNotes(e.target.value)}
                 />
@@ -174,6 +284,7 @@ const ShiftCloseDialog = ({ isOpen, onClose }: ShiftCloseDialogProps) => {
                 <Button
                     block
                     variant="solid"
+                    disabled={!complete}
                     loading={closeShift.isPending}
                     onClick={handleClose}
                 >
