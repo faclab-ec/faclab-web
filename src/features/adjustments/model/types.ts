@@ -11,6 +11,7 @@ export type AdjustmentReason =
     | 'supplier_error'
     | 'correction'
     | 'other'
+    | 'initial_balance'
 
 export const ADJUSTMENT_STATUS_LABELS: Record<AdjustmentStatus, string> = {
     draft: 'Borrador',
@@ -32,6 +33,7 @@ export const ADJUSTMENT_REASON_LABELS: Record<AdjustmentReason, string> = {
     supplier_error: 'Error del proveedor',
     correction: 'Corrección general',
     other: 'Otros',
+    initial_balance: 'Saldo inicial',
 }
 
 export interface Adjustment {

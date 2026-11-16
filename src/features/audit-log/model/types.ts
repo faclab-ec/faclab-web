@@ -53,6 +53,7 @@ export const AUDIT_ACTION_LABELS = {
     'pos_terminal.created': 'Terminal creada',
     'pos_terminal.updated': 'Terminal modificada',
     'pos_terminal.deleted': 'Terminal eliminada',
+    'import.confirmed': 'Importación confirmada',
 } as const
 
 export type AuditAction = keyof typeof AUDIT_ACTION_LABELS
@@ -80,6 +81,7 @@ export const AUDIT_RESOURCE_LABELS: Record<string, string> = {
     branch: 'Sucursal',
     emission_point: 'Punto de emisión',
     pos_terminal: 'Terminal',
+    import: 'Importación',
 }
 
 export type AuditSource = 'request' | 'message' | 'task'
@@ -172,6 +174,11 @@ const FIELD_LABELS: Record<string, string> = {
     price: 'Precio',
     valid_from: 'Rige desde',
     valid_to: 'Rige hasta',
+    kind: 'Qué se importa',
+    mode: 'Modo',
+    file_name: 'Archivo',
+    total_rows: 'Filas',
+    planned: 'Lo que haría cada fila',
 }
 
 export const fieldLabel = (field: string): string =>

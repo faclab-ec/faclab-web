@@ -46,6 +46,8 @@ export const PERMISSION = {
 
     USER_MANAGE: 'user:manage',
     AUDIT_READ: 'audit:read',
+    // Importación masiva de datos iniciales (S5.8): solo ADMIN
+    IMPORT_WRITE: 'import:write',
 
     ORGANIZATION_READ: 'organization:read',
     ORGANIZATION_WRITE: 'organization:write',

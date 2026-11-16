@@ -33,6 +33,7 @@ const SCREENS = [
     { path: '/payables', heading: 'Cuentas por pagar' },
     { path: '/settings/users', heading: 'Usuarios' },
     { path: '/settings/audit-log', heading: 'Bitácora de auditoría' },
+    { path: '/settings/imports', heading: 'Importar datos' },
     { path: '/settings/company-config', heading: 'Perfil fiscal' },
     { path: '/settings/certificates', heading: 'Certificados Digitales' },
     { path: '/settings/sequences', heading: 'Secuenciales' },

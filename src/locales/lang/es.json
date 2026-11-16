@@ -83,6 +83,7 @@
             "title": "Configuración",
             "users": "Usuarios",
             "auditLog": "Bitácora de auditoría",
+            "imports": "Importar datos",
             "branches": "Sucursales",
             "companyConfig": "Perfil fiscal",
             "certificates": "Certificados Digitales",
