@@ -27,6 +27,7 @@ import {
     HiOutlineSwitchVertical,
     HiOutlineTag,
     HiOutlineTruck,
+    HiOutlineUpload,
     HiOutlineUserGroup,
     HiOutlineUsers,
 } from 'react-icons/hi'
@@ -65,6 +66,7 @@ const navigationIcon: NavigationIcons = {
     inventoryAlerts: <HiOutlineBell />,
     settingsUsers: <HiOutlineUsers />,
     settingsAuditLog: <HiOutlineClipboardList />,
+    settingsImports: <HiOutlineUpload />,
     settingsBranches: <HiOutlineLocationMarker />,
     settingsCompanyConfig: <HiOutlineOfficeBuilding />,
     settingsCertificates: <HiOutlineLockClosed />,

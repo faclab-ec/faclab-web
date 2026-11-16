@@ -8,6 +8,7 @@ import {
     type MockApi,
 } from '../support/mockApi'
 import { emptyDailyReport, emptyDashboard, emptyValuation } from './dashboard'
+import { importTemplates } from './imports'
 import { emptyAging } from './receivables'
 
 const EMPTY_ADMIN_LISTS = [
@@ -33,6 +34,7 @@ const EMPTY_ADMIN_LISTS = [
     'payables',
     'users',
     'audit-log',
+    'imports',
     'branches',
     'emission-points',
     'pos-terminals',
@@ -51,6 +53,7 @@ export const mockEmptyBackend = (api: MockApi): void => {
     for (const resource of EMPTY_ADMIN_LISTS) {
         api.get(`${ADMIN}/${resource}`, ({ query }) => paginated([], query))
     }
+    api.get(`${ADMIN}/imports/templates`, () => ok(importTemplates()))
     api.get(`${ADMIN}/dashboard`, () => ok(emptyDashboard()))
     api.get(`${ADMIN}/receivables/aging`, () => ok(emptyAging()))
     api.get(`${ADMIN}/reports/inventory/valuation`, () => ok(emptyValuation()))

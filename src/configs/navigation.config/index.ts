@@ -382,6 +382,16 @@ const navigationConfig: NavigationTree[] = [
                 subMenu: [],
             },
             {
+                key: 'settings.imports',
+                path: '/settings/imports',
+                title: 'Importar datos',
+                translateKey: 'nav.settings.imports',
+                icon: 'settingsImports',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: ['import:write'],
+                subMenu: [],
+            },
+            {
                 key: 'settings.branches',
                 path: '/settings/branches',
                 title: 'Branches',

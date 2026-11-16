@@ -27,6 +27,12 @@ import {
     AUDIT_ACTION_LABELS,
     AUDIT_SOURCE_LABELS,
 } from '@features/audit-log/model/types'
+import {
+    IMPORT_KINDS,
+    IMPORT_MODES,
+    IMPORT_ROW_ACTIONS,
+    IMPORT_STATUSES,
+} from '@features/imports/model/types'
 import { CREDIT_NOTE_STATUS_LABELS } from '@features/invoicing/model/types'
 import { LOCATION_TYPES } from '@features/locations/model/types'
 import { MOVEMENT_TYPES } from '@features/movements/model/types'
@@ -147,6 +153,10 @@ const FRONT_ENUMS: [string, string, readonly string[]][] = [
         'PAYABLE_APPLICATION_KINDS',
         PAYABLE_APPLICATION_KINDS,
     ],
+    ['ImportKind', 'IMPORT_KINDS', IMPORT_KINDS],
+    ['ImportMode', 'IMPORT_MODES', IMPORT_MODES],
+    ['ImportStatus', 'IMPORT_STATUSES', IMPORT_STATUSES],
+    ['ImportRowAction', 'IMPORT_ROW_ACTIONS', IMPORT_ROW_ACTIONS],
 ]
 
 /** Valores del backend que el front puede ignorar, con el motivo */

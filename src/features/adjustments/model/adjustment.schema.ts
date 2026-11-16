@@ -8,6 +8,7 @@ export const adjustmentReasons = [
     'supplier_error',
     'correction',
     'other',
+    'initial_balance',
 ] as const
 
 export const adjustmentSchema = z.object({
