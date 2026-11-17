@@ -54,6 +54,11 @@ export const AUDIT_ACTION_LABELS = {
     'pos_terminal.updated': 'Terminal modificada',
     'pos_terminal.deleted': 'Terminal eliminada',
     'import.confirmed': 'Importación confirmada',
+    'integration.created': 'Integración creada',
+    'integration.updated': 'Integración modificada',
+    'integration.secret_created': 'Secreto de integración creado',
+    'integration.secret_revoked': 'Secreto de integración revocado',
+    'integration.revoked': 'Integración revocada',
 } as const
 
 export type AuditAction = keyof typeof AUDIT_ACTION_LABELS
@@ -82,6 +87,7 @@ export const AUDIT_RESOURCE_LABELS: Record<string, string> = {
     emission_point: 'Punto de emisión',
     pos_terminal: 'Terminal',
     import: 'Importación',
+    integration: 'Integración',
 }
 
 export type AuditSource = 'request' | 'message' | 'task'
