@@ -59,6 +59,12 @@ export const AUDIT_ACTION_LABELS = {
     'integration.secret_created': 'Secreto de integración creado',
     'integration.secret_revoked': 'Secreto de integración revocado',
     'integration.revoked': 'Integración revocada',
+    'webhook_endpoint.created': 'Webhook creado',
+    'webhook_endpoint.updated': 'Webhook modificado',
+    'webhook_endpoint.deleted': 'Webhook eliminado',
+    'webhook_endpoint.enabled': 'Webhook activado',
+    'webhook_endpoint.disabled': 'Webhook desactivado',
+    'webhook_endpoint.secret_rotated': 'Secreto de webhook rotado',
 } as const
 
 export type AuditAction = keyof typeof AUDIT_ACTION_LABELS
@@ -88,6 +94,7 @@ export const AUDIT_RESOURCE_LABELS: Record<string, string> = {
     pos_terminal: 'Terminal',
     import: 'Importación',
     integration: 'Integración',
+    webhook_endpoint: 'Webhook',
 }
 
 export type AuditSource = 'request' | 'message' | 'task'
