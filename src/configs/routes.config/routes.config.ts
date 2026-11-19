@@ -26,6 +26,7 @@ import { transfersRoutes } from '@features/transfers'
 import { adminUsersRoutes } from '@features/admin-users'
 import { auditLogRoutes } from '@features/audit-log'
 import { importsRoutes } from '@features/imports'
+import { integrationsRoutes } from '@features/integrations'
 import { invoicingRoutes } from '@features/invoicing'
 import { posAdminRoutes } from '@features/posAdmin'
 import { organizationRoutes } from '@features/organization'
@@ -65,6 +66,7 @@ export const protectedRoutes: Routes = [
     ...adminUsersRoutes,
     ...auditLogRoutes,
     ...importsRoutes,
+    ...integrationsRoutes,
     ...organizationRoutes,
     ...invoicingRoutes,
     {

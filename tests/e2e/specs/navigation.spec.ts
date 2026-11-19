@@ -113,6 +113,10 @@ test.describe('Permisos', () => {
         await expect(
             nav.getByRole('link', { name: 'Importar datos' })
         ).toHaveCount(0)
+        await expect(
+            nav.getByRole('link', { name: 'Integraciones' })
+        ).toHaveCount(0)
+        await expect(nav.getByRole('link', { name: 'Webhooks' })).toHaveCount(0)
         await expect(nav.getByRole('link', { name: 'Ajustes' })).toHaveCount(0)
         await expect(page.getByRole('button', { name: 'POS' })).toHaveCount(0)
     })

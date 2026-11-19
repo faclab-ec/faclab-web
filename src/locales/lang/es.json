@@ -84,6 +84,8 @@
             "users": "Usuarios",
             "auditLog": "Bitácora de auditoría",
             "imports": "Importar datos",
+            "integrations": "Integraciones",
+            "webhooks": "Webhooks",
             "branches": "Sucursales",
             "companyConfig": "Perfil fiscal",
             "certificates": "Certificados Digitales",

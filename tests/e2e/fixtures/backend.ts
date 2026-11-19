@@ -35,6 +35,8 @@ const EMPTY_ADMIN_LISTS = [
     'users',
     'audit-log',
     'imports',
+    'integrations',
+    'webhook-endpoints',
     'branches',
     'emission-points',
     'pos-terminals',
