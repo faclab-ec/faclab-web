@@ -48,6 +48,8 @@ export const PERMISSION = {
     AUDIT_READ: 'audit:read',
     // Importación masiva de datos iniciales (S5.8): solo ADMIN
     IMPORT_WRITE: 'import:write',
+    // Clientes de integración y webhooks de la API pública (S6.2–S6.5): solo ADMIN
+    INTEGRATION_MANAGE: 'integration:manage',
 
     ORGANIZATION_READ: 'organization:read',
     ORGANIZATION_WRITE: 'organization:write',

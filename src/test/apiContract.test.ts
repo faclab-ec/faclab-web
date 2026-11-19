@@ -33,6 +33,15 @@ import {
     IMPORT_ROW_ACTIONS,
     IMPORT_STATUSES,
 } from '@features/imports/model/types'
+import {
+    INTEGRATION_CLIENT_STATUSES,
+    INTEGRATION_ENVIRONMENTS,
+    SCOPES,
+    WEBHOOK_DELIVERY_STATUSES,
+    WEBHOOK_DISABLED_REASONS,
+    WEBHOOK_ENDPOINT_STATUSES,
+    WEBHOOK_EVENT_TYPES,
+} from '@features/integrations/model/types'
 import { CREDIT_NOTE_STATUS_LABELS } from '@features/invoicing/model/types'
 import { LOCATION_TYPES } from '@features/locations/model/types'
 import { MOVEMENT_TYPES } from '@features/movements/model/types'
@@ -157,6 +166,29 @@ const FRONT_ENUMS: [string, string, readonly string[]][] = [
     ['ImportMode', 'IMPORT_MODES', IMPORT_MODES],
     ['ImportStatus', 'IMPORT_STATUSES', IMPORT_STATUSES],
     ['ImportRowAction', 'IMPORT_ROW_ACTIONS', IMPORT_ROW_ACTIONS],
+    ['Scope', 'SCOPES', SCOPES],
+    [
+        'IntegrationClientStatus',
+        'INTEGRATION_CLIENT_STATUSES',
+        INTEGRATION_CLIENT_STATUSES,
+    ],
+    [
+        'IntegrationEnvironment',
+        'INTEGRATION_ENVIRONMENTS',
+        INTEGRATION_ENVIRONMENTS,
+    ],
+    ['WebhookEventType', 'WEBHOOK_EVENT_TYPES', WEBHOOK_EVENT_TYPES],
+    [
+        'WebhookEndpointStatus',
+        'WEBHOOK_ENDPOINT_STATUSES',
+        WEBHOOK_ENDPOINT_STATUSES,
+    ],
+    [
+        'WebhookDeliveryStatus',
+        'WEBHOOK_DELIVERY_STATUSES',
+        WEBHOOK_DELIVERY_STATUSES,
+    ],
+    ['DisabledReason', 'WEBHOOK_DISABLED_REASONS', WEBHOOK_DISABLED_REASONS],
 ]
 
 /** Valores del backend que el front puede ignorar, con el motivo */

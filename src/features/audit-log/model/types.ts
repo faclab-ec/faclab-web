@@ -192,6 +192,19 @@ const FIELD_LABELS: Record<string, string> = {
     file_name: 'Archivo',
     total_rows: 'Filas',
     planned: 'Lo que haría cada fila',
+    // Clientes de integración (S6.2) y webhooks (S6.4)
+    client_id: 'Client ID',
+    environment: 'Ambiente',
+    scopes: 'Permisos (scopes)',
+    allowed_ips: 'Redes de origen',
+    secret_id: 'Secreto',
+    previous_expire_at: 'Los secretos anteriores vencen',
+    previous_expires_at: 'El secreto anterior vence',
+    url: 'URL',
+    event_types: 'Eventos',
+    exclude_own_changes: 'Sin los cambios propios',
+    integration_client_id: 'Cliente de integración',
+    disabled_reason: 'Motivo de la desactivación',
 }
 
 export const fieldLabel = (field: string): string =>

@@ -14,6 +14,7 @@ Frontend administrativo de **Faclab**, un sistema de gestión comercial para pym
 | Análisis | `reports` (valoración, rotación, movimientos, resumen por bodega) |
 | Organización | `organization` (sucursales o establecimientos SRI, puntos de emisión y cajas) |
 | Administración | `auth` (login con elección de empresa, cambio de empresa, cambio de contraseña), `admin-users` (usuarios, roles y sucursales permitidas) |
+| Integraciones | `integrations` (portal de la API pública: clientes de integración con sus scopes, sucursales y redes, secretos que se muestran una sola vez y se rotan, uso por día; webhooks con su secreto de firma, prueba, historial de entregas y reenvío) |
 
 ### Backends
 
@@ -210,6 +211,7 @@ queryFn: async () => {
 - En componentes: `useCan(PERMISSION.X)` y `useHasRole(ROLE.ADMIN)` de `@/stores/useAuthStore`.
 - Al iniciar sesión, el cajero entra directo a `/pos`.
 - Sucursales, puntos de emisión y cajas: `organization:read` para verlas, `organization:write` (solo Administrador) para cambiarlas. El perfil fiscal, los certificados y los secuenciales piden `user:manage`.
+- Integraciones y webhooks (`/settings/integrations`, `/settings/webhooks`): `integration:manage`, solo Administrador. Sin ese permiso no aparecen en el menú y sus rutas responden "Sin acceso".
 
 ### Formularios
 
