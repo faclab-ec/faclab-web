@@ -1,6 +1,7 @@
 import { Component, ErrorInfo, ReactNode } from 'react'
 import { HiOutlineExclamation } from 'react-icons/hi'
 import Button from '@/components/ui/Button'
+import { reportError } from '@shared/lib/telemetry'
 
 class ErrorBoundary extends Component<
     { children: ReactNode },
@@ -17,6 +18,11 @@ class ErrorBoundary extends Component<
 
     componentDidCatch(error: Error, info: ErrorInfo) {
         console.error('ErrorBoundary:', error, info)
+        // A SigNoz con la ruta y la versión; nunca el estado ni los formularios
+        reportError(error, {
+            source: 'boundary',
+            componentStack: info.componentStack ?? undefined,
+        })
     }
 
     render() {

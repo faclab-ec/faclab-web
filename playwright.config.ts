@@ -78,6 +78,9 @@ export default defineConfig({
         env: {
             VITE_API_BASE_URL: BASE_URL,
             VITE_INVOICING_API_URL: `${BASE_URL}/__invoicing`,
+            // Sin Collector: la telemetría (S7.3) queda apagada aunque el
+            // .env local la encienda
+            VITE_OTEL_ENABLED: 'false',
         },
     },
 })
