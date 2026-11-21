@@ -37,3 +37,20 @@ export function getErrorMessage(
     }
     return fallback
 }
+
+/**
+ * Id de la solicitud que falló (`meta.requestId` del envelope de error del
+ * core y la facturación), para mostrarlo junto al mensaje.
+ */
+export function getErrorRequestId(error: unknown): string | undefined {
+    if (isApiError(error)) {
+        return error.requestId || undefined
+    }
+    if (axios.isAxiosError(error)) {
+        const requestId = error.response?.data?.meta?.requestId
+        return typeof requestId === 'string' && requestId
+            ? requestId
+            : undefined
+    }
+    return undefined
+}

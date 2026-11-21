@@ -65,7 +65,7 @@ VITE_INVOICING_API_URL=http://localhost:3173   # faclab-invoicing
 
 `src/configs/app.config.ts` arma los hosts de cada API (`inventoryApiHost`, `posApiHost`, `invoicingApiHost`) a partir de estas variables. En ese archivo también está `enableMock` para activar MirageJS.
 
-Las URLs también se pueden fijar al cargar la página, sin reconstruir: `index.html` carga `/config.js` antes del bundle, y lo que ese archivo define en `window.__FACLAB_CONFIG__` (`apiBaseUrl`, `invoicingApiUrl`) tiene prioridad sobre los `VITE_*`. En desarrollo `public/config.js` no define nada, así que mandan los `.env`. La imagen de Docker lo reemplaza al arrancar (ver [Despliegue con Docker](#despliegue-con-docker)).
+Las URLs también se pueden fijar al cargar la página, sin reconstruir: `index.html` carga `/config.js` antes del bundle, y lo que ese archivo define en `window.__FACLAB_CONFIG__` (`apiBaseUrl`, `invoicingApiUrl` y las claves de [telemetría](#telemetría)) tiene prioridad sobre los `VITE_*`. En desarrollo `public/config.js` no define nada, así que mandan los `.env`. La imagen de Docker lo reemplaza al arrancar (ver [Despliegue con Docker](#despliegue-con-docker)).
 
 Sobre las variables de entorno:
 
@@ -185,7 +185,29 @@ queryFn: async () => {
 
 **Errores.** Todo error se rechaza como `ApiError` (`src/utils/errors/ApiError.ts`), con `code`, `message`, `status` y `errors[]`. En la UI se muestran con `notifyError(error, 'Mensaje por defecto')` de `@shared/ui/notify`; los backends responden en inglés, así que un feature pasa sus textos por código con `{ messages: X_ERROR_MESSAGES }`.
 
+**Id de solicitud.** El core y la facturación devuelven `meta.requestId` en cada error. `notifyError` y `ErrorState` lo muestran debajo del mensaje («Id de solicitud», completo y seleccionable), porque es lo que soporte busca en los logs y las trazas. Un aviso con id dura 8 s en lugar de 3 y se puede cerrar.
+
 **Sucursal y caja.** El interceptor agrega `X-Branch-Id` (la sucursal activa) a toda llamada a `/api/admin` y `/api/pos`, y `X-Terminal-Id` (la caja vinculada) a las de `/api/pos`. Nunca a `/api/auth` (`/me` rechazaría una sucursal vieja) ni a faclab-invoicing, que filtra por la empresa del token. Si el core responde `BRANCH_ACCESS_DENIED`, renueva el token (trae los accesos nuevos) y reintenta una vez.
+
+### Telemetría
+
+`src/shared/lib/telemetry/` envía a SigNoz, por OpenTelemetry (S7.3 del core, `docs/architecture/OBSERVABILITY.md` §9.3):
+
+- **Trazas** de la carga de la página y de cada llamada XHR o fetch. Solo las llamadas al core y a la facturación llevan `traceparent`, así que su traza continúa en esos servicios: una venta del POS se ve desde el navegador hasta el SRI.
+- **Errores de interfaz** como spans `ui.error`, con la ruta y la versión de la app. Vienen del `ErrorBoundary` y de los errores no controlados de `window`. Nunca llevan datos de formularios, del usuario ni el mensaje de un `ApiError`, solo su código.
+- **Web vitals** (LCP, INP y CLS) como histogramas por ruta. La ruta siempre es el patrón (`/sales/:id`), nunca la URL. Las URLs de las trazas van sin los valores del query string.
+
+Está **apagada por defecto**: el e2e la necesita apagada, y apagarla es el rollback. El SDK va en un chunk aparte (unos 44 KB gzip) que solo se descarga con la telemetría encendida; el bundle inicial crece menos de 1 KB.
+
+| `.env` | `/config.js` | Por defecto | Para qué |
+|---|---|---|---|
+| `VITE_OTEL_ENABLED` | `otelEnabled` | `false` | Encenderla |
+| `VITE_OTLP_URL` | `otlpUrl` | `/otlp` | Base OTLP/HTTP; `/otlp` es del mismo origen, sin CORS hacia el Collector |
+| `VITE_OTEL_SAMPLING_RATE` | `otelSamplingRate` | `1` | Fracción de trazas que inicia el navegador; el core y la facturación la respetan |
+| `VITE_ENVIRONMENT` | `environment` | `local` | `deployment.environment.name` |
+| `OTLP_PROXY_TARGET` | — | `http://localhost:4318` | Adónde reenvía `/otlp` el servidor de Vite (`npm start`, `npm run preview`) |
+
+En local, con SigNoz levantado (`faclab-infra/scripts/signoz.sh up`), basta `VITE_OTEL_ENABLED=true` en el `.env`. El servidor de Vite reenvía `/otlp` al OTLP/HTTP de SigNoz. `service.version` es el `SERVICE_VERSION` del build o, sin él, la versión de `package.json`.
 
 ### Autenticación
 
@@ -344,7 +366,7 @@ Cada PR y cada push a `master` corren `.github/workflows/ci.yml` en GitHub Actio
 |---|---|---|
 | `checks` | `npm ci`, `npm run typecheck`, `npm run lint`, `npm test`, `npm run build` | Sí |
 | `e2e` | `npx playwright test --ignore-snapshots` en Chromium | No, hasta que la suite sea estable en Linux |
-| `image` | Construye la imagen de Docker sin publicarla. Comprueba que no arranque sin URLs, que `/pos` devuelva `index.html`, que `/config.js` traiga las URLs sin caché y que un asset inexistente dé 404 | Sí |
+| `image` | Construye la imagen de Docker sin publicarla. Comprueba que no arranque sin URLs ni con una telemetría inválida, que `/pos` devuelva `index.html`, que `/config.js` traiga las URLs y la telemetría sin caché y que un asset inexistente dé 404 | Sí |
 
 El job `e2e` omite las comparaciones de `visual.spec.ts` porque solo hay capturas de referencia de macOS; esas se siguen validando en local. Su reporte queda como artefacto `playwright-report`.
 
@@ -366,7 +388,7 @@ El `Dockerfile` hace el build con Node 22 (Debian, igual que CI) y sirve el resu
 | Ruta | Respuesta | `Cache-Control` |
 |---|---|---|
 | `/assets/*` | El archivo (nombres con hash), o 404 si no existe | `public, max-age=31536000, immutable` |
-| `/config.js` | Las URLs de este entorno | `no-store` |
+| `/config.js` | Las URLs y la telemetría de este entorno | `no-store` |
 | Cualquier otra (`/pos`, `/catalog/products`…) | El archivo si existe; si no, `index.html` | `no-cache` |
 
 Las URLs de API se configuran al arrancar el contenedor, sin reconstruir la imagen:
@@ -377,6 +399,17 @@ Las URLs de API se configuran al arrancar el contenedor, sin reconstruir la imag
 | `INVOICING_API_URL` | `https://facturacion.faclab.ec` | faclab-invoicing |
 
 `docker/entrypoint.sh` exige las dos y las valida: deben ser `http://` o `https://` y no tener espacios, comillas ni `<` `>`. Si alguna falta o no es válida, el contenedor no arranca y lo dice. Les quita la barra final y escribe `/config.js` antes de arrancar Caddy. Para cambiarlas basta con reiniciar el contenedor con otros valores.
+
+La [telemetría](#telemetría) es opcional y se valida igual:
+
+| Variable | Valores | Por defecto |
+|---|---|---|
+| `OTEL_ENABLED` | `true` o `false` | `false` |
+| `OTLP_URL` | Una ruta (`/otlp`) o una URL `http(s)` | `/otlp` |
+| `OTEL_SAMPLING_RATE` | De `0` a `1` | `1` |
+| `ENVIRONMENT` | `local`, `staging` o `production` | `production` |
+
+El proxy de entrada lleva `/otlp` del dominio de la web al receptor OTLP/HTTP del Collector, con límites de tamaño y frecuencia (S8.1 del core). La versión se fija al construir con `--build-arg SERVICE_VERSION=$(git rev-parse --short HEAD)`; sin ella queda la de `package.json`.
 
 ```bash
 docker build -t faclab-web .

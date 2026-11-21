@@ -9,6 +9,7 @@ import ProtectedRoute from '@/components/route/ProtectedRoute'
 import PublicRoute from '@/components/route/PublicRoute'
 import AuthorityGuard from '@/components/route/AuthorityGuard'
 import AppRoute from '@/components/route/AppRoute'
+import RouteTracker from '@app/RouteTracker'
 
 const { authenticatedEntryPath } = appConfig
 
@@ -64,6 +65,8 @@ const AllRoutes = () => {
 const AppViews = () => {
     return (
         <Suspense fallback={<Loading loading={true} />}>
+            {/* Aquí y no en App: la tabla de rutas no entra al bundle inicial */}
+            <RouteTracker />
             <AllRoutes />
         </Suspense>
     )

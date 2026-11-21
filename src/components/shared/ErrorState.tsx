@@ -1,7 +1,8 @@
 import classNames from 'classnames'
 import { HiOutlineExclamation, HiOutlineRefresh } from 'react-icons/hi'
 import Button from '@/components/ui/Button'
-import { getErrorMessage } from '@shared/lib/getErrorMessage'
+import { getErrorMessage, getErrorRequestId } from '@shared/lib/getErrorMessage'
+import RequestId from '@shared/ui/RequestId'
 
 interface ErrorStateProps {
     /** Error de la consulta; se muestra el mensaje del backend si lo trae */
@@ -17,37 +18,41 @@ const ErrorState = ({
     title = 'No se pudo cargar la información',
     onRetry,
     className,
-}: ErrorStateProps) => (
-    <div
-        role="alert"
-        className={classNames(
-            'flex flex-col items-center justify-center gap-3 px-6 py-12 text-center',
-            className
-        )}
-    >
-        <span
-            aria-hidden="true"
-            className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-2xl text-red-500 dark:bg-red-500/10"
+}: ErrorStateProps) => {
+    const requestId = getErrorRequestId(error)
+    return (
+        <div
+            role="alert"
+            className={classNames(
+                'flex flex-col items-center justify-center gap-3 px-6 py-12 text-center',
+                className
+            )}
         >
-            <HiOutlineExclamation />
-        </span>
-        <div>
-            <p className="font-semibold text-gray-900 dark:text-gray-50">
-                {title}
-            </p>
-            <p className="mt-1 text-gray-500 dark:text-gray-400">
-                {getErrorMessage(
-                    error,
-                    'Revisa tu conexión e inténtalo de nuevo.'
-                )}
-            </p>
+            <span
+                aria-hidden="true"
+                className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-2xl text-red-500 dark:bg-red-500/10"
+            >
+                <HiOutlineExclamation />
+            </span>
+            <div>
+                <p className="font-semibold text-gray-900 dark:text-gray-50">
+                    {title}
+                </p>
+                <p className="mt-1 text-gray-500 dark:text-gray-400">
+                    {getErrorMessage(
+                        error,
+                        'Revisa tu conexión e inténtalo de nuevo.'
+                    )}
+                </p>
+                {requestId && <RequestId id={requestId} className="mt-2" />}
+            </div>
+            {onRetry && (
+                <Button size="sm" icon={<HiOutlineRefresh />} onClick={onRetry}>
+                    Reintentar
+                </Button>
+            )}
         </div>
-        {onRetry && (
-            <Button size="sm" icon={<HiOutlineRefresh />} onClick={onRetry}>
-                Reintentar
-            </Button>
-        )}
-    </div>
-)
+    )
+}
 
 export default ErrorState

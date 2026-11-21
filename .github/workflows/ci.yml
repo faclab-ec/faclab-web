@@ -94,11 +94,26 @@ jobs:
           cat startup.log
           grep -q 'API_BASE_URL is required' startup.log
 
+      - name: Refuse invalid telemetry settings
+        run: |
+          if docker run --rm \
+            -e API_BASE_URL=https://api.example.test \
+            -e INVOICING_API_URL=https://invoicing.example.test \
+            -e OTEL_SAMPLING_RATE=2 \
+            faclab-web:ci > startup.log 2>&1; then
+            echo "The image started with OTEL_SAMPLING_RATE=2"
+            exit 1
+          fi
+          cat startup.log
+          grep -q 'OTEL_SAMPLING_RATE must be a number between 0 and 1' startup.log
+
       - name: Serve the SPA with runtime settings
         run: |
           docker run -d --name web -p 8080:8080 \
             -e API_BASE_URL=https://api.example.test \
             -e INVOICING_API_URL=https://invoicing.example.test \
+            -e OTEL_ENABLED=true \
+            -e ENVIRONMENT=staging \
             faclab-web:ci
           for _ in $(seq 1 30); do
             curl -fsS http://localhost:8080/health > /dev/null && break
@@ -107,5 +122,6 @@ jobs:
           docker logs web
           curl -fsS http://localhost:8080/pos | grep -q 'id="root"'
           curl -fsS http://localhost:8080/config.js | grep -q '"apiBaseUrl":"https://api.example.test"'
+          curl -fsS http://localhost:8080/config.js | grep -q '"otelEnabled":true,"otlpUrl":"/otlp","otelSamplingRate":1,"environment":"staging"'
           curl -fsSI http://localhost:8080/config.js | grep -qi '^cache-control: no-store'
           test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/assets/missing.js)" = 404

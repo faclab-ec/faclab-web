@@ -10,6 +10,9 @@ COPY package.json package-lock.json .npmrc ./
 RUN npm ci
 
 COPY . .
+# service.version de la telemetría (S7.3): tag o SHA del commit; vacía, la
+# versión de package.json. Después de npm ci para no invalidar su caché
+ARG SERVICE_VERSION=
 RUN npm run build
 
 
@@ -43,6 +46,7 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
     CMD ["wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/health"]
 
-# API_BASE_URL e INVOICING_API_URL son obligatorias: sin ellas no arranca
+# API_BASE_URL e INVOICING_API_URL son obligatorias: sin ellas no arranca. La
+# telemetría (OTEL_ENABLED, OTLP_URL, OTEL_SAMPLING_RATE, ENVIRONMENT) es opcional
 ENTRYPOINT ["entrypoint.sh"]
 CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]

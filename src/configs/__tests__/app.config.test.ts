@@ -63,4 +63,69 @@ describe('appConfig', () => {
         expect(config.apiBaseUrl).toBe('http://localhost:3000')
         expect(config.invoicingApiHost).toBe('http://localhost:3173')
     })
+
+    describe('telemetry (S7.3)', () => {
+        const unsetTelemetryEnv = () => {
+            vi.stubEnv('VITE_OTEL_ENABLED', undefined)
+            vi.stubEnv('VITE_OTLP_URL', undefined)
+            vi.stubEnv('VITE_OTEL_SAMPLING_RATE', undefined)
+            vi.stubEnv('VITE_ENVIRONMENT', undefined)
+        }
+
+        it('está apagada por defecto y envía al /otlp del mismo origen', async () => {
+            unsetTelemetryEnv()
+
+            const { telemetry } = await loadConfig()
+
+            expect(telemetry).toEqual({
+                enabled: false,
+                otlpUrl: '/otlp',
+                samplingRate: 1,
+                environment: 'local',
+            })
+        })
+
+        it('se enciende con VITE_*', async () => {
+            unsetTelemetryEnv()
+            vi.stubEnv('VITE_OTEL_ENABLED', 'true')
+            vi.stubEnv('VITE_OTEL_SAMPLING_RATE', '0.25')
+
+            const { telemetry } = await loadConfig()
+
+            expect(telemetry.enabled).toBe(true)
+            expect(telemetry.samplingRate).toBe(0.25)
+        })
+
+        it('/config.js manda sobre VITE_*, también para apagarla', async () => {
+            unsetTelemetryEnv()
+            vi.stubEnv('VITE_OTEL_ENABLED', 'true')
+            window.__FACLAB_CONFIG__ = {
+                otelEnabled: false,
+                otlpUrl: 'https://app.example.test/otlp/',
+                otelSamplingRate: 0.5,
+                environment: 'staging',
+            }
+
+            const { telemetry } = await loadConfig()
+
+            expect(telemetry).toEqual({
+                enabled: false,
+                otlpUrl: 'https://app.example.test/otlp',
+                samplingRate: 0.5,
+                environment: 'staging',
+            })
+        })
+
+        it('una fracción de muestreo inválida queda en 1 y se limita a [0, 1]', async () => {
+            unsetTelemetryEnv()
+            vi.stubEnv('VITE_OTEL_SAMPLING_RATE', 'mucho')
+            expect((await loadConfig()).telemetry.samplingRate).toBe(1)
+
+            vi.stubEnv('VITE_OTEL_SAMPLING_RATE', '3')
+            expect((await loadConfig()).telemetry.samplingRate).toBe(1)
+
+            vi.stubEnv('VITE_OTEL_SAMPLING_RATE', '-1')
+            expect((await loadConfig()).telemetry.samplingRate).toBe(0)
+        })
+    })
 })
