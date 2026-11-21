@@ -191,7 +191,7 @@ queryFn: async () => {
 
 ### Telemetría
 
-`src/shared/lib/telemetry/` envía a SigNoz, por OpenTelemetry (S7.3 del core, `docs/architecture/OBSERVABILITY.md` §9.3):
+`src/shared/lib/telemetry/` envía a SigNoz, por OpenTelemetry y a través del Collector de faclab-infra (S7.3 y S7.4 del core, `docs/architecture/OBSERVABILITY.md` §9.3):
 
 - **Trazas** de la carga de la página y de cada llamada XHR o fetch. Solo las llamadas al core y a la facturación llevan `traceparent`, así que su traza continúa en esos servicios: una venta del POS se ve desde el navegador hasta el SRI.
 - **Errores de interfaz** como spans `ui.error`, con la ruta y la versión de la app. Vienen del `ErrorBoundary` y de los errores no controlados de `window`. Nunca llevan datos de formularios, del usuario ni el mensaje de un `ApiError`, solo su código.
@@ -207,7 +207,7 @@ Está **apagada por defecto**: el e2e la necesita apagada, y apagarla es el roll
 | `VITE_ENVIRONMENT` | `environment` | `local` | `deployment.environment.name` |
 | `OTLP_PROXY_TARGET` | — | `http://localhost:4318` | Adónde reenvía `/otlp` el servidor de Vite (`npm start`, `npm run preview`) |
 
-En local, con SigNoz levantado (`faclab-infra/scripts/signoz.sh up`), basta `VITE_OTEL_ENABLED=true` en el `.env`. El servidor de Vite reenvía `/otlp` al OTLP/HTTP de SigNoz. `service.version` es el `SERVICE_VERSION` del build o, sin él, la versión de `package.json`.
+En local, con el Collector y SigNoz levantados (`docker compose up -d collector` y `scripts/signoz.sh up` en faclab-infra), basta `VITE_OTEL_ENABLED=true` en el `.env`. El servidor de Vite reenvía `/otlp` al receptor del navegador del Collector (`localhost:4318`): acepta hasta 1 MiB por envío, solo trazas y métricas, y descarta lo que no sea de `service.name=faclab-web`. El Collector borra los atributos sensibles y reenvía a SigNoz. `service.version` es el `SERVICE_VERSION` del build o, sin él, la versión de `package.json`.
 
 ### Autenticación
 
