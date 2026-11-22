@@ -16,8 +16,8 @@ export default defineConfig(({ mode }) => {
     const appVersion = env.SERVICE_VERSION || env.npm_package_version || 'dev'
 
     // /otlp es del mismo origen que la app, como detrás de Caddy: el navegador
-    // no necesita CORS hacia el Collector. En local reenvía al OTLP/HTTP de
-    // SigNoz.
+    // no necesita CORS hacia el Collector. En local reenvía al receptor del
+    // navegador del Collector de faclab-infra (:4318), que reenvía a SigNoz.
     const otlpProxy = {
         '/otlp': {
             target: env.OTLP_PROXY_TARGET || 'http://localhost:4318',
