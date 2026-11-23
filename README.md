@@ -366,7 +366,7 @@ Cada PR y cada push a `master` corren `.github/workflows/ci.yml` en GitHub Actio
 |---|---|---|
 | `checks` | `npm ci`, `npm run typecheck`, `npm run lint`, `npm test`, `npm run build` | Sí |
 | `e2e` | `npx playwright test --ignore-snapshots` en Chromium | No, hasta que la suite sea estable en Linux |
-| `image` | Construye la imagen de Docker sin publicarla. Comprueba que no arranque sin URLs ni con una telemetría inválida, que `/pos` devuelva `index.html`, que `/config.js` traiga las URLs y la telemetría sin caché y que un asset inexistente dé 404 | Sí |
+| `image` | Construye la imagen de Docker sin publicarla (la publica un tag, ver [Versiones y publicación](#versiones-y-publicación)). Comprueba que no arranque sin URLs ni con una telemetría inválida, que `/pos` devuelva `index.html`, que `/config.js` traiga las URLs y la telemetría sin caché y que un asset inexistente dé 404 | Sí |
 
 El job `e2e` omite las comparaciones de `visual.spec.ts` porque solo hay capturas de referencia de macOS; esas se siguen validando en local. Su reporte queda como artefacto `playwright-report`.
 
@@ -409,7 +409,7 @@ La [telemetría](#telemetría) es opcional y se valida igual:
 | `OTEL_SAMPLING_RATE` | De `0` a `1` | `1` |
 | `ENVIRONMENT` | `local`, `staging` o `production` | `production` |
 
-El proxy de entrada lleva `/otlp` del dominio de la web al receptor OTLP/HTTP del Collector, con límites de tamaño y frecuencia (S8.1 del core). La versión se fija al construir con `--build-arg SERVICE_VERSION=$(git rev-parse --short HEAD)`; sin ella queda la de `package.json`.
+El proxy de entrada lleva `/otlp` del dominio de la web al receptor OTLP/HTTP del Collector, con límites de tamaño y frecuencia (S8.1 del core). La versión se fija al construir con `--build-arg SERVICE_VERSION=$(git rev-parse --short HEAD)`; sin ella queda la de `package.json`. Las imágenes publicadas la traen de su tag y la dejan también en la variable `SERVICE_VERSION` de la imagen.
 
 ```bash
 docker build -t faclab-web .
@@ -420,6 +420,39 @@ docker run --rm -p 5173:8080 \
 ```
 
 En local conviene publicarlo en el puerto 5173, porque es el origen que faclab-core y faclab-invoicing permiten por CORS por defecto. En otro entorno, ese origen tiene que estar en `CORS_ORIGINS` de los dos backends. Con sistema de archivos de solo lectura, `/srv/runtime` necesita un tmpfs del usuario `app` (`--tmpfs /srv/runtime:uid=10001,gid=10001`).
+
+## Versiones y publicación
+
+Desde S8.2, cada versión es un tag `vX.Y.Z` con
+[versionado semántico](https://semver.org/lang/es/). Hasta el piloto la versión empieza por 0, y una
+versión menor puede romper la compatibilidad. `package.json` lleva la misma versión, y lo que trae
+cada una está en [CHANGELOG.md](CHANGELOG.md).
+
+1. **Preparar.** En `master` al día, `scripts/release.sh minor` (o `major`, `patch`, `X.Y.Z`):
+   - crea la rama `release/vX.Y.Z`;
+   - agrega al CHANGELOG la sección de la versión, con los commits de `master` desde la anterior
+     agrupados por tipo;
+   - pone esa versión en `package.json` y `package-lock.json`;
+   - hace el commit `chore(release): vX.Y.Z`.
+
+   Revisa la sección, súbela y abre el PR con ese título.
+2. **Etiquetar.** Después del merge, `scripts/release.sh tag X.Y.Z` crea el tag anotado sobre el
+   commit del release en `origin/master`. Publícalo con `git push origin vX.Y.Z`.
+3. **Publicar.** El tag corre `.github/workflows/release.yml`:
+   - comprueba que la versión venga de `master`, con su sección y su `package.json`;
+   - construye la imagen en un runner nativo por arquitectura (amd64 y arm64), con
+     `SERVICE_VERSION=X.Y.Z` (el `service.version` de la telemetría);
+   - publica `ghcr.io/faclab-ec/faclab-web:X.Y.Z`;
+   - comprueba las dos plataformas y la versión;
+   - crea el release de GitHub con la sección del CHANGELOG.
+
+Una **prerelease** (`vX.Y.Z-rc.1`) se publica igual desde cualquier commit subido, sin release de
+GitHub. Es para probar en staging.
+
+Desplegar una versión es un PR en faclab-infra que cambia
+`deploy/production/versions/<entorno>.env`. Una web nueva que necesita una versión mínima del core o
+de faclab-invoicing lo dice en la
+[matriz de compatibilidad](https://github.com/faclab-ec/faclab-infra/blob/master/deploy/production/COMPATIBILITY.md).
 
 ## Convenciones
 

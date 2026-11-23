@@ -39,6 +39,11 @@ COPY --chmod=755 docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 # Propiedad de root: el usuario app no puede cambiar los estáticos
 COPY --from=build /app/build /srv/app
 
+# La misma versión del build, para verla y comprobarla en la imagen como en
+# las de faclab-core y faclab-invoicing (S8.2)
+ARG SERVICE_VERSION=
+ENV SERVICE_VERSION=${SERVICE_VERSION}
+
 USER app
 
 EXPOSE 8080
