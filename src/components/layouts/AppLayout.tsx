@@ -11,6 +11,7 @@ import View from '@app/AppViews'
 import { HiOutlineShoppingCart } from 'react-icons/hi'
 import { useCan } from '@/stores'
 import { InvoicingReadinessAlert } from '@features/invoicing'
+import { SubscriptionAlert } from '@features/subscription'
 
 const HeaderActionsStart = () => {
     return (
@@ -53,6 +54,11 @@ const AppLayout = () => {
                 <Header
                     headerEnd={<HeaderActionsEnd />}
                     headerStart={<HeaderActionsStart />}
+                />
+                {/* A company that can only read: nothing else can be done */}
+                <SubscriptionAlert
+                    rounded={false}
+                    className="border-x-0 border-t-0"
                 />
                 {/* Before selling: invoices can't go out until this is fixed */}
                 <InvoicingReadinessAlert

@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test'
 import type {
     BranchSummary,
     Session,
+    SessionSubscription,
     TenantOption,
     TenantSummary,
     TokenPair,
@@ -13,6 +14,7 @@ import {
 import { ROLE, type RoleCode } from '@/constants/roles.constant'
 import { AUTH, INVOICING, ok, type MockApi } from './mockApi'
 import { invoicingReady } from '../fixtures/invoicing'
+import { activeSubscription } from '../fixtures/subscription'
 
 export interface SessionOptions {
     role?: RoleCode
@@ -29,6 +31,8 @@ export interface SessionOptions {
     branches?: BranchSummary[]
     /** Caja que este navegador ya tenía vinculada (`fc.workplace`) */
     terminal?: { branchId: number; terminalId: number }
+    /** Suscripción de la empresa; por defecto activa, sin avisos */
+    subscription?: SessionSubscription
 }
 
 export const TENANT: TenantSummary = {
@@ -84,6 +88,7 @@ export const buildSession = (options: SessionOptions = {}): Session => {
         tenant,
         tenants: options.tenants ?? [{ ...tenant, role }],
         branches: options.branches ?? [MAIN_BRANCH],
+        subscription: options.subscription ?? activeSubscription(),
     }
 }
 

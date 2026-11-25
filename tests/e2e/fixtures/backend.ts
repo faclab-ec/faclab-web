@@ -10,6 +10,7 @@ import {
 import { emptyDailyReport, emptyDashboard, emptyValuation } from './dashboard'
 import { importTemplates } from './imports'
 import { emptyAging } from './receivables'
+import { buildSubscription } from './subscription'
 
 const EMPTY_ADMIN_LISTS = [
     'categories',
@@ -59,6 +60,7 @@ export const mockEmptyBackend = (api: MockApi): void => {
     api.get(`${ADMIN}/dashboard`, () => ok(emptyDashboard()))
     api.get(`${ADMIN}/receivables/aging`, () => ok(emptyAging()))
     api.get(`${ADMIN}/reports/inventory/valuation`, () => ok(emptyValuation()))
+    api.get(`${ADMIN}/subscription`, () => ok(buildSubscription()))
 
     api.get(`${POS}/shifts`, ({ query }) => paginated([], query))
     api.get(`${POS}/refunds`, ({ query }) => paginated([], query))
