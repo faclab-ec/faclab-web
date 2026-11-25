@@ -412,6 +412,16 @@ const navigationConfig: NavigationTree[] = [
                 subMenu: [],
             },
             {
+                key: 'settings.subscription',
+                path: '/settings/subscription',
+                title: 'Plan y uso',
+                translateKey: 'nav.settings.subscription',
+                icon: 'settingsSubscription',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: ['organization:read'],
+                subMenu: [],
+            },
+            {
                 key: 'settings.branches',
                 path: '/settings/branches',
                 title: 'Branches',

@@ -9,6 +9,12 @@ const COMMON_ERROR_MESSAGES: ErrorMessages = {
     // S5.1: cada unidad de medida dice cuántos decimales admite (0 = enteras)
     QUANTITY_PRECISION_EXCEEDED:
         'La cantidad tiene más decimales de los que admite la unidad del producto.',
+    // S8.4: el plan de la empresa no admite otro (sucursal, caja, usuario...)
+    PLAN_LIMIT_REACHED:
+        'El plan de la empresa no admite más de este recurso. Revisa Configuración → Plan y uso.',
+    // S8.4: suscripción suspendida, cancelada o con la prueba vencida
+    SUBSCRIPTION_READ_ONLY:
+        'La suscripción de la empresa no está activa: solo se puede consultar.',
 }
 
 export function getErrorMessage(

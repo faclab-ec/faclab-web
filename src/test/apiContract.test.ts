@@ -75,6 +75,10 @@ import {
     SALE_STATUS_LABELS,
 } from '@features/sales/model/types'
 import { SERIAL_STATUS_LABELS } from '@features/serialNumbers/model/types'
+import {
+    PLAN_RESOURCES,
+    SUBSCRIPTION_STATUSES,
+} from '@features/subscription/model/types'
 import { TRANSFER_STATUS_LABELS } from '@features/transfers/model/types'
 
 const OPENAPI_URL = process.env.OPENAPI_URL
@@ -189,6 +193,8 @@ const FRONT_ENUMS: [string, string, readonly string[]][] = [
         WEBHOOK_DELIVERY_STATUSES,
     ],
     ['DisabledReason', 'WEBHOOK_DISABLED_REASONS', WEBHOOK_DISABLED_REASONS],
+    ['SubscriptionStatus', 'SUBSCRIPTION_STATUSES', SUBSCRIPTION_STATUSES],
+    ['PlanResource', 'PLAN_RESOURCES', PLAN_RESOURCES],
 ]
 
 /** Valores del backend que el front puede ignorar, con el motivo */

@@ -50,6 +50,17 @@ export type BranchSummary = {
     isMain: boolean
 }
 
+/** Suscripción de la empresa (S8.4): `/me` la trae para todos los roles */
+export type SessionSubscription = {
+    planName: string | null
+    status: 'trial' | 'active' | 'suspended' | 'cancelled'
+    trialEndsAt: string | null
+    /** Suspendida, cancelada o con la prueba vencida: solo se puede consultar */
+    readOnly: boolean
+    /** Los comprobantes del mes llegaron al límite del plan */
+    documentsLimitReached: boolean
+}
+
 export type Session = {
     id: number
     username: string
@@ -64,6 +75,8 @@ export type Session = {
     tenants: TenantOption[]
     /** Sucursales activas a las que puede entrar, ordenadas por código */
     branches: BranchSummary[]
+    /** Desde faclab-core S8.4; falta en un core anterior */
+    subscription?: SessionSubscription
 }
 
 export type LoginRequest = {

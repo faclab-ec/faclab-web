@@ -15,6 +15,7 @@ import {
 import { useCan, useHasRole } from '@/stores'
 import { ROLE } from '@/constants/roles.constant'
 import { InvoicingStatusChip } from '@features/invoicing'
+import { SubscriptionChip } from '@features/subscription'
 import StatusBadge from '@/components/shared/StatusBadge'
 import { LogoMark } from '@/components/template/Logo'
 
@@ -91,6 +92,7 @@ const POSHeader = ({
                         </button>
                     )}
                 </span>
+                <SubscriptionChip />
                 <InvoicingStatusChip />
             </div>
 

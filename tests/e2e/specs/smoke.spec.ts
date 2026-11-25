@@ -40,6 +40,7 @@ const SCREENS = [
     { path: '/settings/certificates', heading: 'Certificados Digitales' },
     { path: '/settings/sequences', heading: 'Secuenciales' },
     { path: '/settings/branches', heading: 'Sucursales' },
+    { path: '/settings/subscription', heading: 'Plan y uso' },
 ]
 
 test.describe('Arranque', () => {
