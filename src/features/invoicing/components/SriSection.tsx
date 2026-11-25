@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import type { Control, FieldErrors, UseFormRegister } from 'react-hook-form'
 import Input from '@/components/ui/Input'
 import { FormItem } from '@/components/ui/Form'
@@ -50,13 +51,22 @@ const SriSection = ({
                     invalid={!!errors.environment}
                     errorMessage={errors.environment?.message}
                 >
+                    {/* El ambiente de producción se activa solo desde el asistente
+                        de puesta en marcha (S8.5): pide confirmación y se audita */}
                     <ControlledSelect
+                        isDisabled
                         name="environment"
                         control={control}
                         options={environmentOptions}
-                        isDisabled={isSubmitting}
                         placeholder="Seleccione el ambiente"
                     />
+                    <p className="mt-1 text-xs text-gray-500">
+                        Para pasar a producción usa{' '}
+                        <Link className="underline" to="/settings/onboarding">
+                            Puesta en marcha
+                        </Link>
+                        .
+                    </p>
                 </FormItem>
                 <FormItem label="Régimen RIMPE">
                     <ControlledSelect

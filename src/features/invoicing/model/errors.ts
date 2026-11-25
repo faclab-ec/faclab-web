@@ -23,6 +23,8 @@ export const INVOICING_ERROR_MESSAGES: ErrorMessages = {
     LOGO_INVALID:
         'El logo debe ser una imagen PNG o JPEG de hasta 2000 × 2000 píxeles.',
     LOGO_TOO_LARGE: 'El logo pesa más de 300 KB.',
+    USE_GO_LIVE:
+        'El ambiente de producción se activa solo desde Configuración → Puesta en marcha.',
     STORAGE_UNAVAILABLE:
         'El almacenamiento de documentos no responde: intenta de nuevo en unos minutos.',
 }

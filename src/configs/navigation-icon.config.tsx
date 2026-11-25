@@ -74,6 +74,7 @@ const navigationIcon: NavigationIcons = {
     settingsWebhooks: <HiOutlineLightningBolt />,
     settingsBranches: <HiOutlineLocationMarker />,
     settingsSubscription: <HiOutlineSparkles />,
+    settingsOnboarding: <HiOutlineClipboardCheck />,
     settingsCompanyConfig: <HiOutlineOfficeBuilding />,
     settingsCertificates: <HiOutlineLockClosed />,
     settingsSequences: <HiOutlineHashtag />,
