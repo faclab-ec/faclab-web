@@ -362,6 +362,16 @@ const navigationConfig: NavigationTree[] = [
         authority: [],
         subMenu: [
             {
+                key: 'settings.onboarding',
+                path: '/settings/onboarding',
+                title: 'Puesta en marcha',
+                translateKey: 'nav.settings.onboarding',
+                icon: 'settingsOnboarding',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: ['user:manage'],
+                subMenu: [],
+            },
+            {
                 key: 'settings.users',
                 path: '/settings/users',
                 title: 'Usuarios',

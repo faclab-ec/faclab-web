@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+import { lazy, Suspense } from 'react'
 import Loading from '@/components/shared/Loading'
 import { protectedRoutes, publicRoutes } from '@app/routes/routes.config'
 import appConfig from '@/configs/app.config'
@@ -13,11 +13,15 @@ import RouteTracker from '@app/RouteTracker'
 
 const { authenticatedEntryPath } = appConfig
 
+// La consola de plataforma (S8.5): fuera de las rutas de una empresa
+const PlatformApp = lazy(() => import('@features/platform/pages/PlatformApp'))
+
 const AllRoutes = () => {
     const userAuthority = useSession()?.permissions ?? []
 
     return (
         <Routes>
+            <Route path="/platform/*" element={<PlatformApp />} />
             <Route path="/" element={<ProtectedRoute />}>
                 <Route
                     path="/"

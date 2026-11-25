@@ -65,6 +65,11 @@ export const AUDIT_ACTION_LABELS = {
     'webhook_endpoint.enabled': 'Webhook activado',
     'webhook_endpoint.disabled': 'Webhook desactivado',
     'webhook_endpoint.secret_rotated': 'Secreto de webhook rotado',
+    // La plataforma sobre la empresa (S8.5)
+    'tenant.provisioned': 'Empresa creada por la plataforma',
+    'tenant.suspended': 'Empresa suspendida',
+    'tenant.activated': 'Empresa reactivada',
+    'subscription.changed': 'Suscripción cambiada',
 } as const
 
 export type AuditAction = keyof typeof AUDIT_ACTION_LABELS
@@ -95,6 +100,8 @@ export const AUDIT_RESOURCE_LABELS: Record<string, string> = {
     import: 'Importación',
     integration: 'Integración',
     webhook_endpoint: 'Webhook',
+    tenant: 'Empresa',
+    subscription: 'Suscripción',
 }
 
 export type AuditSource = 'request' | 'message' | 'task'
