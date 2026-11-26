@@ -24,6 +24,8 @@ const PresentationPicker = ({
         isOpen={isOpen}
         width={420}
         contentLabel={`Presentación de ${product.name}`}
+        // Sobre la pantalla del POS (z-50), como sus demás diálogos
+        overlayClassName="!z-[60]"
         onClose={onClose}
         onRequestClose={onClose}
     >
