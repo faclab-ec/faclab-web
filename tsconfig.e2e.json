@@ -3,5 +3,5 @@
   "compilerOptions": {
     "types": ["node"]
   },
-  "include": ["tests/e2e", "playwright.config.ts", "src/vite-env.d.ts"]
+  "include": ["tests/e2e", "tests/e2e-full-stack", "playwright.config.ts", "playwright.full-stack.config.ts", "src/vite-env.d.ts"]
 }

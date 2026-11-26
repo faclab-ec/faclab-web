@@ -20,7 +20,8 @@
     "test:coverage": "vitest run --coverage",
     "check:contract": "OPENAPI_URL=${OPENAPI_URL:-http://localhost:3000/openapi.json} vitest run src/test/apiContract.test.ts",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:full": "playwright test -c playwright.full-stack.config.ts",
+        "test:e2e:ui": "playwright test --ui",
     "test:e2e:report": "playwright show-report",
     "test:e2e:update": "playwright test visual --update-snapshots",
     "test:e2e:install": "playwright install chromium"

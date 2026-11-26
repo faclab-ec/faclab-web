@@ -16,6 +16,8 @@ export default tseslint.config(
             'build/**',
             'playwright-report/**',
             'test-results/**',
+            'playwright-report-full-stack/**',
+            'test-results-full-stack/**',
             'dist/**',
             'public/**',
             'src/assets/styles/**',
@@ -130,7 +132,11 @@ export default tseslint.config(
     {
         // Pruebas E2E: código de Node/Playwright, no de React. El `use` de
         // los fixtures de Playwright no es el hook `use` de React.
-        files: ['tests/e2e/**/*.ts', 'playwright.config.ts'],
+        files: [
+            'tests/e2e/**/*.ts',
+            'tests/e2e-full-stack/**/*.ts',
+            'playwright*.config.ts',
+        ],
         rules: {
             'react-hooks/rules-of-hooks': 'off',
             'react-refresh/only-export-components': 'off',

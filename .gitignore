@@ -23,6 +23,8 @@ build
 coverage
 test-results
 playwright-report
+playwright-report-full-stack
+test-results-full-stack
 blob-report
 
 # Logs

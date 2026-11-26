@@ -87,6 +87,7 @@ npm run check:contract  # Compara los enums del front con el OpenAPI de faclab-c
 
 npm run test:e2e:install  # Descarga Chromium para Playwright (una vez)
 npm run test:e2e          # Pruebas end-to-end (Playwright)
+npm run test:e2e:full     # Flujo completo contra servicios reales (faclab-infra/e2e/run.sh)
 npm run test:e2e:ui       # Las mismas, en la interfaz interactiva
 npm run test:e2e:report   # Abre el último reporte HTML
 npm run test:e2e:update   # Regenera las capturas de referencia
@@ -128,6 +129,7 @@ src/
 └── test/           # setup de Vitest
 
 tests/e2e/          # Playwright: specs/, fixtures/ (datos) y support/ (API simulada, sesión)
+tests/e2e-full-stack/  # Playwright contra los servicios reales (faclab-infra/e2e)
 ```
 
 ### Estructura de un feature
@@ -281,14 +283,15 @@ Para agregar un mock:
 
 ## Tests
 
-Hay cuatro comprobaciones distintas; ninguna reemplaza a otra:
+Hay cinco comprobaciones distintas; ninguna reemplaza a otra:
 
 | Comprobación | Comando | Qué valida |
 |---|---|---|
 | Tipos | `npm run typecheck` | Que el código compila en TypeScript |
 | Lint | `npm run lint` | Reglas de estilo y errores comunes |
 | Unitarias | `npm test` | Hooks, esquemas y utilidades, en jsdom, sin navegador |
-| End-to-end | `npm run test:e2e` | La app completa en un navegador real |
+| End-to-end | `npm run test:e2e` | La app completa en un navegador real, con el backend simulado |
+| End-to-end completo | `faclab-infra/e2e/run.sh` | El flujo de venta contra los servicios reales |
 
 ### Unitarias (Vitest)
 
@@ -305,7 +308,7 @@ npm run test:e2e
 
 Playwright levanta su propio servidor de desarrollo en `http://127.0.0.1:5199` (no toca un `npm start` que tengas abierto en el 5173) y antes de las pruebas recorre la app una vez para que Vite compile cada pantalla.
 
-**No necesita backend.** Todas las llamadas a `faclab-core` y `faclab-invoicing` se interceptan en el navegador y se responden con datos de prueba que respetan el envelope `{ data, meta }` y los códigos de error reales. No se escribe nada en ninguna base de datos. A cambio, estas pruebas no validan la integración real: para eso está `npm run check:contract`.
+**No necesita backend.** Todas las llamadas a `faclab-core` y `faclab-invoicing` se interceptan en el navegador y se responden con datos de prueba que respetan el envelope `{ data, meta }` y los códigos de error reales. No se escribe nada en ninguna base de datos. A cambio, estas pruebas no validan la integración real: para eso están `npm run check:contract` y la suite completa (abajo).
 
 ```
 tests/e2e/
@@ -357,6 +360,19 @@ test('lista los proveedores', async ({ page, api, signIn }) => {
 ```
 
 Busca los elementos como los encontraría una persona: `getByRole`, `getByLabel`, `getByText`. No uses clases CSS ni `waitForTimeout`.
+
+### End-to-end completo (servicios reales)
+
+`tests/e2e-full-stack/` (config `playwright.full-stack.config.ts`, proyecto `full-stack`) no simula nada: recorre contra core, invoicing, Kafka, PostgreSQL y el SRI (un simulador, o `celcer` a mano) el login eligiendo empresa, la apertura del turno, una venta con presentación y lista de precios, la factura autorizada con su RIDE, la devolución con nota de crédito, el cierre de caja y la conciliación sin discrepancias.
+
+El entorno lo crea y lo destruye faclab-infra, con los cuatro repositorios como carpetas hermanas:
+
+```bash
+npm ci && npx playwright install chromium   # una sola vez
+../faclab-infra/e2e/run.sh                  # levanta todo, corre la suite y limpia
+```
+
+`npm run test:e2e:full` solo corre la suite contra un entorno que ya está en marcha (`run.sh --keep`). Es un solo escenario en serie, sin reintentos: los datos son los de `scripts/seed.py` de faclab-core, y si cambian la lista "Mayorista", la presentación "Caja x25" o el cliente "Ferretería El Maestro", hay que ajustar `tests/e2e-full-stack/env.ts` y los totales de la prueba. Corre cada noche y a demanda en el workflow `E2E` de faclab-infra; guía completa en `faclab-infra/e2e/README.md`.
 
 ## Integración continua
 

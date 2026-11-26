@@ -19,7 +19,9 @@ coverage
 # Pruebas y documentación
 tests
 test-results
+test-results-full-stack
 playwright-report
+playwright-report-full-stack
 blob-report
 docs
 *.md
