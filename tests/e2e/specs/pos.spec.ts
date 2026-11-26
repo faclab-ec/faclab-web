@@ -4,8 +4,10 @@ import {
     SALE_NUMBER,
     WHOLESALE_PRICES,
     builder,
+    hingeBox,
     mockPOS,
     openShift,
+    posProducts,
     posTerminal,
 } from '../fixtures/pos'
 import { mockEmptyBackend } from '../fixtures/backend'
@@ -456,6 +458,44 @@ test.describe('Punto de venta', () => {
         ])
         // 2,5 × 0,85 = 2,125 → 2,13 más 0,32 de IVA, como en faclab-core
         expect(sale.payments[0].amount).toBe(2.45)
+    })
+
+    test('al pulsar un producto con presentaciones deja elegir la caja', async ({
+        page,
+        api,
+    }) => {
+        mockPOS(api)
+        const base = {
+            ...hingeBox(),
+            id: 2,
+            name: 'Unidad',
+            factor: 1,
+            barcode: null,
+            salePrice: null,
+            isBase: true,
+            effectiveSalePrice: 0.95,
+        }
+        api.get(`${POS}/products`, () =>
+            ok(
+                posProducts().map((item) =>
+                    item.id === 2
+                        ? { ...item, presentations: [base, hingeBox()] }
+                        : item
+                )
+            )
+        )
+        await page.goto('/pos')
+
+        await product(page, 'Bisagra cazoleta 35mm').click()
+        // El selector se abre sobre la pantalla del POS, no detrás de ella
+        await page
+            .getByRole('dialog', {
+                name: 'Presentación de Bisagra cazoleta 35mm',
+            })
+            .getByRole('button', { name: /Caja x50/ })
+            .click()
+
+        await expect(order(page)).toContainText('Caja x50')
     })
 
     test('escanear el código de la caja agrega la caja con su precio', async ({
