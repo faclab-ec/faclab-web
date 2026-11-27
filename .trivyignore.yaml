@@ -1,0 +1,14 @@
+# Vulnerabilities accepted by the security CI (.github/workflows/security.yml, S9.3).
+# Each one needs a statement (why it doesn't apply or can't be fixed yet) and an
+# expired_at, after which it fails again. Review them with faclab-core's
+# docs/architecture/SEGURIDAD.md
+vulnerabilities:
+  - id: CVE-2026-78661
+    purls:
+      - pkg:golang/golang.org/x/net@v0.60.0
+    statement: >-
+      GO-2026-6860, quadratic time in golang.org/x/net/html's parser, inside the caddy binary of
+      caddy:2.11-alpine (v2.11.9, the latest, still builds with x/net v0.60.0). docker/Caddyfile
+      only serves files and sets headers: no templates nor markdown, nothing parses HTML. Remove it
+      once a Caddy release builds with x/net 0.62
+    expired_at: 2027-01-31
