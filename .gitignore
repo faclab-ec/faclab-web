@@ -6,6 +6,7 @@
 !.eslintrc.*
 !.eslintignore
 !.prettierrc
+!.trivyignore.yaml
 !.prettierrc.*
 !.prettierignore
 !.github/
